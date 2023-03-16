@@ -1,17 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class Stamina : ActionCard, IMovementCard {
+public class Stamina : ActionCard {
     public Stamina(ActionCardSO actionCardSO) : base(actionCardSO) { }
 
-    public List<ActionChoice> ChoicesMove() {
-        return new List<ActionChoice>() {
-            new ActionChoice("Move 2 (N)", "Move 2 (N)", false, 0, ActionTypes.Move),
-            new ActionChoice("Move 4 (S)", "Move 4 (S)", true, 1, ActionTypes.Move)
-        };
-    }
-
-    public override void Apply(ActionChoice choice) {
+    public override void Apply(CardChoice choice) {
         base.Apply(choice);
         Player player = GameManager.Instance.CurrentPlayer;
         switch (choice.Id) {

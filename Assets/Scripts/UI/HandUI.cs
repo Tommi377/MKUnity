@@ -40,10 +40,7 @@ public class HandUI : MonoBehaviour {
 
         if (!RoundManager.Instance.CanPlayCard(cardVisual.Card)) return;
 
-        List<ActionChoice> choices = cardVisual.Card.ChoicesDefault(RoundManager.Instance.CurrentAction);
-        choices.AddRange(cardVisual.Card.Choices(RoundManager.Instance.CurrentAction));
-
-        if (choices.Count == 0) {
+        if (!cardVisual.Card.HasPlayableChoices(RoundManager.Instance.CurrentAction)) {
             Debug.Log("Card doesn't have any playable actions");
             return;
         }
@@ -66,19 +63,18 @@ public class HandUI : MonoBehaviour {
         if (selectedCardVisual != null) {
             switch (mode) {
                 case Modes.Default: {
-                        List<ActionChoice> choices = selectedCardVisual.Card.ChoicesDefault(RoundManager.Instance.CurrentAction);
-                        choices.AddRange(selectedCardVisual.Card.Choices(RoundManager.Instance.CurrentAction));
+                        List<CardChoice> choices = selectedCardVisual.Card.Choices(RoundManager.Instance.CurrentAction);
 
-                        foreach (ActionChoice choice in choices) {
-                            Button button = buttonUI.AddButton(choice.Name, () => CardActionClick(selectedCardVisual.Card, choice));
-                            if (choice.Super && !ManaManager.Instance.SelectedManaUsableWithCard(selectedCardVisual.Card)) button.interactable = false;
+                        foreach (CardChoice choice in choices) {
+                            bool interactable = !choice.Super || ManaManager.Instance.SelectedManaUsableWithCard(selectedCardVisual.Card);
+                            Button button = buttonUI.AddButton(choice.Name, () => CardActionClick(selectedCardVisual.Card, choice), interactable);
                         }
                         break;
                     }
                 case Modes.OnlySuper: {
-                        List<ActionChoice> choices = selectedCardVisual.Card.Choices(RoundManager.Instance.CurrentAction);
+                        List<CardChoice> choices = selectedCardVisual.Card.Choices(RoundManager.Instance.CurrentAction);
 
-                        foreach (ActionChoice choice in choices) {
+                        foreach (CardChoice choice in choices) {
                             if (choice.Super) buttonUI.AddButton(choice.Name, () => CardActionClick(selectedCardVisual.Card, choice));
                         }
                         break;
@@ -91,7 +87,7 @@ public class HandUI : MonoBehaviour {
         return RoundManager.Instance.CurrentPhase == TurnPhases.Movement || RoundManager.Instance.CurrentPhase == TurnPhases.Action;
     }
 
-    private void CardActionClick(Card card, ActionChoice choice) {
+    private void CardActionClick(Card card, CardChoice choice) {
         ButtonInput.Instance.CardActionClick(card, choice);
         DeselectCard();
     }

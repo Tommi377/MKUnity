@@ -9,5 +9,4 @@ public class ActionCardSO : CardSO {
     public List<ManaSource.Types> ManaTypes;
     public List<ActionTypes> ActionTypeList;
     public List<ActionTypeRestriction> ActionTypeRestrictionList;
-    public List<ActionChoice> ActionChoices;
 }

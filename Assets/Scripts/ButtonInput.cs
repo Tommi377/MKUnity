@@ -39,7 +39,7 @@ public class ButtonInput : MonoBehaviour {
     public event EventHandler<OnCardActionClickArgs> OnCardActionClick;
     public class OnCardActionClickArgs : EventArgs {
         public Card card;
-        public ActionChoice choice;
+        public CardChoice choice;
     }
     public event EventHandler OnShuffleDiscardClick;
     public event EventHandler OnDrawCardClick;
@@ -56,7 +56,7 @@ public class ButtonInput : MonoBehaviour {
         }
     }
 
-    public void CardActionClick(Card card, ActionChoice choice) {
+    public void CardActionClick(Card card, CardChoice choice) {
         OnCardActionClick?.Invoke(this, new OnCardActionClickArgs {
             card = card,
             choice = choice

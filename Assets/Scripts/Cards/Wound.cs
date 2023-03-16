@@ -8,7 +8,7 @@ public class Wound : Card {
     public override string Name => "Wound";
     public override Types Type => Types.Wound;
 
-    public override bool CanApply(ActionTypes action, ActionChoice actionChoice) {
+    public override bool CanApply(ActionTypes action, CardChoice actionChoice) {
         return false;
     }
 
@@ -16,14 +16,9 @@ public class Wound : Card {
         return false;
     }
 
-    public override void Apply(ActionChoice choice) { }
+    public override void Apply(CardChoice choice) { }
 
-
-    public override List<ActionChoice> ChoicesDefault(ActionTypes type) {
-        return new List<ActionChoice>();
-    }
-
-    public override List<ActionChoice> Choices(ActionTypes actionType) {
-        return new List<ActionChoice>();
+    public override List<CardChoice> Choices(ActionTypes actionType) {
+        return new List<CardChoice>();
     }
 }

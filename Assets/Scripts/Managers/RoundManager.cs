@@ -61,7 +61,7 @@ public class RoundManager : MonoBehaviour {
     }
 
     // Tests if a card's action is playable with the selected action
-    public bool CanApplyAction(Card card, ActionChoice actionChoice) {
+    public bool CanApplyAction(Card card, CardChoice actionChoice) {
         if (actionChoice.Id < 0) return true; // Can play always if using default action
 
         if (!CanPlayCard(card)) return false; // Can't play if card actions does not include round action

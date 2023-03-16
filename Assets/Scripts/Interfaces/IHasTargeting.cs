@@ -7,11 +7,11 @@ public enum TargetTypes {
 
 public interface IHasTargeting {
     TargetTypes TargetType { get; }
-    bool HasTarget(ActionChoice choice);
+    bool HasTarget(CardChoice choice);
     void PreTargetSideEffect() { }
 }
 
 public interface ITargetingCard<T> : IHasTargeting {
-    bool ValidTarget(ActionChoice choice, T target);
-    void TargetSideEffect(ActionChoice choice, T target);
+    bool ValidTarget(CardChoice choice, T target);
+    void TargetSideEffect(CardChoice choice, T target);
 }

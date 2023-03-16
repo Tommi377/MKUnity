@@ -6,4 +6,5 @@ using UnityEngine;
 public class CardSO : ScriptableObject {
     public string Name;
     public Card.Types Type;
+    public List<CardChoice> Choices;
 }

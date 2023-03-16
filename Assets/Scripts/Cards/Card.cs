@@ -1,24 +1,27 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
 [Serializable]
-public class ActionChoice {
+public class CardChoice {
     public string Name;
     public string Description;
     public bool Super;
     public int Id;
     public ActionTypes ActionType;
 
-    public ActionChoice(string name, string description, bool super, int id, ActionTypes actionTypes) {
+    public CardChoice(string name, string description, bool super, int id, ActionTypes actionTypes) {
         Name = name;
         Description = description;
         Super = super;
         Id = id;
         ActionType = actionTypes;
     }
+
+    public override string ToString() => $"Choice: {Name} ({Id}, {ActionType})";
 }
 
 public abstract class Card {
@@ -38,8 +41,7 @@ public abstract class Card {
     public abstract string Name { get; }
     public abstract Types Type { get; }
     public abstract bool CanPlay(ActionTypes action);
-    public abstract bool CanApply(ActionTypes action, ActionChoice actionChoice);
-    public abstract List<ActionChoice> Choices(ActionTypes actionType);
+    public abstract bool CanApply(ActionTypes action, CardChoice actionChoice);
 
     public override string ToString() => $"{Name} ({Type})";
 
@@ -67,32 +69,22 @@ public abstract class Card {
         return null;
     }
 
-
-    public virtual List<ActionChoice> ChoicesDefault(ActionTypes type) {
-        List<ActionChoice> choices = new List<ActionChoice>();
-
-        switch(type) {
-            case ActionTypes.Move:
-                choices.Add(new ActionChoice("Move 1 (D)", "Move 1 (D)", false, -1, ActionTypes.Move));
-                break;
-            case ActionTypes.Combat:
-                choices.Add(new ActionChoice("Attack 1 (D)", "Attack 1 (D)", false, -2, ActionTypes.Combat));
-                choices.Add(new ActionChoice("Block 1 (D)", "Block 1 (D)", false, -3, ActionTypes.Combat));
-                break;
+    public virtual List<CardChoice> Choices(ActionTypes actionType) {
+        List<CardChoice> choices = new List<CardChoice>() {
+            new CardChoice("Influence 1 (D)", "Influence 1 (D)", false, -4, ActionTypes.Influence),
+            new CardChoice("Block 1 (D)", "Block 1 (D)", false, -3, ActionTypes.Combat),
+            new CardChoice("Attack 1 (D)", "Attack 1 (D)", false, -2, ActionTypes.Combat),
+            new CardChoice("Move 1 (D)", "Move 1 (D)", false, -1, ActionTypes.Move),
         };
 
-        if (this is ISpecialCard) {
-            choices.AddRange((this as ISpecialCard).ChoicesSpecial());
-        }
+        choices.AddRange(CardSO.Choices);
 
-        if (this is IHealCard && !GameManager.Instance.CurrentPlayer.IsInCombat()) {
-            choices.AddRange((this as ISpecialCard).ChoicesSpecial());
-        }
-
-        return choices;
+        return choices.Where((choice) => CanApply(actionType, choice)).ToList();
     }
 
-    public virtual void Apply(ActionChoice choice) {
+    public bool HasPlayableChoices(ActionTypes actionType) => Choices(actionType).Any();
+
+    public virtual void Apply(CardChoice choice) {
         Player player = GameManager.Instance.CurrentPlayer;
         switch (choice.Id) {
             case -1:
@@ -103,6 +95,9 @@ public abstract class Card {
                 break;
             case -3:
                 GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Block, CombatElements.Normal));
+                break;
+            case -4:
+                player.AddInfluence(1);
                 break;
         }
     }

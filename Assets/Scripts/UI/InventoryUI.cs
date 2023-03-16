@@ -33,7 +33,7 @@ public class InventoryUI : MonoBehaviour {
     private void UpdateUI(Inventory inventory) {
         // TODO: optimize it so it doesnt redraw everything every time
         foreach (Transform child in manaContainer) {
-            Destroy(child);
+            Destroy(child.gameObject);
         }
         foreach (ManaSource.Types type in inventory.GetManaList()) {
             ManaTokenVisual manaTokenVisual = Instantiate(manaTokenPrefab, manaContainer).GetComponent<ManaTokenVisual>();

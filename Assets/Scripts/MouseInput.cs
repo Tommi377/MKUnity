@@ -52,7 +52,6 @@ public class MouseInput : MonoBehaviour {
                 if (found.gameObject) {
                     CardVisual cardVisual = found.gameObject.GetComponent<CardVisual>();
                     Debug.Log("Hit " + found.gameObject.name);
-                    Debug.Log("Hit " + cardVisual.Card.Name);
                     OnCardClick?.Invoke(this, new OnCardClickArgs { cardVisual = cardVisual });
                     return;
                 }

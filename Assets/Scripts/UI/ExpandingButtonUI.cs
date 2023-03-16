@@ -6,12 +6,13 @@ using UnityEngine.UI;
 public class ExpandingButtonUI : MonoBehaviour {
     [SerializeField] private Transform buttonPrefab;
 
-    public Button AddButton(string text, UnityAction onClick) {
+    public Button AddButton(string text, UnityAction onClick, bool interactable = true) {
         if (!gameObject.activeSelf) {
             gameObject.SetActive(true);
         }
 
         Button button = Instantiate(buttonPrefab, transform).GetComponent<Button>();
+        button.interactable = interactable;
         button.onClick.AddListener(onClick);
         button.transform.Find("Text").GetComponent<TMP_Text>().SetText(text);
         return button;

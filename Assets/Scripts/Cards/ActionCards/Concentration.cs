@@ -2,24 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class Concentration : ActionCard, ISpecialCard, ITargetingCard<(Card, ActionChoice)> {
+public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
     private ActionCard suppliedCard;
-    private ActionChoice suppliedChoice;
-
-    public List<ActionChoice> ChoicesSpecial() {
-        return new List<ActionChoice>() {
-            new ActionChoice("Gain blue (N)", "Gain blue (N)", false, 0, ActionTypes.Special),
-            new ActionChoice("Gain white (N)", "Gain white (N)", false, 1, ActionTypes.Special),
-            new ActionChoice("Gain red (N)", "Gain red (N)", false, 2, ActionTypes.Special),
-            new ActionChoice("Buff card +2 (S)", "Buff card +2 (S)", true, 3, ActionTypes.Special),
-        };
-    }
+    private CardChoice suppliedChoice;
 
     public Concentration(ActionCardSO actionCardSO) : base(actionCardSO) { }
 
-    public override bool CanApply(ActionTypes action, ActionChoice actionChoice) {
+    public override bool CanApply(ActionTypes action, CardChoice actionChoice) {
         if (!base.CanApply(action, actionChoice)) return false;
 
+        // TODO: Logic to decide whether the player has playable cards in hand
         return actionChoice.Id != 3 ||
             RoundManager.Instance.CurrentAction == ActionTypes.Move ||
             RoundManager.Instance.CurrentAction == ActionTypes.Influence ||
@@ -27,13 +19,13 @@ public class Concentration : ActionCard, ISpecialCard, ITargetingCard<(Card, Act
     }
 
     public TargetTypes TargetType => TargetTypes.Action;
-    public bool HasTarget(ActionChoice choice) => choice.Id == 3;
+    public bool HasTarget(CardChoice choice) => choice.Id == 3;
 
-    public bool ValidTarget(ActionChoice choice, (Card, ActionChoice) target) {
+    public bool ValidTarget(CardChoice choice, (Card, CardChoice) target) {
         if (target.Item1 is not ActionCard) return false;
 
         ActionCard actionCard = target.Item1 as ActionCard;
-        ActionChoice targetChoice = target.Item2;
+        CardChoice targetChoice = target.Item2;
         ActionTypes actionType = RoundManager.Instance.CurrentAction;
 
         return targetChoice.Super && actionCard.CanPlay(actionType) && actionCard.CanApply(actionType, targetChoice);
@@ -43,25 +35,26 @@ public class Concentration : ActionCard, ISpecialCard, ITargetingCard<(Card, Act
         EventSignalManager.ChangeHandUIMode(this, HandUI.Modes.OnlySuper);
     }
 
-    public void TargetSideEffect(ActionChoice choice, (Card, ActionChoice) target) {
+    public void TargetSideEffect(CardChoice choice, (Card, CardChoice) target) {
         suppliedCard = target.Item1 as ActionCard;
         suppliedChoice = target.Item2;
         GameManager.Instance.CurrentPlayer.DiscardCard(suppliedCard);
         EventSignalManager.ChangeHandUIMode(this, HandUI.Modes.Default);
     }
 
-    public override void Apply(ActionChoice choice) {
+    public override void Apply(CardChoice choice) {
         base.Apply(choice);
         Player player = GameManager.Instance.CurrentPlayer;
 
-        // TODO: Give mana tokens
-        // TODO: Make the target card forced to be super
         switch (choice.Id) {
             case 0:
+                player.GainMana(ManaSource.Types.Blue);
                 break;
             case 1:
+                player.GainMana(ManaSource.Types.White);
                 break;
             case 2:
+                player.GainMana(ManaSource.Types.Red);
                 break;
             case 3:
                 int initMovement = player.Movement;

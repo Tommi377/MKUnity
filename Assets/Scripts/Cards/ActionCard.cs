@@ -23,42 +23,11 @@ public abstract class ActionCard : Card {
         return ActionTypeList.Contains(action);
     }
 
-    public override bool CanApply(ActionTypes action, ActionChoice actionChoice) {
-        // Test whether action type can be applied with normal/super
-        int index = ActionTypeList.IndexOf(action);
+    public override bool CanApply(ActionTypes action, CardChoice cardChoice) {
+        if (cardChoice.ActionType == ActionTypes.Special) return true; // Special cards can be played in any time
+        if (cardChoice.ActionType == ActionTypes.Heal && !GameManager.Instance.CurrentPlayer.IsInCombat()) return true; // Heal cards can only be played out of combat
+        if (action == cardChoice.ActionType) return true; // Actions that match the round action can be played
 
-
-        if (index >= 0 && CanDoAction(actionChoice, ActionCardSO.ActionTypeRestrictionList[index])) return true;
-
-        int specialIndex = ActionTypeList.IndexOf(ActionTypes.Special);
-        if (specialIndex >= 0 && CanDoAction(actionChoice, ActionCardSO.ActionTypeRestrictionList[specialIndex])) return true;
-
-        int healIndex = ActionTypeList.IndexOf(ActionTypes.Heal);
-        if (
-            healIndex >= 0 && GameManager.Instance.CurrentPlayer.IsInCombat() &&
-            CanDoAction(actionChoice, ActionCardSO.ActionTypeRestrictionList[healIndex])
-        ) return true;
-
-        Debug.Log("The card is not playable at all in the first place");
         return false;
-    }
-
-    public override List<ActionChoice> Choices(ActionTypes actionType) {
-        if (actionType == ActionTypes.Move && this is IMovementCard) {
-            IMovementCard card = (IMovementCard)this;
-            return card.ChoicesMove();
-        } else if (actionType == ActionTypes.Combat && this is ICombatCard) {
-            ICombatCard card = (ICombatCard)this;
-            return card.ChoicesCombat();
-        }
-
-        return new List<ActionChoice>();
-    }
-
-    private bool CanDoAction(ActionChoice actionChoice, ActionTypeRestriction restriction) {
-        if (restriction == ActionTypeRestriction.Both) return true;
-
-        return actionChoice.Super && restriction == ActionTypeRestriction.Super ||
-            !actionChoice.Super && restriction == ActionTypeRestriction.Normal;
     }
 }

@@ -8,7 +8,7 @@ using UnityEngine;
 public class TargetingCard {
     public TargetTypes TargetType;
     public Card Card;
-    public ActionChoice Choice;
+    public CardChoice Choice;
 }
 
 public class Player : Entity {
@@ -149,6 +149,11 @@ public class Player : Entity {
         OnInventoryUpdate?.Invoke(this, new OnInventoryUpdateArgs { player = this, inventory = inventory });
     }
 
+    public void GainMana(ManaSource.Types type) {
+        inventory.AddMana(type);
+        OnInventoryUpdate?.Invoke(this, new OnInventoryUpdateArgs { player = this, inventory = inventory });
+    }
+
     private bool TryMove(Hex hex) {
         if (HexMap.HexIsNeigbor(Position, hex.Position)) {
             int moveCost = hex.GetMoveCost();
@@ -216,7 +221,7 @@ public class Player : Entity {
     }
 
 
-    private void HandleCard(Card card, ActionChoice choice) {
+    private void HandleCard(Card card, CardChoice choice) {
         if (targetingCard == null) {
             PlayCard(card, choice);
         } else if (targetingCard.TargetType == TargetTypes.Card) {
@@ -226,7 +231,7 @@ public class Player : Entity {
         }
     }
 
-    private void PlayCard(Card card, ActionChoice choice) {
+    private void PlayCard(Card card, CardChoice choice) {
         if (targetingCard != null) {
             Debug.Log("Can't play a card when another card is unresolved!!");
             return;
@@ -254,7 +259,7 @@ public class Player : Entity {
         }
     }
 
-    private void ApplyCard(Card card, ActionChoice choice) {
+    private void ApplyCard(Card card, CardChoice choice) {
         card.Apply(choice);
 
         // TODO: Ponder whether its good to roll manasource here
