@@ -61,13 +61,13 @@ public class RoundManager : MonoBehaviour {
     }
 
     // Tests if a card's action is playable with the selected action
-    public bool CanApplyAction(Card card, CardChoice actionChoice) {
+    public bool CanApplyAction(Card card, CardChoice actionChoice, PlayCardOptions options) {
         if (actionChoice.Id < 0) return true; // Can play always if using default action
 
         if (!CanPlayCard(card)) return false; // Can't play if card actions does not include round action
 
         // Action card specific
-        if (card is ActionCard && actionChoice.Super) {
+        if (!options.SkipManaUse && card is ActionCard && actionChoice.Super) {
             ActionCard actionCard = card as ActionCard;
             if (!ManaManager.Instance.SelectedManaUsableWithCard(actionCard)) {
                 Debug.Log("Selected mana not suitable for casting");
@@ -84,7 +84,7 @@ public class RoundManager : MonoBehaviour {
 
     // Tests if a card is playable with the selected action
     public bool CanPlayCard(Card card) {
-        if (!GameManager.Instance.CurrentPlayer.CanPlayCard()) {
+        if (!CardManager.Instance.CanPlay()) {
             Debug.Log("Player can't play card");
             return false;
         }

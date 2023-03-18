@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 
 public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
@@ -28,10 +26,10 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
         CardChoice targetChoice = target.Item2;
         ActionTypes actionType = RoundManager.Instance.CurrentAction;
 
-        return targetChoice.Super && actionCard.CanPlay(actionType) && actionCard.CanApply(actionType, targetChoice);
+        return targetChoice.Super && actionCard.HasPlayableChoices(actionType) && actionCard.CanApply(actionType, targetChoice);
     }
 
-    public void PreTargetSideEffect() {
+    public void PreTargetSideEffect(CardChoice choice) {
         EventSignalManager.ChangeHandUIMode(this, HandUI.Modes.OnlySuper);
     }
 
@@ -61,6 +59,7 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
                 int initInfluence = player.Influence;
                 int combatCardCount = player.IsInCombat() ? GetCombat(player).CombatCards.Count() : 0;
 
+                CardManager.Instance.PlayCard(suppliedCard, suppliedChoice, new PlayCardOptions() { SkipManaUse = true });
                 suppliedCard.Apply(suppliedChoice);
 
                 switch (RoundManager.Instance.CurrentAction) {
@@ -83,6 +82,8 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
                         }
                         break;
                 }
+                suppliedCard = null;
+                suppliedChoice = null;
                 break;
         }
     }

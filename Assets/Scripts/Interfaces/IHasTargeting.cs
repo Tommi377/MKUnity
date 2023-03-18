@@ -2,13 +2,13 @@
 public enum TargetTypes {
     Card,
     Action,
-    ManaSource
+    Mana
 }
 
 public interface IHasTargeting {
     TargetTypes TargetType { get; }
     bool HasTarget(CardChoice choice);
-    void PreTargetSideEffect() { }
+    void PreTargetSideEffect(CardChoice choice);
 }
 
 public interface ITargetingCard<T> : IHasTargeting {

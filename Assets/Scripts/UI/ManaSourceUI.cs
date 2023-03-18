@@ -10,8 +10,6 @@ public class ManaSourceUI : MonoBehaviour {
     [SerializeField] private TMP_Text manaUsedText;
     [SerializeField] private Button channelManaButton;
 
-    private bool manaChanneled = false;
-
 #nullable enable
     private ManaSourceVisual? selectedManaSourceVisual;
 #nullable disable

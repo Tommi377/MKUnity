@@ -139,6 +139,7 @@ public class HandUI : MonoBehaviour {
     }
 
     private void EventSignalManager_OnChangeHandUIMode(object sender, EventSignalManager.OnChangeHandUIModeArgs e) {
+        Debug.Log(e.mode);
         SelectMode(e.mode);
     }
 }

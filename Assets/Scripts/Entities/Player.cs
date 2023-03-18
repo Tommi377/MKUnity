@@ -5,12 +5,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
 
-public class TargetingCard {
-    public TargetTypes TargetType;
-    public Card Card;
-    public CardChoice Choice;
-}
-
 public class Player : Entity {
     [SerializeField] private CardSO woundSO;
     [SerializeField] private CardListSO startingDeckSO;
@@ -46,10 +40,6 @@ public class Player : Entity {
     private List<Card> hand = new List<Card>();
     private List<Card> discard = new List<Card>();
 
-#nullable enable
-    private TargetingCard? targetingCard = null;
-#nullable disable
-
     // Stats
     public int Level { get; private set; } = 1;
     public int Fame { get; private set; } = 0;
@@ -60,24 +50,6 @@ public class Player : Entity {
     private int[] levelThreshold = new int[] { 2, 7, 14, 23, 34, 47, 62, 79, 98, 119 };
     private int[] levelToArmor = new int[] { 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5 };
     private int[] levelToHandLimit = new int[] { 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7 };
-
-    // Combat
-    // public int Attack = 0;
-    // public int IceAttack = 0;
-    // public int FireAttack = 0;
-    // public int ColdFireAttack = 0;
-
-    // public int RangedAttack = 0;
-    // public int IceRangedAttack = 0;
-    // public int FireRangedAttack = 0;
-
-    // public int SiegeAttack = 0;
-    // public int IceSiegeAttack = 0;
-    // public int FireSiegedAttack = 0;
-
-    // public int Block = 0;
-    // public int IceBlock = 0;
-    // public int FireBlock = 0;
 
     private void Awake() {
         inventory = new Inventory(this);
@@ -93,7 +65,6 @@ public class Player : Entity {
 
         ButtonInputManager.Instance.OnEndMovementClick += ButtonInput_OnEndMovementClick;
         ButtonInputManager.Instance.OnDrawStartHandClick += ButtonInput_OnDrawStartHandClick;
-        ButtonInputManager.Instance.OnCardActionClick += ButtonInput_OnCardActionClick;
         ButtonInputManager.Instance.OnShuffleDiscardClick += ButtonInput_OnShuffleDiscardClick;
         ButtonInputManager.Instance.OnDrawCardClick += ButtonInput_OnDrawCardClick;
     }
@@ -120,10 +91,6 @@ public class Player : Entity {
             Wound wound = Card.GetCardFromSO(woundSO) as Wound;
             AddCardToHand(wound);
         }
-    }
-
-    public bool CanPlayCard() {
-        return targetingCard == null || targetingCard.TargetType == TargetTypes.Action;
     }
 
     public void AddMovement(int movement) {
@@ -208,78 +175,6 @@ public class Player : Entity {
         }
     }
 
-
-    private void HandleCard(Card card, CardChoice choice) {
-        if (targetingCard == null) {
-            PlayCard(card, choice);
-        } else if (targetingCard.TargetType == TargetTypes.Card) {
-            SetTarget(card);
-        } else if (targetingCard.TargetType == TargetTypes.Action) {
-            SetTarget((card, choice));
-        }
-    }
-
-    private void PlayCard(Card card, CardChoice choice) {
-        if (targetingCard != null) {
-            Debug.Log("Can't play a card when another card is unresolved!!");
-            return;
-        }
-
-        if (!RoundManager.Instance.CanApplyAction(card, choice)) return;
-
-        Debug.Log("Play card " + card.Name + " (" + choice.Name + ")");
-
-        if (card is ActionCard && choice.Super) {
-            ManaManager.Instance.UseSelectedMana();
-        }
-
-        if (card is IHasTargeting) {
-            IHasTargeting targetingCard = card as IHasTargeting;
-            if (targetingCard.HasTarget(choice)) {
-                this.targetingCard = new TargetingCard() {
-                    TargetType = targetingCard.TargetType,
-                    Card = card,
-                    Choice = choice
-                };
-
-                DiscardCard(card);
-
-                targetingCard.PreTargetSideEffect();
-            }
-        }
-        
-        if (targetingCard == null) {
-            ApplyCard(card, choice);
-        }
-    }
-
-    private void ApplyCard(Card card, CardChoice choice) {
-        card.Apply(choice);
-
-        DiscardCard(card);
-    }
-
-    private bool SetTarget<T>(T target) {
-        TargetingCard req = targetingCard;
-        ITargetingCard<T> targeter = req.Card as ITargetingCard<T>;
-
-        if (req == null) {
-            Debug.Log("TestCardRequirement: Not card in midresolve");
-            return true;
-        }
-
-        if (!targeter.ValidTarget(req.Choice, target)) {
-            Debug.Log("TestCardRequirement: Requirement not met");
-            return false;
-        }
-
-        targeter.TargetSideEffect(req.Choice, target);
-
-        targetingCard = null;
-        ApplyCard(targeter as Card, req.Choice);
-        return true;
-    }
-
     private void DrawToHandLimit() {
         int drawAmount = Mathf.Max(HandLimit - hand.Count, 0);
         DrawCards(drawAmount);
@@ -315,9 +210,8 @@ public class Player : Entity {
     private void ShuffleDiscardToDeck() {
         deck.Add(discard);
         deck.Shuffle();
-        Debug.Log(deck.Count);
+
         discard.Clear();
-        Debug.Log(deck.Count);
 
         OnShuffleDiscardToDeck?.Invoke(this, EventArgs.Empty);
     }
@@ -329,19 +223,6 @@ public class Player : Entity {
     private void ResetValues() {
         Movement = 0;
         Influence = 0;
-        //Attack = 0;
-        //IceAttack = 0;
-        //FireAttack = 0;
-        //ColdFireAttack = 0;
-        //RangedAttack = 0;
-        //IceRangedAttack = 0;
-        //FireRangedAttack = 0;
-        //SiegeAttack = 0;
-        //IceSiegeAttack = 0;
-        //FireSiegedAttack = 0;
-        //Block = 0;
-        //IceBlock = 0;
-        //FireBlock = 0;
     }
 
     /* ------------------- EVENTS ---------------------- */
@@ -364,10 +245,6 @@ public class Player : Entity {
 
     private void ButtonInput_OnDrawStartHandClick(object sender, EventArgs e) {
         DrawToHandLimit();
-    }
-
-    private void ButtonInput_OnCardActionClick(object sender, ButtonInputManager.OnCardActionClickArgs e) {
-        HandleCard(e.card, e.choice);
     }
 
     private void ButtonInput_OnShuffleDiscardClick(object sender, EventArgs e) {

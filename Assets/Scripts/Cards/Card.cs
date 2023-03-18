@@ -40,8 +40,9 @@ public abstract class Card {
 
     public abstract string Name { get; }
     public abstract Types Type { get; }
-    public abstract bool CanPlay(ActionTypes action);
     public abstract bool CanApply(ActionTypes action, CardChoice actionChoice);
+
+    public virtual bool CanPlay(ActionTypes action) => HasPlayableChoices(action);
 
     public override string ToString() => $"{Name} ({Type})";
 

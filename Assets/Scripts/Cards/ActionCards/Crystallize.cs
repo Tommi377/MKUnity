@@ -2,20 +2,42 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class Crystallize : ActionCard, ITargetingCard<(Card, CardChoice)> {
+public class Crystallize : ActionCard, ITargetingCard<Mana>, IChoiceEffect {
+    private Mana suppliedMana;
 
     public Crystallize(ActionCardSO actionCardSO) : base(actionCardSO) { }
 
-    public TargetTypes TargetType => TargetTypes.Action;
-    public bool HasTarget(CardChoice choice) => true;
+    public TargetTypes TargetType => TargetTypes.Mana;
+    public bool HasTarget(CardChoice choice) => choice.Id == 0;
+    public bool HasChoice(CardChoice choice) => choice.Id == 1;
 
-    public bool ValidTarget(CardChoice choice, (Card, CardChoice) target) {
-        return true;
+    public bool ValidTarget(CardChoice choice, Mana target) => target.Type != Mana.Types.Gold && target.Type != Mana.Types.Black;
+
+    public void PreTargetSideEffect(CardChoice choice) {}
+
+    public void TargetSideEffect(CardChoice choice, Mana target) {
+        suppliedMana = target;
     }
 
-    public void PreTargetSideEffect() {}
+    public override void Apply(CardChoice choice) {
+        Player player = GameManager.Instance.CurrentPlayer;
 
-    public void TargetSideEffect(CardChoice choice, (Card, CardChoice) target) {}
+        switch(choice.Id) {
+            case 0:
+                player.GetInventory().AddCrystal(suppliedMana.Type);
+                player.GetInventory().RemoveMana(suppliedMana);
+                break;
+        }
+    }
 
-    public override void Apply(CardChoice choice) {}
+    public string GetEffectChoicePrompt(CardChoice choice) => "Choose a crystal to gain";
+
+    public List<(string, Action)> EffectChoices(CardChoice choice) => new List<(string, Action)> {
+        ("Red", () => GameManager.Instance.CurrentPlayer.GetInventory().AddCrystal(Mana.Types.Red)),
+        ("Green", () => GameManager.Instance.CurrentPlayer.GetInventory().AddCrystal(Mana.Types.Green)),
+        ("Blue", () => GameManager.Instance.CurrentPlayer.GetInventory().AddCrystal(Mana.Types.Blue)),
+        ("White", () => GameManager.Instance.CurrentPlayer.GetInventory().AddCrystal(Mana.Types.White)),
+        ("Gold", () => GameManager.Instance.CurrentPlayer.GetInventory().AddCrystal(Mana.Types.Gold)),
+        ("Black", () => GameManager.Instance.CurrentPlayer.GetInventory().AddCrystal(Mana.Types.Black)),
+    };
 }

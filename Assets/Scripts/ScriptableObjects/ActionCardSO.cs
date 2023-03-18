@@ -7,6 +7,4 @@ public class ActionCardSO : CardSO {
     public string DescUp;
     public string DescDown;
     public List<Mana.Types> ManaTypes;
-    public List<ActionTypes> ActionTypeList;
-    public List<ActionTypeRestriction> ActionTypeRestrictionList;
 }
