@@ -13,6 +13,7 @@ public class TargetingCard {
 
 public class PlayCardOptions {
     public bool SkipManaUse = false;
+    public Action ApplyCallback = () => { };
 }
 
 public class CardManager : MonoBehaviour {
@@ -20,8 +21,9 @@ public class CardManager : MonoBehaviour {
 
     public event EventHandler<OnChoiceEffectCardArgs> OnChoiceEffectCard;
     public class OnChoiceEffectCardArgs : EventArgs {
-        public CardChoice choice;
-        public IChoiceEffect card;
+        public CardChoice Choice;
+        public IChoiceEffect Card;
+        public Action Callback;
     }
 
     private bool choiceEffectMidresolve = false;
@@ -77,12 +79,11 @@ public class CardManager : MonoBehaviour {
                 Player.DiscardCard(card);
 
                 targetingCard.PreTargetSideEffect(choice);
+                return;
             }
-        }
-
-        if (targetingCard == null) {
-            ApplyCard(card, choice);
-        }
+        } 
+        
+        ApplyCard(card, choice, options);
     }
 
     private void HandleCard(Card card, CardChoice choice) {
@@ -97,7 +98,7 @@ public class CardManager : MonoBehaviour {
         }
     }
 
-    private void ApplyCard(Card card, CardChoice choice) {
+    private void ApplyCard(Card card, CardChoice choice, PlayCardOptions options) {
         card.Apply(choice);
 
         if (card is IChoiceEffect) {
@@ -105,10 +106,13 @@ public class CardManager : MonoBehaviour {
             if (choiceCard.HasChoice(choice)) {
                 choiceEffectMidresolve = true;
                 OnChoiceEffectCard?.Invoke(this, new OnChoiceEffectCardArgs {
-                    choice = choice,
-                    card = choiceCard
+                    Choice = choice,
+                    Card = choiceCard,
+                    Callback = options.ApplyCallback
                 });
             }
+        } else {
+            options.ApplyCallback();
         }
 
         Player.DiscardCard(card);
@@ -137,7 +141,7 @@ public class CardManager : MonoBehaviour {
         targeter.TargetSideEffect(req.Choice, target);
 
         targetingCard = null;
-        ApplyCard(targeter as Card, req.Choice);
+        ApplyCard(targeter as Card, req.Choice, defaultPlayCardOptions);
         return true;
     }
 

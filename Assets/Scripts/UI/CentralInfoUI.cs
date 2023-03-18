@@ -20,7 +20,7 @@ public class CentralInfoUI : MonoBehaviour {
         CardManager.Instance.OnChoiceEffectCard += CardManager_OnChoiceEffectCard;
     }
 
-    private void SetEffectChoices(IChoiceEffect card, CardChoice choice) {
+    private void SetEffectChoices(IChoiceEffect card, CardChoice choice, Action callback) {
         Enable();
         expandingButtonUI.ClearButtons();
         state = States.EffectChoice;
@@ -30,6 +30,7 @@ public class CentralInfoUI : MonoBehaviour {
             expandingButtonUI.AddButton(text, () => {
                 // TODO: Move the onclick logic away from the UI
                 onClick();
+                callback();
                 ButtonInputManager.Instance.ChoiceEffectDoneClick();
                 Disable();
             });
@@ -47,6 +48,7 @@ public class CentralInfoUI : MonoBehaviour {
     }
 
     private void CardManager_OnChoiceEffectCard(object sender, CardManager.OnChoiceEffectCardArgs e) {
-        SetEffectChoices(e.card, e.choice);
+        Debug.Log("sgeeges");
+        SetEffectChoices(e.Card, e.Choice, e.Callback);
     }
 }
