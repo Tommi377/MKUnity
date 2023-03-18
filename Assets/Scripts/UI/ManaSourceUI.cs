@@ -61,16 +61,14 @@ public class ManaSourceUI : MonoBehaviour {
     }
 
     private void ResetManaSouce() {
-        manaChanneled = true;
         manaUsedText.gameObject.SetActive(false);
     }
 
     private void ManaChanneled() {
-        manaChanneled = false;
         manaUsedText.gameObject.SetActive(true);
     }
 
-    private bool CanChannel() => !manaChanneled;
+    private bool CanChannel() => ManaManager.Instance.CanChannelMana();
 
     private void RoundManager_OnNewRound(object sender, System.EventArgs e) {
         ResetManaSouce();

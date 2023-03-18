@@ -68,7 +68,7 @@ public class ManaManager : MonoBehaviour {
         }
     }
 
-    public bool IsManaUsed() => manaChanneled;
+    public bool CanChannelMana() => !manaChanneled;
 
     public void RollSelectedManaSource() {
         SelectedManaSource.Roll();

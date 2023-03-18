@@ -87,6 +87,8 @@ public class Player : Entity {
     private void Start() {
         Combat.OnCombatEnd += Combat_OnCombatEnd;
 
+        RoundManager.Instance.OnNewRound += RoundManager_OnNewRound;
+
         MouseInputManager.Instance.OnHexClick += MouseInput_OnHexClick;
 
         ButtonInputManager.Instance.OnEndMovementClick += ButtonInput_OnEndMovementClick;
@@ -320,6 +322,10 @@ public class Player : Entity {
         OnShuffleDiscardToDeck?.Invoke(this, EventArgs.Empty);
     }
 
+    private void RoundStartInit() {
+        inventory.RemoveAllTokens();
+    }
+
     private void ResetValues() {
         Movement = 0;
         Influence = 0;
@@ -342,6 +348,10 @@ public class Player : Entity {
 
     private void Combat_OnCombatEnd(object sender, Combat.OnCombatEndArgs e) {
         GainFame(e.result.TotalFame);
+    }
+
+    private void RoundManager_OnNewRound(object sender, EventArgs e) {
+        RoundStartInit();
     }
 
     private void MouseInput_OnHexClick(object sender, MouseInputManager.OnHexClickArgs e) {

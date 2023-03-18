@@ -74,4 +74,9 @@ public class Inventory {
             RemoveToken(mana);
         }
     }
+
+    public void RemoveAllTokens() {
+        tokenList.Clear();
+        OnInventoryUpdate?.Invoke(this, new OnInventoryUpdateArgs { player = Owner, inventory = this });
+    }
 }
