@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
+using static MouseInput;
 
 public class MouseInput : MonoBehaviour {
     public static MouseInput Instance;
@@ -24,6 +25,14 @@ public class MouseInput : MonoBehaviour {
     public class OnManaSourceClickArgs : EventArgs {
         public ManaSourceVisual manaSourceVisual;
     }
+    public event EventHandler<OnManaCrystalClickArgs> OnManaCrystalClick;
+    public class OnManaCrystalClickArgs : EventArgs {
+        public CrystalCounterVisual crystalCounterVisual;
+    }
+    public event EventHandler<OnManaTokenClickArgs> OnManaTokenClick;
+    public class OnManaTokenClickArgs : EventArgs {
+        public ManaTokenVisual manaTokenVisual;
+    }
     /* EVENT DEFINITIONS - END */
 
     void Awake() {
@@ -35,7 +44,7 @@ public class MouseInput : MonoBehaviour {
     }
 
     // Update is called once per frame
-    void Update() {
+    private void Update() {
         if (Input.GetMouseButtonDown(0)) {
 
             // UI ray
@@ -46,9 +55,9 @@ public class MouseInput : MonoBehaviour {
             raycaster.Raycast(pointerData, results);
 
             if (results.Count > 0) {
-                RaycastResult found = results.Find(result => result.gameObject.CompareTag("Card"));
 
                 // Raycast hits card
+                RaycastResult found = results.Find(result => result.gameObject.CompareTag("Card"));
                 if (found.gameObject) {
                     CardVisual cardVisual = found.gameObject.GetComponent<CardVisual>();
                     Debug.Log("Hit " + found.gameObject.name);
@@ -56,16 +65,34 @@ public class MouseInput : MonoBehaviour {
                     return;
                 }
 
-                found = results.Find(result => result.gameObject.CompareTag("ManaSource"));
 
                 // Raycast hits mana source
+                found = results.Find(result => result.gameObject.CompareTag("ManaSource"));
                 if (found.gameObject) {
                     ManaSourceVisual manaSourceVisual = found.gameObject.GetComponent<ManaSourceVisual>();
                     Debug.Log("Hit " + found.gameObject.name);
                     OnManaSourceClick?.Invoke(this, new OnManaSourceClickArgs { manaSourceVisual = manaSourceVisual });
-                    //_uiManager.SelectCard(card);
                     return;
                 }
+
+                // Raycast hits mana crystal
+                found = results.Find(result => result.gameObject.CompareTag("ManaCrystal"));
+                if (found.gameObject) {
+                    CrystalCounterVisual crystalCounterVisual = found.gameObject.GetComponent<CrystalCounterVisual>();
+                    Debug.Log("Hit " + found.gameObject.name);
+                    OnManaCrystalClick?.Invoke(this, new OnManaCrystalClickArgs { crystalCounterVisual = crystalCounterVisual });
+                    return;
+                }
+
+                // Raycast hits mana token
+                found = results.Find(result => result.gameObject.CompareTag("ManaToken"));
+                if (found.gameObject) {
+                    ManaTokenVisual manaTokenVisual = found.gameObject.GetComponent<ManaTokenVisual>();
+                    Debug.Log("Hit " + found.gameObject.name);
+                    OnManaTokenClick?.Invoke(this, new OnManaTokenClickArgs { manaTokenVisual = manaTokenVisual });
+                    return;
+                }
+
                 return;
             }
 

@@ -14,19 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Swiftness
   Type: 0
+  Choices:
+  - Name: Move 2 (N)
+    Description: Move 2
+    Super: 0
+    Id: 0
+    ActionType: 1
+  - Name: Ranged Attack 3 (S)
+    Description: Ranged Attack 3
+    Super: 1
+    Id: 1
+    ActionType: 2
   DescUp: Move 2
   DescDown: Ranged Attack 3
   ManaTypes: 03000000
   ActionTypeList: 0100000002000000
   ActionTypeRestrictionList: 0000000001000000
-  ActionChoices:
-  - Name: Move 2 (N)
-    Description: Move 2 (N)
-    Super: 0
-    Id: 0
-    ActionType: 1
-  - Name: Ranged Attack 3 (S)
-    Description: Ranged Attack 3 (S)
-    Super: 1
-    Id: 1
-    ActionType: 2

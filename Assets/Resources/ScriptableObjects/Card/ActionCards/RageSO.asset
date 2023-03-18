@@ -14,24 +14,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Rage
   Type: 0
+  Choices:
+  - Name: Attack 2 (N)
+    Description: Attack 2
+    Super: 0
+    Id: 0
+    ActionType: 2
+  - Name: Block 2 (N)
+    Description: Block 2
+    Super: 0
+    Id: 1
+    ActionType: 2
+  - Name: Attack 4 (S)
+    Description: Attack 4
+    Super: 1
+    Id: 2
+    ActionType: 2
   DescUp: Attack or Block 2
   DescDown: Attack 4
   ManaTypes: 00000000
   ActionTypeList: 02000000
   ActionTypeRestrictionList: 02000000
-  ActionChoices:
-  - Name: Attack 2 (N)
-    Description: Attack 2 (N)
-    Super: 0
-    Id: 0
-    ActionType: 2
-  - Name: Block 2 (N)
-    Description: Block 2 (N)
-    Super: 0
-    Id: 1
-    ActionType: 2
-  - Name: Attack 4 (S)
-    Description: Attack 4 (S)
-    Super: 0
-    Id: 2
-    ActionType: 2

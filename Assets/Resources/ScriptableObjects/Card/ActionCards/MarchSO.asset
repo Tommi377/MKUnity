@@ -14,19 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: March
   Type: 0
+  Choices:
+  - Name: Move 2 (N)
+    Description: Move 2
+    Super: 0
+    Id: 0
+    ActionType: 1
+  - Name: Move 4 (S)
+    Description: Move 4
+    Super: 1
+    Id: 1
+    ActionType: 1
   DescUp: Move 2
   DescDown: Move 4
   ManaTypes: 01000000
   ActionTypeList: 01000000
   ActionTypeRestrictionList: 02000000
-  ActionChoices:
-  - Name: Move 2 (N)
-    Description: Move 2 (N)
-    Super: 0
-    Id: 0
-    ActionType: 1
-  - Name: Move 4 (N)
-    Description: Move 4 (N)
-    Super: 1
-    Id: 1
-    ActionType: 1

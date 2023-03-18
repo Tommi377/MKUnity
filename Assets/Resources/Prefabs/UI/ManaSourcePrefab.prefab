@@ -89,7 +89,7 @@ GameObject:
   - component: {fileID: 2273218965271840173}
   - component: {fileID: 8913891805890717457}
   m_Layer: 7
-  m_Name: ManaSource
+  m_Name: ManaSourcePrefab
   m_TagString: ManaSource
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

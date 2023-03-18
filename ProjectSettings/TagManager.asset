@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Card
   - ManaSource
+  - ManaToken
+  - ManaCrystal
   layers:
   - Default
   - TransparentFX
