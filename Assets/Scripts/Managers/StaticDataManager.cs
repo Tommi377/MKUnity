@@ -7,5 +7,6 @@ public class StaticDataManager : MonoBehaviour {
         Player.ResetStaticData();
         Combat.ResetStaticData();
         EventSignalManager.ResetStaticData();
+        Inventory.ResetStaticData();
     }
 }

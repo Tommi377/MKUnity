@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour {
         Combat.OnCombatEnd += Combat_OnCombatEnd;
 
         // Button click events
-        ButtonInput.Instance.OnActionChooseClick += ButtonInput_OnActionChooseClick;
+        ButtonInputManager.Instance.OnActionChooseClick += ButtonInput_OnActionChooseClick;
 
         SetDoneInitializing();
     }
@@ -100,7 +100,7 @@ public class GameManager : MonoBehaviour {
         EndOfCombat(e.result);
     }
 
-    private void ButtonInput_OnActionChooseClick(object sender, ButtonInput.OnActionChooseClickArgs e) {
+    private void ButtonInput_OnActionChooseClick(object sender, ButtonInputManager.OnActionChooseClickArgs e) {
         ChooseAction(e.actionType);
     }
 }

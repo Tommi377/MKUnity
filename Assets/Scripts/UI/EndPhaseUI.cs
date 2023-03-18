@@ -7,6 +7,6 @@ public class EndPhaseUI : MonoBehaviour {
     [SerializeField] private Button endButton;
 
     private void Awake() {
-        endButton.onClick.AddListener(() => { ButtonInput.Instance.EndEndPhaseClick(); });
+        endButton.onClick.AddListener(() => { ButtonInputManager.Instance.EndEndPhaseClick(); });
     }
 }

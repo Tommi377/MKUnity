@@ -2,15 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ManaSourceUI : MonoBehaviour {
     [SerializeField] private Transform manaSourceContainer;
     [SerializeField] private Transform manaSourcePrefab;
     [SerializeField] private TMP_Text manaUsedText;
+    [SerializeField] private Button channelManaButton;
+
+    private bool manaChanneled = false;
 
 #nullable enable
     private ManaSourceVisual? selectedManaSourceVisual;
 #nullable disable
+
+    private void Awake() {
+        channelManaButton.onClick.AddListener(() => ButtonInputManager.Instance.ChannelManaClick());
+    }
 
     private void Start() {
         if (ManaManager.Instance.ManaSources.Count > 0 ) {
@@ -21,11 +29,10 @@ public class ManaSourceUI : MonoBehaviour {
 
         RoundManager.Instance.OnNewRound += RoundManager_OnNewRound;
 
-        ManaManager.Instance.OnManaUsed += ManaManager_OnManaUsed;
+        ManaManager.Instance.OnManaSourceChanneled += ManaManager_OnManaSourceChanneled;
         ManaManager.Instance.OnManaSourceCreated += ManaManager_OnManaSourceCreated;
         ManaManager.Instance.OnManaSourceSelected += ManaManager_OnManaSourceSelected;
         ManaManager.Instance.OnManaSourceDeselected += ManaManager_OnManaSourceDeselected;
-
 
         ManaSource.OnManaSourceRoll += ManaSource_OnManaSourceRoll;
     }
@@ -34,6 +41,10 @@ public class ManaSourceUI : MonoBehaviour {
         DeselectManaSource();
         selectedManaSourceVisual = manaSourceVisual;
         selectedManaSourceVisual.Select();
+
+        if (CanChannel()) {
+            channelManaButton.gameObject.SetActive(true);
+        }
     }
 
     private void DeselectManaSource() {
@@ -41,6 +52,7 @@ public class ManaSourceUI : MonoBehaviour {
             selectedManaSourceVisual.Deselect();
             selectedManaSourceVisual = null;
         }
+        channelManaButton.gameObject.SetActive(false);
     }
 
     private void AddManaSourceVisual(ManaSource manaSource) {
@@ -48,12 +60,24 @@ public class ManaSourceUI : MonoBehaviour {
         visual.Init(manaSource);
     }
 
-    private void RoundManager_OnNewRound(object sender, System.EventArgs e) {
+    private void ResetManaSouce() {
+        manaChanneled = true;
         manaUsedText.gameObject.SetActive(false);
     }
 
-    private void ManaManager_OnManaUsed(object sender, System.EventArgs e) {
+    private void ManaChanneled() {
+        manaChanneled = false;
         manaUsedText.gameObject.SetActive(true);
+    }
+
+    private bool CanChannel() => !manaChanneled;
+
+    private void RoundManager_OnNewRound(object sender, System.EventArgs e) {
+        ResetManaSouce();
+    }
+
+    private void ManaManager_OnManaSourceChanneled(object sender, System.EventArgs e) {
+        ManaChanneled();
     }
 
     private void ManaManager_OnManaSourceCreated(object sender, ManaManager.OnManaSourceCreatedArgs e) {

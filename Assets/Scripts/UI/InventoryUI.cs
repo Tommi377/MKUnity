@@ -11,6 +11,13 @@ public class InventoryUI : MonoBehaviour {
     [SerializeField] private Transform crystalContainer;
     [SerializeField] private Transform manaContainer;
 
+    private List<CrystalCounterVisual> crystalCounterVisuals = new List<CrystalCounterVisual>();
+    private List<ManaTokenVisual> manaTokenVisuals = new List<ManaTokenVisual>();
+
+#nullable enable
+    private ISelectableUI? selectedElement;
+#nullable disable
+
     private void Start() {
         if (GameManager.Instance.DoneInitializing) {
             Init();
@@ -18,13 +25,17 @@ public class InventoryUI : MonoBehaviour {
             GameManager.Instance.OnGameManagerDoneInitializing += GameManager_OnGameManagerDoneInitializing;
         }
 
-        Player.OnInventoryUpdate += Player_OnInventoryUpdate;
+        Inventory.OnInventoryUpdate += Inventory_OnInventoryUpdate;
+
+        ManaManager.Instance.OnManaSelected += ManaManager_OnManaSelected;
+        ManaManager.Instance.OnManaDeselected += ManaManager_OnManaDeselected;
     }
 
     private void Init() {
-        foreach (ManaSource.Types type in Enum.GetValues(typeof(ManaSource.Types)).Cast<ManaSource.Types>()) {
+        foreach (Mana.Types type in Enum.GetValues(typeof(Mana.Types)).Cast<Mana.Types>()) {
             CrystalCounterVisual crystalCounterUI = Instantiate(crystalCounterPrefab, crystalContainer).GetComponent<CrystalCounterVisual>();
             crystalCounterUI.Init(type);
+            crystalCounterVisuals.Add(crystalCounterUI);
         }
 
         UpdateUI(GameManager.Instance.CurrentPlayer.GetInventory());
@@ -35,9 +46,43 @@ public class InventoryUI : MonoBehaviour {
         foreach (Transform child in manaContainer) {
             Destroy(child.gameObject);
         }
-        foreach (ManaSource.Types type in inventory.GetManaList()) {
+        manaTokenVisuals.Clear();
+        foreach (Mana mana in inventory.GetTokenList()) {
             ManaTokenVisual manaTokenVisual = Instantiate(manaTokenPrefab, manaContainer).GetComponent<ManaTokenVisual>();
-            manaTokenVisual.Init(type);
+            manaTokenVisual.Init(mana);
+            manaTokenVisuals.Add(manaTokenVisual);
+        }
+
+        if (ManaManager.Instance.SelectedMana != null) {
+            SelectMana(ManaManager.Instance.SelectedMana);
+        }
+    }
+
+    private void SelectMana(Mana mana) {
+        DeselectMana();
+        if (mana.Crystal) {
+            foreach (CrystalCounterVisual crystalCounterVisual in crystalCounterVisuals) {
+                if (crystalCounterVisual.Type == mana.Type) {
+                    crystalCounterVisual.Select();
+                    selectedElement = crystalCounterVisual;
+                    return;
+                }
+            }
+        } else {
+            foreach (ManaTokenVisual manaTokenVisual in manaTokenVisuals) {
+                if (manaTokenVisual.Mana == mana) {
+                    manaTokenVisual.Select();
+                    selectedElement = manaTokenVisual;
+                    return;
+                }
+            }
+        }
+    }
+
+    private void DeselectMana() {
+        if (selectedElement != null) {
+            selectedElement.Deselect();
+            selectedElement = null;
         }
     }
 
@@ -45,7 +90,15 @@ public class InventoryUI : MonoBehaviour {
         Init();
     }
 
-    private void Player_OnInventoryUpdate(object sender, Player.OnInventoryUpdateArgs e) {
+    private void Inventory_OnInventoryUpdate(object sender, Inventory.OnInventoryUpdateArgs e) {
         UpdateUI(e.inventory);
+    }
+
+    private void ManaManager_OnManaSelected(object sender, ManaManager.OnManaSelectedArgs e) {
+        SelectMana(e.mana);
+    }
+
+    private void ManaManager_OnManaDeselected(object sender, EventArgs e) {
+        DeselectMana();
     }
 }

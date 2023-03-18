@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ManaSourceVisual : MonoBehaviour {
+public class ManaSourceVisual : MonoBehaviour, ISelectableUI {
     [SerializeField] private Transform visual;
     [SerializeField] private Transform highlight;
 

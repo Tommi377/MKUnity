@@ -98,17 +98,17 @@ public class Combat {
         OnCombatStart?.Invoke(this, EventArgs.Empty);
         OnCombatPhaseChange?.Invoke(this, new OnCombatPhaseChangeArgs { combat = this, phase = CombatPhases.Range });
 
-        ButtonInput.Instance.OnCombatEnemyChooseClick += ButtonInput_OnCombatEnemyChooseClick;
-        ButtonInput.Instance.OnCombatNextPhaseClick += ButtonInput_OnCombatNextPhaseClick;
-        ButtonInput.Instance.OnCombatBlockChooseClick += ButtonInput_OnCombatBlockChooseClick;
-        ButtonInput.Instance.OnAssignEnemyDamageClick += ButtonInput_OnAssignEnemyDamageClick;
+        ButtonInputManager.Instance.OnCombatEnemyChooseClick += ButtonInput_OnCombatEnemyChooseClick;
+        ButtonInputManager.Instance.OnCombatNextPhaseClick += ButtonInput_OnCombatNextPhaseClick;
+        ButtonInputManager.Instance.OnCombatBlockChooseClick += ButtonInput_OnCombatBlockChooseClick;
+        ButtonInputManager.Instance.OnAssignEnemyDamageClick += ButtonInput_OnAssignEnemyDamageClick;
     }
 
     public void Dispose() {
-        ButtonInput.Instance.OnCombatEnemyChooseClick -= ButtonInput_OnCombatEnemyChooseClick;
-        ButtonInput.Instance.OnCombatNextPhaseClick -= ButtonInput_OnCombatNextPhaseClick;
-        ButtonInput.Instance.OnCombatBlockChooseClick -= ButtonInput_OnCombatBlockChooseClick;
-        ButtonInput.Instance.OnAssignEnemyDamageClick -= ButtonInput_OnAssignEnemyDamageClick;
+        ButtonInputManager.Instance.OnCombatEnemyChooseClick -= ButtonInput_OnCombatEnemyChooseClick;
+        ButtonInputManager.Instance.OnCombatNextPhaseClick -= ButtonInput_OnCombatNextPhaseClick;
+        ButtonInputManager.Instance.OnCombatBlockChooseClick -= ButtonInput_OnCombatBlockChooseClick;
+        ButtonInputManager.Instance.OnAssignEnemyDamageClick -= ButtonInput_OnAssignEnemyDamageClick;
     }
 
     public ReadOnlyCollection<CombatData> CombatCards => combatCards.AsReadOnly();
@@ -209,7 +209,7 @@ public class Combat {
 
     /* ------------------- EVENTS ---------------------- */
 
-    private void ButtonInput_OnCombatEnemyChooseClick(object sender, ButtonInput.OnCombatEnemyChooseClickArgs e) {
+    private void ButtonInput_OnCombatEnemyChooseClick(object sender, ButtonInputManager.OnCombatEnemyChooseClickArgs e) {
         AttackEnemies(e.enemies);
     }
 
@@ -217,11 +217,11 @@ public class Combat {
         CombatNextPhase();
     }
 
-    private void ButtonInput_OnCombatBlockChooseClick(object sender, ButtonInput.OnCombatBlockChooseClickArgs e) {
+    private void ButtonInput_OnCombatBlockChooseClick(object sender, ButtonInputManager.OnCombatBlockChooseClickArgs e) {
         BlockEnemy(e.blockedEnemy);
     }
 
-    private void ButtonInput_OnAssignEnemyDamageClick(object sender, ButtonInput.OnAssignEnemyDamageClickArgs e) {
+    private void ButtonInput_OnAssignEnemyDamageClick(object sender, ButtonInputManager.OnAssignEnemyDamageClickArgs e) {
         AssignDamageToPlayer(e.damagingEnemy);
     }
 }

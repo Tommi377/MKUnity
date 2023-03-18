@@ -16,8 +16,8 @@ public class DeckUI : MonoBehaviour {
     [SerializeField] private TMP_Text discardCountText;
 
     private void Awake() {
-        drawButton.onClick.AddListener(() => ButtonInput.Instance.DrawCardClick());
-        shuffleDiscardButton.onClick.AddListener(() => ButtonInput.Instance.ShuffleDiscardClick());
+        drawButton.onClick.AddListener(() => ButtonInputManager.Instance.DrawCardClick());
+        shuffleDiscardButton.onClick.AddListener(() => ButtonInputManager.Instance.ShuffleDiscardClick());
     }
 
     private void Start() {

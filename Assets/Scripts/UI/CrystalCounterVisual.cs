@@ -5,29 +5,44 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CrystalCounterVisual : MonoBehaviour {
+public class CrystalCounterVisual : MonoBehaviour, ISelectableUI {
+    [SerializeField] private Transform visual;
+    [SerializeField] private Transform highlight;
     [SerializeField] private TMP_Text countText;
 
-    private ManaSource.Types type;
+    public Mana.Types Type { get; private set; }
 
     private void Start() {
-        Player.OnInventoryUpdate += Player_OnInventoryUpdate;
+        Inventory.OnInventoryUpdate += Inventory_OnInventoryUpdate;
     }
 
-    public void Init(ManaSource.Types type) {
-        this.type = type;
+    public void Init(Mana.Types type) {
+        Type = type;
         Inventory inventory = GameManager.Instance.CurrentPlayer.GetInventory();
-        UpdateUI(inventory);
 
-        GetComponent<Image>().color = ManaSource.GetColor(type);
+        UpdateUI(inventory);
+        DrawVisual();
     }
 
     private void UpdateUI(Inventory inventory) {
-        int count = inventory.GetCrystalCount(type);
+        int count = inventory.GetCrystalCount(Type);
         countText.SetText(count.ToString());
     }
 
-    private void Player_OnInventoryUpdate(object sender, Player.OnInventoryUpdateArgs e) {
+    public void DrawVisual() {
+        Image image = visual.GetComponent<Image>();
+        image.color = ManaSource.GetColor(Type);
+    }
+
+    public void Select() {
+        highlight.gameObject.SetActive(true);
+    }
+
+    public void Deselect() {
+        highlight.gameObject.SetActive(false);
+    }
+
+    private void Inventory_OnInventoryUpdate(object sender, Inventory.OnInventoryUpdateArgs e) {
         UpdateUI(e.inventory);
     }
 }

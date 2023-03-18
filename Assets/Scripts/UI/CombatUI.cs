@@ -53,7 +53,7 @@ public class CombatUI : MonoBehaviour {
             case State.Attack:
                 buttonContainer.AddButton("Attack!", () => {
                     Hide();
-                    ButtonInput.Instance.CombatEnemyChooseClick(chosenEnemies);
+                    ButtonInputManager.Instance.CombatEnemyChooseClick(chosenEnemies);
                     chosenEnemies.Clear();
                 });
                 break;
@@ -126,15 +126,15 @@ public class CombatUI : MonoBehaviour {
     }
 
     private void NextPhaseClick() {
-        ButtonInput.Instance.CombatNextPhaseClick();
+        ButtonInputManager.Instance.CombatNextPhaseClick();
     }
 
     private void BlockEnemyClick(Enemy enemy) {
-        ButtonInput.Instance.CombatBlockChooseClick(enemy);
+        ButtonInputManager.Instance.CombatBlockChooseClick(enemy);
     }
 
     private void AssignEnemyDamageClick(Enemy enemy) {
-        ButtonInput.Instance.AssignEnemyDamageClick(enemy);
+        ButtonInputManager.Instance.AssignEnemyDamageClick(enemy);
     }
 
     private void Combat_OnCombatPhaseChange(object sender, Combat.OnCombatPhaseChangeArgs e) {
