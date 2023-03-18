@@ -29,11 +29,6 @@ public class Player : Entity {
         public Card card;
     }
     public static event EventHandler OnShuffleDiscardToDeck;
-    public static event EventHandler<OnInventoryUpdateArgs> OnInventoryUpdate;
-    public class OnInventoryUpdateArgs : EventArgs {
-        public Player player;
-        public Inventory inventory;
-    }
 
     public static void ResetStaticData() {
         OnPlayerDrawCard = null;
@@ -46,7 +41,7 @@ public class Player : Entity {
     public int Movement { get; private set; } = 0;
     public int Influence { get; private set; } = 0;
 
-    private Inventory inventory = new Inventory();
+    private Inventory inventory;
     private Deck deck;
     private List<Card> hand = new List<Card>();
     private List<Card> discard = new List<Card>();
@@ -85,19 +80,20 @@ public class Player : Entity {
     // public int FireBlock = 0;
 
     private void Awake() {
+        inventory = new Inventory(this);
         deck = new Deck(startingDeckSO);
     }
 
     private void Start() {
         Combat.OnCombatEnd += Combat_OnCombatEnd;
 
-        MouseInput.Instance.OnHexClick += MouseInput_OnHexClick;
+        MouseInputManager.Instance.OnHexClick += MouseInput_OnHexClick;
 
-        ButtonInput.Instance.OnEndMovementClick += ButtonInput_OnEndMovementClick;
-        ButtonInput.Instance.OnDrawStartHandClick += ButtonInput_OnDrawStartHandClick;
-        ButtonInput.Instance.OnCardActionClick += ButtonInput_OnCardActionClick;
-        ButtonInput.Instance.OnShuffleDiscardClick += ButtonInput_OnShuffleDiscardClick;
-        ButtonInput.Instance.OnDrawCardClick += ButtonInput_OnDrawCardClick;
+        ButtonInputManager.Instance.OnEndMovementClick += ButtonInput_OnEndMovementClick;
+        ButtonInputManager.Instance.OnDrawStartHandClick += ButtonInput_OnDrawStartHandClick;
+        ButtonInputManager.Instance.OnCardActionClick += ButtonInput_OnCardActionClick;
+        ButtonInputManager.Instance.OnShuffleDiscardClick += ButtonInput_OnShuffleDiscardClick;
+        ButtonInputManager.Instance.OnDrawCardClick += ButtonInput_OnDrawCardClick;
     }
 
     public Inventory GetInventory() => inventory;
@@ -142,16 +138,6 @@ public class Player : Entity {
 
     public void ReduceInfluence(int influence) {
         Influence -= influence;
-    }
-
-    public void GainCrystal(ManaSource.Types type) {
-        inventory.AddCrystal(type);
-        OnInventoryUpdate?.Invoke(this, new OnInventoryUpdateArgs { player = this, inventory = inventory });
-    }
-
-    public void GainMana(ManaSource.Types type) {
-        inventory.AddMana(type);
-        OnInventoryUpdate?.Invoke(this, new OnInventoryUpdateArgs { player = this, inventory = inventory });
     }
 
     private bool TryMove(Hex hex) {
@@ -241,6 +227,10 @@ public class Player : Entity {
 
         Debug.Log("Play card " + card.Name + " (" + choice.Name + ")");
 
+        if (card is ActionCard && choice.Super) {
+            ManaManager.Instance.UseSelectedMana();
+        }
+
         if (card is IHasTargeting) {
             IHasTargeting targetingCard = card as IHasTargeting;
             if (targetingCard.HasTarget(choice)) {
@@ -249,10 +239,12 @@ public class Player : Entity {
                     Card = card,
                     Choice = choice
                 };
+
                 DiscardCard(card);
+
                 targetingCard.PreTargetSideEffect();
             }
-        } 
+        }
         
         if (targetingCard == null) {
             ApplyCard(card, choice);
@@ -261,11 +253,6 @@ public class Player : Entity {
 
     private void ApplyCard(Card card, CardChoice choice) {
         card.Apply(choice);
-
-        // TODO: Ponder whether its good to roll manasource here
-        if (card is ActionCard && choice.Super) {
-            ManaManager.Instance.UseMana();
-        }
 
         DiscardCard(card);
     }
@@ -357,7 +344,7 @@ public class Player : Entity {
         GainFame(e.result.TotalFame);
     }
 
-    private void MouseInput_OnHexClick(object sender, MouseInput.OnHexClickArgs e) {
+    private void MouseInput_OnHexClick(object sender, MouseInputManager.OnHexClickArgs e) {
         TryMove(e.hex);
     }
 
@@ -369,7 +356,7 @@ public class Player : Entity {
         DrawToHandLimit();
     }
 
-    private void ButtonInput_OnCardActionClick(object sender, ButtonInput.OnCardActionClickArgs e) {
+    private void ButtonInput_OnCardActionClick(object sender, ButtonInputManager.OnCardActionClickArgs e) {
         HandleCard(e.card, e.choice);
     }
 

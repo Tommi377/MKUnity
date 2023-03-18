@@ -9,8 +9,8 @@ public class ChoosePhaseUI : MonoBehaviour {
     [SerializeField] private Button selectSkipButton;
 
     private void Awake() {
-        selectCombatButton.onClick.AddListener(() => { ButtonInput.Instance.ActionChooseClick(ActionTypes.Combat); });
-        selectInfluenceButton.onClick.AddListener(() => { ButtonInput.Instance.ActionChooseClick(ActionTypes.Influence); });
-        selectSkipButton.onClick.AddListener(() => { ButtonInput.Instance.ActionChooseClick(ActionTypes.None); });
+        selectCombatButton.onClick.AddListener(() => { ButtonInputManager.Instance.ActionChooseClick(ActionTypes.Combat); });
+        selectInfluenceButton.onClick.AddListener(() => { ButtonInputManager.Instance.ActionChooseClick(ActionTypes.Influence); });
+        selectSkipButton.onClick.AddListener(() => { ButtonInputManager.Instance.ActionChooseClick(ActionTypes.None); });
     }
 }

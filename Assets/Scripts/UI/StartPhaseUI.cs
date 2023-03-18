@@ -9,11 +9,11 @@ public class StartPhaseUI : MonoBehaviour {
 
     private void Awake() {
         drawButton.onClick.AddListener(() => { 
-            ButtonInput.Instance.DrawStartHandClick();
+            ButtonInputManager.Instance.DrawStartHandClick();
             drawButton.gameObject.SetActive(false);
             startButton.gameObject.SetActive(true);
         });
-        startButton.onClick.AddListener(() => { ButtonInput.Instance.EndStartPhaseClick(); });
+        startButton.onClick.AddListener(() => { ButtonInputManager.Instance.EndStartPhaseClick(); });
 
         startButton.gameObject.SetActive(false);
     }

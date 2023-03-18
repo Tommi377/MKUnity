@@ -3276,7 +3276,7 @@ GameObject:
   - component: {fileID: 826557911}
   - component: {fileID: 826557912}
   m_Layer: 0
-  m_Name: ButtonInput
+  m_Name: ButtonInputManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4680,7 +4680,7 @@ GameObject:
   - component: {fileID: 1517192248}
   - component: {fileID: 1517192249}
   m_Layer: 0
-  m_Name: MouseInput
+  m_Name: MouseInputManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4710,7 +4710,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1517192247}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d4a45b53a340b54dbb8801756acf839, type: 3}
+  m_Script: {fileID: 11500000, guid: cc6b40b3c7606f947bfe06dc24e7575c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   raycaster: {fileID: 747185979}

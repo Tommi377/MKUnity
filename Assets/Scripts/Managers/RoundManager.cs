@@ -55,9 +55,9 @@ public class RoundManager : MonoBehaviour {
 
         Combat.OnCombatEnd += Combat_OnCombatEnd;
 
-        ButtonInput.Instance.OnEndStartPhaseClick += ButtonInput_OnEndStartPhaseClick;
-        ButtonInput.Instance.OnEndMovementClick += ButtonInput_OnEndMovementClick;
-        ButtonInput.Instance.OnEndEndPhaseClick += ButtonInput_OnEndEndPhaseClick;
+        ButtonInputManager.Instance.OnEndStartPhaseClick += ButtonInput_OnEndStartPhaseClick;
+        ButtonInputManager.Instance.OnEndMovementClick += ButtonInput_OnEndMovementClick;
+        ButtonInputManager.Instance.OnEndEndPhaseClick += ButtonInput_OnEndEndPhaseClick;
     }
 
     // Tests if a card's action is playable with the selected action

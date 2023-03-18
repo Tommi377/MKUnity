@@ -48,13 +48,13 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
 
         switch (choice.Id) {
             case 0:
-                player.GainMana(ManaSource.Types.Blue);
+                player.GetInventory().AddToken(Mana.Types.Blue);
                 break;
             case 1:
-                player.GainMana(ManaSource.Types.White);
+                player.GetInventory().AddToken(Mana.Types.White);
                 break;
             case 2:
-                player.GainMana(ManaSource.Types.Red);
+                player.GetInventory().AddToken(Mana.Types.Red);
                 break;
             case 3:
                 int initMovement = player.Movement;

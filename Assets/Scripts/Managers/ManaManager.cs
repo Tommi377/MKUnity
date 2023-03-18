@@ -10,14 +10,16 @@ public class ManaManager : MonoBehaviour {
     private List<ManaSource> manaSources = new List<ManaSource>();
     public ReadOnlyCollection<ManaSource> ManaSources => manaSources.AsReadOnly();
 
-    private bool manaUsed = false;
+    private bool manaChanneled = false;
 
 #nullable enable
     public ManaSource? SelectedManaSource { get; private set; } = null;
+    public Mana? SelectedMana { get; private set; } = null;
 #nullable disable
 
     /* EVENT DEFINITIONS - START */
     public event EventHandler OnManaUsed;
+    public event EventHandler OnManaSourceChanneled;
     public event EventHandler<OnManaSourceCreatedArgs> OnManaSourceCreated;
     public class OnManaSourceCreatedArgs : EventArgs {
         public ManaSource manaSource;
@@ -26,6 +28,11 @@ public class ManaManager : MonoBehaviour {
     public event EventHandler<OnManaSourceSelectedArgs> OnManaSourceSelected;
     public class OnManaSourceSelectedArgs : EventArgs {
         public ManaSource manaSource;
+    }
+    public event EventHandler OnManaDeselected;
+    public event EventHandler<OnManaSelectedArgs> OnManaSelected;
+    public class OnManaSelectedArgs : EventArgs {
+        public Mana mana;
     }
     /* EVENT DEFINITIONS - END */
 
@@ -45,28 +52,23 @@ public class ManaManager : MonoBehaviour {
             OnManaSourceCreated?.Invoke(this, new OnManaSourceCreatedArgs { manaSource = manaSource });
         }
 
-        MouseInput.Instance.OnManaSourceClick += MouseInput_OnManaSourceClick;
+        MouseInputManager.Instance.OnManaSourceClick += MouseInputManager_OnManaSourceClick;
+        MouseInputManager.Instance.OnManaTokenClick += MouseInputManager_OnManaTokenClick;
+        MouseInputManager.Instance.OnManaCrystalClick += MouseInputManager_OnManaCrystalClick;
+
+
+        ButtonInputManager.Instance.OnChannelManaClick += ButtonInputManager_OnChannelManaClick;
     }
 
     public void RoundStartSetup() {
         DeselectManaSource();
-        manaUsed = false;
+        manaChanneled = false;
         foreach (ManaSource manaSource in manaSources) {
             manaSource.Roll();
         }
     }
 
-    public void UseMana() {
-        if (!manaUsed) {
-            manaUsed = true;
-            RollSelectedManaSource();
-            OnManaUsed?.Invoke(this, EventArgs.Empty);
-        } else {
-            Debug.Log("Trying to use mana when it has been alread used");
-        }
-    }
-
-    public bool IsManaUsed() => manaUsed;
+    public bool IsManaUsed() => manaChanneled;
 
     public void RollSelectedManaSource() {
         SelectedManaSource.Roll();
@@ -76,17 +78,41 @@ public class ManaManager : MonoBehaviour {
     public bool SelectedManaUsableWithCard(Card card) {
         if (card is ActionCard) {
             ActionCard actionCard = (ActionCard)card;
-            if (SelectedManaSource == null) return false;
-            if (manaUsed) return false;
-            if (SelectedManaSource.Type == ManaSource.Types.Gold && RoundManager.Instance.IsDay()) return true;
-            if (actionCard.ManaTypes.Contains(SelectedManaSource.Type)) return true;
+            if (SelectedMana == null) return false;
+            if (SelectedMana.Type == Mana.Types.Gold && RoundManager.Instance.IsDay()) return true;
+            if (actionCard.ManaTypes.Contains(SelectedMana.Type)) return true;
         }
         return false;
     }
 
+    public void UseSelectedMana() {
+
+        GameManager.Instance.CurrentPlayer.GetInventory().RemoveMana(SelectedMana);
+        OnManaUsed?.Invoke(this, EventArgs.Empty);
+        DeselectMana();
+    }
+
+    private void ChannelSelectedMana() {
+        if (SelectedManaSource == null) {
+            Debug.Log("No mana to channel");
+            return;
+        }
+
+        if (manaChanneled) {
+            Debug.Log("Already channeled");
+            return;
+        }
+
+        GameManager.Instance.CurrentPlayer.GetInventory().AddToken(SelectedManaSource.Type);
+
+        manaChanneled = true;
+        RollSelectedManaSource();
+        OnManaSourceChanneled?.Invoke(this, EventArgs.Empty);
+    }
+
     private void SelectManaSource(ManaSource manaSource) {
         DeselectManaSource();
-        if (manaUsed) return;
+        if (manaChanneled) return;
 
         SelectedManaSource = manaSource;
         OnManaSourceSelected?.Invoke(this, new OnManaSourceSelectedArgs() { manaSource = manaSource });
@@ -99,11 +125,48 @@ public class ManaManager : MonoBehaviour {
         }
     }
 
-    private void MouseInput_OnManaSourceClick(object sender, MouseInput.OnManaSourceClickArgs e) {
+    private void SelectMana(Mana mana) {
+        SelectedMana = mana;
+        OnManaSelected?.Invoke(this, new OnManaSelectedArgs() { mana = mana });
+    }
+
+    private void DeselectMana() {
+        if (SelectedMana != null) {
+            SelectedMana = null;
+            OnManaDeselected?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private void MouseInputManager_OnManaSourceClick(object sender, MouseInputManager.OnManaSourceClickArgs e) {
         if (e.manaSourceVisual.ManaSource == SelectedManaSource) {
             DeselectManaSource();
         } else {
             SelectManaSource(e.manaSourceVisual.ManaSource);
         }
     }
+
+    private void ButtonInputManager_OnChannelManaClick(object sender, EventArgs e) {
+        ChannelSelectedMana();
+    }
+
+    private void MouseInputManager_OnManaTokenClick(object sender, MouseInputManager.OnManaTokenClickArgs e) {
+        if (e.manaTokenVisual.Mana == SelectedMana) {
+            DeselectMana();
+        } else {
+            SelectMana(e.manaTokenVisual.Mana);
+        }
+    }
+
+    private void MouseInputManager_OnManaCrystalClick(object sender, MouseInputManager.OnManaCrystalClickArgs e) {
+        Player player = GameManager.Instance.CurrentPlayer;
+
+        if (player.GetInventory().HasCrystalOf(e.crystalCounterVisual.Type)) {
+            if (SelectedMana != null && SelectedMana.Crystal && e.crystalCounterVisual.Type == SelectedMana.Type) {
+                DeselectMana();
+            } else {
+                SelectMana(player.GetInventory().GetCrystalOf(e.crystalCounterVisual.Type));
+            }
+        }
+    }
+
 }

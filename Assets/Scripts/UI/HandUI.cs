@@ -19,12 +19,14 @@ public class HandUI : MonoBehaviour {
 #nullable disable
 
     private void Start() {
-        MouseInput.Instance.OnCardClick += MouseInput_OnCardClick;
-        MouseInput.Instance.OnNonCardClick += MouseInput_OnNonCardClick;
-        MouseInput.Instance.OnManaSourceClick += MouseInput_OnManaSourceClick;
+        MouseInputManager.Instance.OnCardClick += MouseInput_OnCardClick;
+        MouseInputManager.Instance.OnNonCardClick += MouseInput_OnNonCardClick;
 
         Player.OnPlayerDrawCard += Player_OnPlayerDrawCard;
         Player.OnPlayerDiscardCard += Player_OnPlayerDiscardCard;
+
+        ManaManager.Instance.OnManaSelected += ManaManager_OnManaSelected;
+        ManaManager.Instance.OnManaDeselected += ManaManager_OnManaDeselected;
 
         EventSignalManager.OnChangeHandUIMode += EventSignalManager_OnChangeHandUIMode;
     }
@@ -88,7 +90,7 @@ public class HandUI : MonoBehaviour {
     }
 
     private void CardActionClick(Card card, CardChoice choice) {
-        ButtonInput.Instance.CardActionClick(card, choice);
+        ButtonInputManager.Instance.CardActionClick(card, choice);
         DeselectCard();
     }
 
@@ -99,7 +101,7 @@ public class HandUI : MonoBehaviour {
         return false;
     }
 
-    private void MouseInput_OnCardClick(object sender, MouseInput.OnCardClickArgs e) {
+    private void MouseInput_OnCardClick(object sender, MouseInputManager.OnCardClickArgs e) {
         if (HandContains(e.cardVisual)) {
             SelectCard(e.cardVisual);
         } else {
@@ -111,9 +113,14 @@ public class HandUI : MonoBehaviour {
         DeselectCard();
     }
 
-    private void MouseInput_OnManaSourceClick(object sender, MouseInput.OnManaSourceClickArgs e) {
+    private void ManaManager_OnManaSelected(object sender, ManaManager.OnManaSelectedArgs e) {
         UpdateChoices();
     }
+
+    private void ManaManager_OnManaDeselected(object sender, EventArgs e) {
+        UpdateChoices();
+    }
+
 
     private void Player_OnPlayerDrawCard(object sender, Player.OnPlayerDrawCardArgs e) {
         CardVisual cardVisual = Instantiate(cardVisualPrefab, transform).GetComponent<CardVisual>();

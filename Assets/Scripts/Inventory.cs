@@ -1,38 +1,77 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using UnityEditor;
-
+using UnityEngine;
+using static UnityEngine.UI.GridLayoutGroup;
+//   Red, Green, Blue, White, Gold, Black
 public class Inventory {
-    private int[] crystalCounts = new int[6] { 0, 0, 0, 0, 0, 0};
-    private List<ManaSource.Types> manaList = new List<ManaSource.Types>();
+    public Player Owner {  get; private set; }
 
-    public int GetCrystalCount(ManaSource.Types type) => crystalCounts[(int)type];
-    public bool HasCrystalOf(ManaSource.Types type) => crystalCounts[(int)type] > 0;
+    public static event EventHandler<OnInventoryUpdateArgs> OnInventoryUpdate;
+    public class OnInventoryUpdateArgs : EventArgs {
+        public Player player;
+        public Inventory inventory;
+    }
 
-    public int GetManaCount(ManaSource.Types type) => manaList.Count;
-    public bool HasManaOf(ManaSource.Types type) => manaList.Contains(type);
-    public ReadOnlyCollection<ManaSource.Types> GetManaList() => manaList.AsReadOnly();
+    public static void ResetStaticData() {
+        OnInventoryUpdate = null;
+    }
 
-    public void AddCrystal(ManaSource.Types type) {
-        int i = (int)type;
-        if (crystalCounts[i] <= 3) {
-            crystalCounts[i]++;
+    private Dictionary<Mana.Types, List<Mana>> crystalDict = new Dictionary<Mana.Types, List<Mana>> {
+        { Mana.Types.Red, new List<Mana>() },
+        { Mana.Types.Green, new List<Mana>() },
+        { Mana.Types.Blue, new List<Mana>() },
+        { Mana.Types.White, new List<Mana>() },
+        { Mana.Types.Gold, new List<Mana>() },
+        { Mana.Types.Black, new List<Mana>() }
+    };
+    private List<Mana> tokenList = new List<Mana>();
+
+    public Inventory(Player owner) {
+        Owner = owner;
+    }
+
+    public int GetCrystalCount(Mana.Types type) => crystalDict[type].Count;
+    public bool HasCrystalOf(Mana.Types type) => GetCrystalCount(type) > 0;
+    public Mana GetCrystalOf(Mana.Types type) => crystalDict[type].First();
+
+    public bool HasTokenOf(Mana.Types type) => tokenList.Any(mana => type == mana.Type);
+    public ReadOnlyCollection<Mana> GetTokenList() => tokenList.AsReadOnly();
+
+    public void AddCrystal(Mana.Types type) => AddCrystal(new Mana(type, true));
+    public void AddCrystal(Mana mana) {
+        if (GetCrystalCount(mana.Type) <= 3) {
+            crystalDict[mana.Type].Add(mana);
+            OnInventoryUpdate?.Invoke(this, new OnInventoryUpdateArgs { player = Owner, inventory = this });
         }
     }
 
-    public void RemoveCrystal(ManaSource.Types type) {
-        int i = (int)type;
-        if (crystalCounts[i] > 0) {
-            crystalCounts[i]--;
+    public void RemoveCrystal(Mana mana) {
+        if (GetCrystalCount(mana.Type) > 0) {
+            crystalDict[mana.Type].Remove(mana);
+            OnInventoryUpdate?.Invoke(this, new OnInventoryUpdateArgs { player = Owner, inventory = this });
         }
     }
 
-    public void AddMana(ManaSource.Types type) {
-        manaList.Add(type);
+    public void AddToken(Mana.Types type) => AddToken(new Mana(type, false));
+    public void AddToken(Mana mana) {
+        tokenList.Add(mana);
+        OnInventoryUpdate?.Invoke(this, new OnInventoryUpdateArgs { player = Owner, inventory = this });
     }
 
-    public void RemoveMana(ManaSource.Types type) {
-        manaList.Remove(type);
+    public void RemoveToken(Mana mana) {
+        tokenList.Remove(mana);
+        OnInventoryUpdate?.Invoke(this, new OnInventoryUpdateArgs { player = Owner, inventory = this });
+    }
+
+    public void RemoveMana(Mana mana) {
+        if (mana.Crystal) {
+            RemoveCrystal(mana);
+        } else {
+            RemoveToken(mana);
+        }
     }
 }
