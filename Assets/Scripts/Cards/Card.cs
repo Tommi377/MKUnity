@@ -92,10 +92,10 @@ public abstract class Card {
                 player.AddMovement(1);
                 break;
             case -2:
-                GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Normal, CombatElements.Normal));
+                GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Normal, CombatElements.Physical));
                 break;
             case -3:
-                GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Block, CombatElements.Normal));
+                GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Block, CombatElements.Physical));
                 break;
             case -4:
                 player.AddInfluence(1);

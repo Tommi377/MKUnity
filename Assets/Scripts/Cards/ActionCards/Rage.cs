@@ -9,13 +9,13 @@ public  class Rage : ActionCard {
         Player player = GameManager.Instance.CurrentPlayer;
         switch (choice.Id) {
             case 0:
-                GetCombat(player).PlayCombatCard(new CombatData(2, CombatTypes.Normal, CombatElements.Normal));
+                GetCombat(player).PlayCombatCard(new CombatData(2, CombatTypes.Normal, CombatElements.Physical));
                 break;
             case 1:
-                GetCombat(player).PlayCombatCard(new CombatData(2, CombatTypes.Block, CombatElements.Normal));
+                GetCombat(player).PlayCombatCard(new CombatData(2, CombatTypes.Block, CombatElements.Physical));
                 break;
             case 2:
-                GetCombat(player).PlayCombatCard(new CombatData(4, CombatTypes.Normal, CombatElements.Normal));
+                GetCombat(player).PlayCombatCard(new CombatData(4, CombatTypes.Normal, CombatElements.Physical));
                 break;
         }
     }

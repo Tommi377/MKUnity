@@ -69,12 +69,13 @@ public class Hex : MonoBehaviour {
 
         // TODO: make this pick random
         if (entityType != null) {
-            switch (entityType) {
-                case EntityTypes.Orc:
-                    GameObject entityPrefab = Resources.Load("Prefabs/Prowler") as GameObject;
-                    Entity entity = Instantiate(entityPrefab, _entityContainerTransform).GetComponent<Entity>();
-                    PlaceEntity(entity);
-                    break;
+            Entity entity = HexMap.Instance.SpawnRandomEntity(this, (EntityTypes)entityType);
+            if (entity != null) {
+                switch (entityType) {
+                    case EntityTypes.Orc:
+                        ((Enemy)entity).SetRoaming();
+                        break;
+                }
             }
         }
 

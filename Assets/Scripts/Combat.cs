@@ -21,9 +21,9 @@ public enum CombatTypes {
     Block
 }
 public enum CombatElements {
-    Normal,
-    Ice,
+    Physical,
     Fire,
+    Ice,
     ColdFire
 }
 
@@ -201,8 +201,11 @@ public class Combat {
     }
 
     private void AssignDamageToPlayer(Enemy enemy) {
-        int woundCardAmount = Mathf.CeilToInt((float)enemy.Attack / Player.Armor);
-        Player.TakeWounds(woundCardAmount);
+        foreach (EnemyAttack attack in enemy.Attacks) {
+            // TODO: Brutal ability and stuff
+            int woundCardAmount = Mathf.CeilToInt((float)attack.Damage / Player.Armor);
+            Player.TakeWounds(woundCardAmount);
+        }
         unblocked.Remove(enemy);
         OnCombatAssign?.Invoke(this, EventArgs.Empty);
     }
@@ -284,7 +287,10 @@ public class CombatBlock {
         this.combatCards = combatCards;
 
         // Modify this attack depending on modifiers
-        totalDamage = enemy.Attack;
+        totalDamage = 0;
+        foreach (EnemyAttack attack in enemy.Attacks) {
+            totalDamage += attack.Damage;
+        }
 
         foreach (CombatData combatCard in combatCards) {
             ReceiveDamage(combatCard);
