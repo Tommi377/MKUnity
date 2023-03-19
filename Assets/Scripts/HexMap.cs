@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.Assertions;
 
 public class HexMap : MonoBehaviour {
+    [SerializeField] private GameObject enemyPrefab;
+
     public static HexMap Instance { get; private set; }
 
     public Player player;
@@ -163,6 +165,26 @@ public class HexMap : MonoBehaviour {
             }
         }
         Debug.LogError("Couldn't delete entity");
+    }
+
+    public Entity SpawnRandomEntity(Hex hex, EntityTypes type) {
+        List<EnemySO> entitySOs = EntityManager.Instance.GetEntitySOs(type);
+
+        Debug.Log(type);
+        if (entitySOs.Count > 0) {
+            EnemySO enemySO = entitySOs[Random.Range(0, entitySOs.Count)];
+            Enemy enemy = Instantiate(enemyPrefab).GetComponent<Enemy>();
+            enemy.Init(enemySO);
+            SpawnEntity(hex, enemy);
+            return enemy;
+        } else {
+            Debug.Log("Type didn't have any possible enities");
+            return null;
+        }
+    }
+
+    public void SpawnEntity(Hex hex, Entity entity) {
+        hex.PlaceEntity(entity);
     }
 
     private void GenerateMap() {

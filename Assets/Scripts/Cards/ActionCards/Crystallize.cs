@@ -20,6 +20,7 @@ public class Crystallize : ActionCard, ITargetingCard<Mana>, IChoiceEffect {
     }
 
     public override void Apply(CardChoice choice) {
+        base.Apply(choice);
         Player player = GameManager.Instance.CurrentPlayer;
 
         switch(choice.Id) {

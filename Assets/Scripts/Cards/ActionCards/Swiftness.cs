@@ -14,7 +14,7 @@ public class Swiftness : ActionCard {
                 break;
             case 1:
                 Combat combat = GetCombat(player);
-                combat.PlayCombatCard(new CombatData(3, CombatTypes.Range, CombatElements.Normal));
+                combat.PlayCombatCard(new CombatData(3, CombatTypes.Range, CombatElements.Physical));
                 break;
         }
     }
