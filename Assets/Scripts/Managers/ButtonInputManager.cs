@@ -43,7 +43,10 @@ public class ButtonInputManager : MonoBehaviour {
     }
     public event EventHandler OnShuffleDiscardClick;
     public event EventHandler OnDrawCardClick;
-    public event EventHandler OnChoiceEffectDoneClick;
+    public event EventHandler<OnChoiceEffectDoneClickArgs> OnChoiceEffectDoneClick;
+    public class OnChoiceEffectDoneClickArgs : EventArgs {
+        public int choiceId;
+    }
 
     /* MISC RELATED */
     public event EventHandler OnChannelManaClick;
@@ -111,8 +114,8 @@ public class ButtonInputManager : MonoBehaviour {
         OnDrawCardClick?.Invoke(this, EventArgs.Empty);
     }
 
-    public void ChoiceEffectDoneClick() {
-        OnChoiceEffectDoneClick?.Invoke(this, EventArgs.Empty);
+    public void ChoiceEffectDoneClick(int id) {
+        OnChoiceEffectDoneClick?.Invoke(this, new OnChoiceEffectDoneClickArgs { choiceId = id });
     }
 
     public void ChannelManaClick() {
