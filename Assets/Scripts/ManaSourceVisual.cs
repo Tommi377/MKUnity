@@ -17,7 +17,7 @@ public class ManaSourceVisual : MonoBehaviour, ISelectableUI {
 
     public void DrawVisual() {
         Image image = visual.GetComponent<Image>();
-        image.color = ManaSource.GetColor(ManaSource.Type);
+        image.color = ManaSource.GetColor(ManaSource.ManaType);
     }
 
     public void Select() {

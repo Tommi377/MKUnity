@@ -2,7 +2,8 @@
 public enum TargetTypes {
     Card,
     Action,
-    Mana
+    Mana,
+    ManaSource
 }
 
 public interface IHasTargeting {

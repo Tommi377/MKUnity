@@ -60,7 +60,7 @@ public abstract class Card {
             case Types.Action:
                 ActionCardSO actionCardSO = cardSO as ActionCardSO;
 
-                Type type = System.Type.GetType(cardSO.Name);
+                Type type = System.Type.GetType(cardSO.Name.Replace(" ", ""));
                 return (ActionCard)Activator.CreateInstance(type, new object[] { actionCardSO });
             case Types.Wound:
                 return new Wound(cardSO);

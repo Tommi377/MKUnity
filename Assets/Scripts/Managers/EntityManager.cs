@@ -22,7 +22,6 @@ public class EntityManager : MonoBehaviour {
         for (int i = 0; i < enemyListKeys.Count; i++) {
             enemyListSOMap.Add(enemyListKeys[i], enemyListValues[i]);
         }
-        Debug.Log(enemyListSOMap);
     }
 
     public List<EnemySO> GetEntitySOs(EntityTypes type) {

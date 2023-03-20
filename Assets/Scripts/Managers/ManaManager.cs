@@ -10,7 +10,9 @@ public class ManaManager : MonoBehaviour {
     private List<ManaSource> manaSources = new List<ManaSource>();
     public ReadOnlyCollection<ManaSource> ManaSources => manaSources.AsReadOnly();
 
-    private bool manaChanneled = false;
+    private int defaultMaxChannels = 1;
+    private int maxChannels = 1;
+    private int manaChanneled = 0;
 
 #nullable enable
     public ManaSource? SelectedManaSource { get; private set; } = null;
@@ -19,7 +21,7 @@ public class ManaManager : MonoBehaviour {
 
     /* EVENT DEFINITIONS - START */
     public event EventHandler OnManaUsed;
-    public event EventHandler OnManaSourceChanneled;
+    public event EventHandler OnManaChannelUpdate;
     public event EventHandler<OnManaSourceCreatedArgs> OnManaSourceCreated;
     public class OnManaSourceCreatedArgs : EventArgs {
         public ManaSource manaSource;
@@ -62,13 +64,14 @@ public class ManaManager : MonoBehaviour {
 
     public void RoundStartSetup() {
         DeselectManaSource();
-        manaChanneled = false;
+        maxChannels = defaultMaxChannels;
+        manaChanneled = 0;
         foreach (ManaSource manaSource in manaSources) {
             manaSource.Roll();
         }
     }
 
-    public bool CanChannelMana() => !manaChanneled;
+    public bool CanChannelMana() => manaChanneled < maxChannels;
 
     public void RollSelectedManaSource() {
         SelectedManaSource.Roll();
@@ -76,8 +79,7 @@ public class ManaManager : MonoBehaviour {
     }
 
     public bool SelectedManaUsableWithCard(Card card) {
-        if (card is ActionCard) {
-            ActionCard actionCard = (ActionCard)card;
+        if (card is ActionCard actionCard) {
             if (SelectedMana == null) return false;
             if (SelectedMana.Type == Mana.Types.Gold && RoundManager.Instance.IsDay()) return true;
             if (actionCard.ManaTypes.Contains(SelectedMana.Type)) return true;
@@ -92,27 +94,32 @@ public class ManaManager : MonoBehaviour {
         DeselectMana();
     }
 
+    public void IncreaseMaxManaChannels() {
+        maxChannels += 1;
+        OnManaChannelUpdate?.Invoke(this, EventArgs.Empty);
+    }
+
     private void ChannelSelectedMana() {
         if (SelectedManaSource == null) {
             Debug.Log("No mana to channel");
             return;
         }
 
-        if (manaChanneled) {
+        if (!CanChannelMana()) {
             Debug.Log("Already channeled");
             return;
         }
 
-        GameManager.Instance.CurrentPlayer.GetInventory().AddToken(SelectedManaSource.Type);
+        GameManager.Instance.CurrentPlayer.GetInventory().AddToken(SelectedManaSource.ManaType);
 
-        manaChanneled = true;
+        manaChanneled += 1;
         RollSelectedManaSource();
-        OnManaSourceChanneled?.Invoke(this, EventArgs.Empty);
+        OnManaChannelUpdate?.Invoke(this, EventArgs.Empty);
     }
 
     private void SelectManaSource(ManaSource manaSource) {
         DeselectManaSource();
-        if (manaChanneled) return;
+        if (!CanChannelMana()) return;
 
         SelectedManaSource = manaSource;
         OnManaSourceSelected?.Invoke(this, new OnManaSourceSelectedArgs() { manaSource = manaSource });

@@ -65,6 +65,7 @@ public class CardManager : MonoBehaviour {
         ButtonInputManager.Instance.OnChoiceEffectDoneClick += ButtonInputManager_OnChoiceEffectDoneClick;
 
         ManaManager.Instance.OnManaSelected += ManaManager_OnManaSelected;
+        ManaManager.Instance.OnManaSourceSelected += ManaManager_OnManaSourceSelected;
     }
 
     public bool CanPlay() {
@@ -192,6 +193,12 @@ public class CardManager : MonoBehaviour {
     private void ManaManager_OnManaSelected(object sender, ManaManager.OnManaSelectedArgs e) {
         if (targetingCard != null && targetingCard.TargetType == TargetTypes.Mana) {
             SetTarget(e.mana);
+        }
+    }
+
+    private void ManaManager_OnManaSourceSelected(object sender, ManaManager.OnManaSourceSelectedArgs e) {
+        if (targetingCard != null && targetingCard.TargetType == TargetTypes.ManaSource) {
+            SetTarget(e.manaSource);
         }
     }
 

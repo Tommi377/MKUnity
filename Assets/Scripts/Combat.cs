@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public enum CombatPhases {
     Range,
@@ -30,11 +31,13 @@ public class CombatData {
     public int Damage;
     public CombatTypes CombatType;
     public CombatElements CombatElement;
+    public Func<List<Enemy>, int> CombatFunc;
 
-    public CombatData(int damage, CombatTypes combatType, CombatElements combatElement) {
+    public CombatData(int damage, CombatTypes combatType, CombatElements combatElement, Func<List<Enemy>, int> combatFunc = null) {
         Damage = damage;
         CombatType = combatType;
         CombatElement = combatElement;
+        CombatFunc = combatFunc;
     }
 
     public override string ToString() {
@@ -260,9 +263,15 @@ public class CombatAttack {
         if (CombatPhase == CombatPhases.Range) {
             if (combatCard.CombatType == CombatTypes.Range || combatCard.CombatType == CombatTypes.Siege) {
                 TotalArmor -= combatCard.Damage;
+                if (combatCard.CombatFunc != null) {
+                    TotalArmor -= combatCard.CombatFunc(Enemies);
+                }
             }
         } else if (CombatPhase == CombatPhases.Attack) {
             TotalArmor -= combatCard.Damage;
+            if (combatCard.CombatFunc != null) {
+                TotalArmor -= combatCard.CombatFunc(Enemies);
+            }
         } else {
             Debug.Log("Can't deal damage with this card");
         }
@@ -292,16 +301,19 @@ public class CombatBlock {
         }
 
         foreach (CombatData combatCard in combatCards) {
-            ReceiveDamage(combatCard);
+            BlockDamage(combatCard);
         }
     }
 
-    private void ReceiveDamage(CombatData combatCard) {
+    private void BlockDamage(CombatData combatCard) {
         if (combatCard.CombatType != CombatTypes.Block) {
             return;
         }
         // TODO: add resistance and other checking
         totalBlock += combatCard.Damage;
+        if (combatCard.CombatFunc != null) {
+            totalBlock += combatCard.CombatFunc(new List<Enemy>() { enemy });
+        }
     }
     public int PlayerReceivedDamage() {
         return FullyBlocked ? 0 : totalDamage;

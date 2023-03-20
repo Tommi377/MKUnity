@@ -23,11 +23,17 @@ public class Player : Entity {
         public Card card;
     }
     public static event EventHandler OnShuffleDiscardToDeck;
+    public static event EventHandler<OnPlayerTrashCardArgs> OnPlayerTrashCard;
+    public class OnPlayerTrashCardArgs : EventArgs {
+        public Player player;
+        public Card card;
+    }
 
     public static void ResetStaticData() {
         OnPlayerDrawCard = null;
         OnPlayerDiscardCard = null;
         OnShuffleDiscardToDeck = null;
+        OnPlayerTrashCard = null;
     }
     /* EVENT DEFINITIONS - END */
 
@@ -109,6 +115,32 @@ public class Player : Entity {
         Influence -= influence;
     }
 
+    public void AddReputation(int reputation) {
+        Reputation += reputation;
+    }
+
+    public void ReduceReputation(int reputation) {
+        Reputation -= reputation;
+    }
+
+    public void AddFame(int fame) {
+        Fame += fame;
+    }
+
+    public void ReduceFame(int fame) {
+        Fame -= fame;
+    }
+
+    public void HealWounds(int count = 1) {
+        for (int i = 0; i < count; i++) {
+            Card found = hand.Find((card) => card is Wound);
+            if (found != null) {
+                hand.Remove(found);
+                OnPlayerTrashCard?.Invoke(this, new OnPlayerTrashCardArgs { player = this, card = found });
+            }
+        }
+    }
+
     private bool TryMove(Hex hex) {
         if (HexMap.HexIsNeigbor(Position, hex.Position)) {
             int moveCost = hex.GetMoveCost();
@@ -163,6 +195,17 @@ public class Player : Entity {
         ResetValues();
     }
 
+    public void DrawCards(int count = 1) {
+        for (int i = 0; i < count; i++) {
+            if (deck.Empty) {
+                Debug.Log("Can't draw from an empty deck");
+                return;
+            }
+            Card card = deck.Draw();
+            AddCardToHand(card);
+        }
+    }
+
     private void LevelUp() {
         Level += 1;
     }
@@ -178,21 +221,6 @@ public class Player : Entity {
     private void DrawToHandLimit() {
         int drawAmount = Mathf.Max(HandLimit - hand.Count, 0);
         DrawCards(drawAmount);
-    }
-
-    private void DrawCards(int count) {
-        for (int i = 0; i < count; i++) {
-            DrawCard();
-        }
-    }
-
-    private void DrawCard() {
-        if (deck.Empty) {
-            Debug.Log("Can't draw from an empty deck");
-            return;
-        }
-        Card card = deck.Draw();
-        AddCardToHand(card);
     }
 
     private void AddCardToHand(Card card) {
@@ -252,6 +280,6 @@ public class Player : Entity {
     }
 
     private void ButtonInput_OnDrawCardClick(object sender, EventArgs e) {
-        DrawCard();
+        DrawCards();
     }
 }

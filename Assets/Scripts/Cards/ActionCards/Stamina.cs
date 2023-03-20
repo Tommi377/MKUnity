@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+
 public class Stamina : ActionCard {
     public Stamina(ActionCardSO actionCardSO) : base(actionCardSO) { }
 
