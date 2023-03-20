@@ -5,9 +5,6 @@ using TMPro;
 using UnityEngine;
 
 public class CentralInfoUI : MonoBehaviour {
-    public enum States { None, EffectChoice }
-
-    private States state = States.None;
 
     [SerializeField] private TMP_Text centralInfoText;
     [SerializeField] private ExpandingButtonUI expandingButtonUI;
@@ -17,21 +14,28 @@ public class CentralInfoUI : MonoBehaviour {
     }
 
     private void Start() {
+        CardManager.Instance.OnStartTargeting += CardManager_OnPlayTargetCard;
+        CardManager.Instance.OnEndTargeting += CardManager_OnEndTargeting;
         CardManager.Instance.OnChoiceEffectCard += CardManager_OnChoiceEffectCard;
     }
 
-    private void SetEffectChoices(IChoiceEffect card, CardChoice choice, Action callback) {
+    private void SetTargetText(IHasTargeting card) {
         Enable();
         expandingButtonUI.ClearButtons();
-        state = States.EffectChoice;
+
+        centralInfoText.SetText("Choose a " + card.TargetType + " as a target");
+    }
+
+    private void SetEffectChoices(IChoiceEffect card, CardChoice choice) {
+        Enable();
+        expandingButtonUI.ClearButtons();
 
         centralInfoText.SetText(card.GetEffectChoicePrompt(choice));
-        foreach ((string text, Action onClick) in card.EffectChoices(choice)) {
-            expandingButtonUI.AddButton(text, () => {
-                // TODO: Move the onclick logic away from the UI
-                onClick();
-                callback();
-                ButtonInputManager.Instance.ChoiceEffectDoneClick();
+        List<string> choiceTexts = card.EffectChoices(choice);
+        for (int i = 0; i < choiceTexts.Count; i++) {
+            int choiceIndex = i;
+            expandingButtonUI.AddButton(choiceTexts[i], () => {
+                ButtonInputManager.Instance.ChoiceEffectDoneClick(choiceIndex);
                 Disable();
             });
         }
@@ -47,8 +51,15 @@ public class CentralInfoUI : MonoBehaviour {
         expandingButtonUI.gameObject.SetActive(false);
     }
 
+    private void CardManager_OnPlayTargetCard(object sender, CardManager.OnStartTargetingArgs e) {
+        SetTargetText(e.Card);
+    }
+
+    private void CardManager_OnEndTargeting(object sender, EventArgs e) {
+        Disable();
+    }
+
     private void CardManager_OnChoiceEffectCard(object sender, CardManager.OnChoiceEffectCardArgs e) {
-        Debug.Log("sgeeges");
-        SetEffectChoices(e.Card, e.Choice, e.Callback);
+        SetEffectChoices(e.Card, e.Choice);
     }
 }

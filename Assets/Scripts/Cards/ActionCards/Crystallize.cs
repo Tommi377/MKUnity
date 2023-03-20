@@ -1,4 +1,4 @@
-using System;
+using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -33,12 +33,29 @@ public class Crystallize : ActionCard, ITargetingCard<Mana>, IChoiceEffect {
 
     public string GetEffectChoicePrompt(CardChoice choice) => "Choose a crystal to gain";
 
-    public List<(string, Action)> EffectChoices(CardChoice choice) => new List<(string, Action)> {
-        ("Red", () => GameManager.Instance.CurrentPlayer.GetInventory().AddCrystal(Mana.Types.Red)),
-        ("Green", () => GameManager.Instance.CurrentPlayer.GetInventory().AddCrystal(Mana.Types.Green)),
-        ("Blue", () => GameManager.Instance.CurrentPlayer.GetInventory().AddCrystal(Mana.Types.Blue)),
-        ("White", () => GameManager.Instance.CurrentPlayer.GetInventory().AddCrystal(Mana.Types.White)),
-        ("Gold", () => GameManager.Instance.CurrentPlayer.GetInventory().AddCrystal(Mana.Types.Gold)),
-        ("Black", () => GameManager.Instance.CurrentPlayer.GetInventory().AddCrystal(Mana.Types.Black)),
-    };
+    List<string> IChoiceEffect.EffectChoices(CardChoice choice) => new List<string> { "Red", "Green", "Blue", "White", "Gold", "Black" };
+
+    public void ApplyEffect(int id) {
+        Inventory inventory = GameManager.Instance.CurrentPlayer.GetInventory();
+        switch (id) {
+            case 0:
+                inventory.AddCrystal(Mana.Types.Red);
+                break;
+            case 1:
+                inventory.AddCrystal(Mana.Types.Green);
+                break;
+            case 2:
+                inventory.AddCrystal(Mana.Types.Blue);
+                break;
+            case 3:
+                inventory.AddCrystal(Mana.Types.White);
+                break;
+            case 4:
+                inventory.AddCrystal(Mana.Types.Gold);
+                break;
+            case 5:
+                inventory.AddCrystal(Mana.Types.Black);
+                break;
+        }
+    }
 }

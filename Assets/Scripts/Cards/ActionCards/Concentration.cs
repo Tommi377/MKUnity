@@ -1,4 +1,5 @@
 using System.Linq;
+using UnityEngine;
 
 public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
     private ActionCard suppliedCard;
@@ -59,31 +60,30 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
                 int initInfluence = player.Influence;
                 int combatCardCount = player.IsInCombat() ? GetCombat(player).CombatCards.Count() : 0;
 
-                CardManager.Instance.PlayCard(suppliedCard, suppliedChoice, new PlayCardOptions() {
-                    SkipManaUse = true,
-                    ApplyCallback = () => {
-                        switch (RoundManager.Instance.CurrentAction) {
-                            case ActionTypes.Move:
-                                if (player.Movement > initMovement) {
-                                    player.AddMovement(2);
-                                }
-                                break;
-                            case ActionTypes.Influence:
-                                if (player.Influence > initInfluence) {
-                                    player.AddInfluence(2);
-                                }
-                                break;
-                            case ActionTypes.Combat:
-                                Combat combat = GetCombat(player);
-                                if (combat.CombatCards.Count() > combatCardCount) {
-                                    CombatData combatCard = combat.CombatCards.Last();
+                CardManager.Instance.AddUnresolvedCard(this, () => {
+                    switch (RoundManager.Instance.CurrentAction) {
+                        case ActionTypes.Move:
+                            if (player.Movement > initMovement) {
+                                player.AddMovement(2);
+                            }
+                            break;
+                        case ActionTypes.Influence:
+                            if (player.Influence > initInfluence) {
+                                player.AddInfluence(2);
+                            }
+                            break;
+                        case ActionTypes.Combat:
+                            Combat combat = GetCombat(player);
+                            if (combat.CombatCards.Count() > combatCardCount) {
+                                CombatData combatCard = combat.CombatCards.Last();
 
-                                    combat.PlayCombatCard(new CombatData(2, combatCard.CombatType, combatCard.CombatElement));
-                                }
-                                break;
-                        }
-                    } 
+                                combat.PlayCombatCard(new CombatData(2, combatCard.CombatType, combatCard.CombatElement));
+                            }
+                            break;
+                    }
                 });
+
+                CardManager.Instance.PlayCard(suppliedCard, suppliedChoice, new PlayCardOptions() { SkipManaUse = true });
                 suppliedCard = null;
                 suppliedChoice = null;
                 break;
