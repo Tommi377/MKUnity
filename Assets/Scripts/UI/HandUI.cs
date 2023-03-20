@@ -24,6 +24,7 @@ public class HandUI : MonoBehaviour {
 
         Player.OnPlayerDrawCard += Player_OnPlayerDrawCard;
         Player.OnPlayerDiscardCard += Player_OnPlayerDiscardCard;
+        Player.OnPlayerTrashCard += Player_OnPlayerTrashCard;
 
         ManaManager.Instance.OnManaSelected += ManaManager_OnManaSelected;
         ManaManager.Instance.OnManaDeselected += ManaManager_OnManaDeselected;
@@ -101,6 +102,15 @@ public class HandUI : MonoBehaviour {
         return false;
     }
 
+    private void RemoveCard(Card card) {
+        foreach (Transform child in transform) {
+            if (child.GetComponent<CardVisual>().Card == card) {
+                Destroy(child.gameObject);
+                return;
+            }
+        }
+    }
+
     private void MouseInput_OnCardClick(object sender, MouseInputManager.OnCardClickArgs e) {
         if (HandContains(e.cardVisual)) {
             SelectCard(e.cardVisual);
@@ -135,7 +145,12 @@ public class HandUI : MonoBehaviour {
             return;
         } else {
             Debug.Log("HandUI discarded card not found");
+            RemoveCard(e.card);
         }
+    }
+
+    private void Player_OnPlayerTrashCard(object sender, Player.OnPlayerTrashCardArgs e) {
+        RemoveCard(e.card);
     }
 
     private void EventSignalManager_OnChangeHandUIMode(object sender, EventSignalManager.OnChangeHandUIModeArgs e) {

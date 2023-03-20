@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
 public class March : ActionCard {
     public March(ActionCardSO actionCardSO) : base(actionCardSO) { }
 

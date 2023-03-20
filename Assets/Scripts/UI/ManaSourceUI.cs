@@ -27,12 +27,12 @@ public class ManaSourceUI : MonoBehaviour {
 
         RoundManager.Instance.OnNewRound += RoundManager_OnNewRound;
 
-        ManaManager.Instance.OnManaSourceChanneled += ManaManager_OnManaSourceChanneled;
+        ManaManager.Instance.OnManaChannelUpdate += ManaManager_OnManaSourceChanneled;
         ManaManager.Instance.OnManaSourceCreated += ManaManager_OnManaSourceCreated;
         ManaManager.Instance.OnManaSourceSelected += ManaManager_OnManaSourceSelected;
         ManaManager.Instance.OnManaSourceDeselected += ManaManager_OnManaSourceDeselected;
 
-        ManaSource.OnManaSourceRoll += ManaSource_OnManaSourceRoll;
+        ManaSource.OnManaSourceUpdate += ManaSource_OnManaSourceRoll;
     }
 
     private void SelectManaSource(ManaSourceVisual manaSourceVisual) {
@@ -63,7 +63,11 @@ public class ManaSourceUI : MonoBehaviour {
     }
 
     private void ManaChanneled() {
-        manaUsedText.gameObject.SetActive(true);
+        UpdateManaUsedText();
+    }
+
+    private void UpdateManaUsedText() {
+        manaUsedText.gameObject.SetActive(!ManaManager.Instance.CanChannelMana());
     }
 
     private bool CanChannel() => ManaManager.Instance.CanChannelMana();

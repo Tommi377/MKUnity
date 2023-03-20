@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 
 public class Crystallize : ActionCard, ITargetingCard<Mana>, IChoiceEffect {
     private Mana suppliedMana;
@@ -33,29 +32,12 @@ public class Crystallize : ActionCard, ITargetingCard<Mana>, IChoiceEffect {
 
     public string GetEffectChoicePrompt(CardChoice choice) => "Choose a crystal to gain";
 
-    List<string> IChoiceEffect.EffectChoices(CardChoice choice) => new List<string> { "Red", "Green", "Blue", "White", "Gold", "Black" };
+    private readonly List<string> effectChoices = new List<string> { "Red", "Green", "Blue", "White", "Gold", "Black" };
+    public List<string> EffectChoices(CardChoice choice) => effectChoices;
 
     public void ApplyEffect(int id) {
         Inventory inventory = GameManager.Instance.CurrentPlayer.GetInventory();
-        switch (id) {
-            case 0:
-                inventory.AddCrystal(Mana.Types.Red);
-                break;
-            case 1:
-                inventory.AddCrystal(Mana.Types.Green);
-                break;
-            case 2:
-                inventory.AddCrystal(Mana.Types.Blue);
-                break;
-            case 3:
-                inventory.AddCrystal(Mana.Types.White);
-                break;
-            case 4:
-                inventory.AddCrystal(Mana.Types.Gold);
-                break;
-            case 5:
-                inventory.AddCrystal(Mana.Types.Black);
-                break;
-        }
+        Mana.Types manaType = (Mana.Types)id; // Only works because the choices are in order
+        inventory.AddCrystal(manaType);
     }
 }
