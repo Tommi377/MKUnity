@@ -61,7 +61,6 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
                 int combatCardCount = player.IsInCombat() ? GetCombat(player).CombatCards.Count() : 0;
 
                 CardManager.Instance.AddUnresolvedCard(this, () => {
-                    Debug.Log("Second");
                     switch (RoundManager.Instance.CurrentAction) {
                         case ActionTypes.Move:
                             if (player.Movement > initMovement) {

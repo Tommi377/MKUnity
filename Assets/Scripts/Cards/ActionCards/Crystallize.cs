@@ -36,7 +36,6 @@ public class Crystallize : ActionCard, ITargetingCard<Mana>, IChoiceEffect {
     List<string> IChoiceEffect.EffectChoices(CardChoice choice) => new List<string> { "Red", "Green", "Blue", "White", "Gold", "Black" };
 
     public void ApplyEffect(int id) {
-        Debug.Log("First");
         Inventory inventory = GameManager.Instance.CurrentPlayer.GetInventory();
         switch (id) {
             case 0:
