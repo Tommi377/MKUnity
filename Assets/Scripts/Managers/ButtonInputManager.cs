@@ -11,7 +11,6 @@ public class ButtonInputManager : MonoBehaviour {
     /* EVENT DEFINITIONS - START */
     /* ------------------------- */
     /* PHASE RELATED */
-    public event EventHandler OnDrawStartHandClick;
     public event EventHandler OnEndStartPhaseClick;
     public event EventHandler OnEndMovementClick;
     public event EventHandler OnEndEndPhaseClick;
@@ -68,10 +67,6 @@ public class ButtonInputManager : MonoBehaviour {
             card = card,
             choice = choice
         });
-    }
-
-    public void DrawStartHandClick() {
-        OnDrawStartHandClick?.Invoke(this, EventArgs.Empty);
     }
 
     public void EndStartPhaseClick() {

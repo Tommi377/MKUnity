@@ -4,22 +4,23 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class StartPhaseUI : MonoBehaviour {
-    [SerializeField] private Button drawButton;
-    [SerializeField] private Button startButton;
-
-    private void Awake() {
-        drawButton.onClick.AddListener(() => { 
-            ButtonInputManager.Instance.DrawStartHandClick();
-            drawButton.gameObject.SetActive(false);
-            startButton.gameObject.SetActive(true);
-        });
-        startButton.onClick.AddListener(() => { ButtonInputManager.Instance.EndStartPhaseClick(); });
-
-        startButton.gameObject.SetActive(false);
-    }
+    [SerializeField] private ExpandingButtonUI expandingButtonUI;
 
     private void OnEnable() {
-        drawButton.gameObject.SetActive(true);
-        startButton.gameObject.SetActive(false);
+        UpdateUI();
+    }
+
+    private void UpdateUI() {
+        expandingButtonUI.ClearButtons();
+        if (GameManager.Instance == null || GameManager.Instance.CurrentPlayer == null) return;
+
+        foreach (BaseAction action in GameManager.Instance.CurrentPlayer.GetStartOfTurnActions()) {
+            expandingButtonUI.AddButton(action.Name, (button) => {
+                action.Action();
+                button.interactable = false;
+            });
+        }
+
+        expandingButtonUI.AddButton("Start\nTurn", ButtonInputManager.Instance.EndStartPhaseClick);
     }
 }

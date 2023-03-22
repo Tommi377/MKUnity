@@ -5,6 +5,17 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
 
+public class BaseAction {
+    public string Name;
+    public string Description;
+    public Action Action;
+    public BaseAction(string name, string description, Action action) {
+        Name = name;
+        Description = description;
+        Action = action;
+    }
+}
+
 public class Player : Entity {
     [SerializeField] private CardSO woundSO;
     [SerializeField] private CardListSO startingDeckSO;
@@ -53,9 +64,9 @@ public class Player : Entity {
     public int Armor => levelToArmor[Level - 1];
     public int HandLimit => levelToHandLimit[Level - 1];
 
-    private int[] levelThreshold = new int[] { 2, 7, 14, 23, 34, 47, 62, 79, 98, 119 };
-    private int[] levelToArmor = new int[] { 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5 };
-    private int[] levelToHandLimit = new int[] { 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7 };
+    private readonly int[] levelThreshold = new int[] { 2, 7, 14, 23, 34, 47, 62, 79, 98, 119 };
+    private readonly int[] levelToArmor = new int[] { 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5 };
+    private readonly int[] levelToHandLimit = new int[] { 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7 };
 
     private void Awake() {
         inventory = new Inventory(this);
@@ -63,14 +74,16 @@ public class Player : Entity {
     }
 
     private void Start() {
+        TurnStartInit();
+
         Combat.OnCombatEnd += Combat_OnCombatEnd;
 
         RoundManager.Instance.OnNewRound += RoundManager_OnNewRound;
+        RoundManager.Instance.OnNewTurn += RoundManager_OnNewTurn;
 
         MouseInputManager.Instance.OnHexClick += MouseInput_OnHexClick;
 
         ButtonInputManager.Instance.OnEndMovementClick += ButtonInput_OnEndMovementClick;
-        ButtonInputManager.Instance.OnDrawStartHandClick += ButtonInput_OnDrawStartHandClick;
         ButtonInputManager.Instance.OnShuffleDiscardClick += ButtonInput_OnShuffleDiscardClick;
         ButtonInputManager.Instance.OnDrawCardClick += ButtonInput_OnDrawCardClick;
     }
@@ -141,6 +154,66 @@ public class Player : Entity {
         }
     }
 
+    public List<ActionTypes> GetPossibleActions() {
+        List<ActionTypes> actions = new List<ActionTypes>();
+        Hex currentHex = GetHex();
+
+        if (currentHex.Entities.Any(e => e.IsAggressive())) {
+            // Ended movement on a nonsafe tile
+            actions.Add(ActionTypes.Combat);
+        } else {
+            // Structure actions
+            if (currentHex.ContainsStructure() && currentHex.Structure.CanInfluence(this)) {
+                actions.Add(ActionTypes.Influence);
+            }
+
+            // Check if combat possible with rampaging enemies
+            List<Enemy> rampaging = new List<Enemy>();
+            foreach (Hex neighbor in HexMap.Instance.GetNeighbors(Position)) {
+                foreach (Enemy enemy in neighbor.GetEnemies()) {
+                    if (enemy.Rampaging) rampaging.Add(enemy);
+                }
+            }
+            if (rampaging.Any()) actions.Add(ActionTypes.Combat);
+
+            // TODO: Add card action turn if applicable
+
+            actions.Add(ActionTypes.None); // End turn without doing actions
+        }
+
+        return actions;
+    }
+
+    public void DrawCards(int count = 1) {
+        for (int i = 0; i < count; i++) {
+            if (deck.Empty) {
+                Debug.Log("Can't draw from an empty deck");
+                return;
+            }
+            Card card = deck.Draw();
+            AddCardToHand(card);
+        }
+    }
+    
+    public List<BaseAction> GetStartOfTurnActions() {
+        List <BaseAction> actions = new List<BaseAction>();
+
+        if (TryGetHex(out Hex hex) && hex.ContainsStructure()) {
+            actions.AddRange(hex.Structure.StartOfTurnActions(this));
+        }
+        return actions;
+    }
+
+    public List<BaseAction> GetEndOfTurnActions() {
+        List<BaseAction> actions = new List<BaseAction>();
+
+        if (TryGetHex(out Hex hex) && hex.ContainsStructure()) {
+            actions.AddRange(hex.Structure.EndOfTurnActions(this));
+        }
+
+        return actions;
+    }
+
     private bool TryMove(Hex hex) {
         if (HexMap.HexIsNeigbor(Position, hex.Position)) {
             int moveCost = hex.GetMoveCost();
@@ -160,49 +233,14 @@ public class Player : Entity {
     }
 
     private void EndMovement() {
-        // Find possible actions for action phase
-        if (!TryGetHex(out Hex currentHex)) {
-            Debug.Log("Hex doesn't exist");
-            return;
-        }
-
-        // TODO: restrict actions depending on whether they are executable
-        List<ActionTypes> actions = new List<ActionTypes>();
-        switch (currentHex.StructureType) {
-            case HexStructureTypes.MagicalGlade:
-                // TODO: add influence if demons in recruit row
-                break;
-            case HexStructureTypes.Village:
-            case HexStructureTypes.MageTower:
-            case HexStructureTypes.Monastery:
-            case HexStructureTypes.Keep:
-                if (currentHex.Entities.Any(e => e.IsAggressive())) {
-                    actions.Add(ActionTypes.Combat);
-                } else {
-                    actions.Add(ActionTypes.Influence);
-                }
-                break;
-            case HexStructureTypes.AncientRuins:
-                // TODO: add ancient ruins stuff
-                break;
-            default:
-                break;
-        }
         ResetValues();
     }
 
     public void EndAction() {
         ResetValues();
-    }
-
-    public void DrawCards(int count = 1) {
-        for (int i = 0; i < count; i++) {
-            if (deck.Empty) {
-                Debug.Log("Can't draw from an empty deck");
-                return;
-            }
-            Card card = deck.Draw();
-            AddCardToHand(card);
+        if (!GetHex().IsSafeTile()) {
+            // Force player to retreat
+            // Then execute the end of turn
         }
     }
 
@@ -245,7 +283,12 @@ public class Player : Entity {
     }
 
     private void RoundStartInit() {
+        ShuffleDiscardToDeck();
+    }
+
+    private void TurnStartInit() {
         inventory.RemoveAllTokens();
+        DrawToHandLimit();
     }
 
     private void ResetValues() {
@@ -263,16 +306,16 @@ public class Player : Entity {
         RoundStartInit();
     }
 
+    private void RoundManager_OnNewTurn(object sender, EventArgs e) {
+        TurnStartInit();
+    }
+
     private void MouseInput_OnHexClick(object sender, MouseInputManager.OnHexClickArgs e) {
         TryMove(e.hex);
     }
 
     private void ButtonInput_OnEndMovementClick(object sender, EventArgs e) {
         EndMovement();
-    }
-
-    private void ButtonInput_OnDrawStartHandClick(object sender, EventArgs e) {
-        DrawToHandLimit();
     }
 
     private void ButtonInput_OnShuffleDiscardClick(object sender, EventArgs e) {

@@ -4,18 +4,18 @@ using UnityEngine;
 
 public class RoundActionUI : MonoBehaviour {
 
-    [SerializeField] private Transform startPhaseUI;
-    [SerializeField] private Transform movePhaseUI;
-    [SerializeField] private Transform choosePhaseUI;
-    [SerializeField] private Transform combatPhaseUI;
-    [SerializeField] private Transform endPhaseUI;
+    [SerializeField] private StartPhaseUI startPhaseUI;
+    [SerializeField] private MovePhaseUI movePhaseUI;
+    [SerializeField] private ChoosePhaseUI choosePhaseUI;
+    [SerializeField] private CombatUI combatPhaseUI;
+    [SerializeField] private EndPhaseUI endPhaseUI;
 
     private void Start() {
         UpdateUI();
 
         RoundManager.Instance.OnPhaseChange += RoundManager_OnPhaseChange;
 
-        combatPhaseUI.GetComponent<CombatUI>().Initialize();
+        combatPhaseUI.Initialize();
     }
 
     private void UpdateUI() {

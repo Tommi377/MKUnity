@@ -12,9 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6888c3bfc2e8dca4db77a4ad2eb4a8a4, type: 3}
   m_Name: ThreatenSO
   m_EditorClassIdentifier: 
-  Name: 
+  Name: Threaten
   Type: 0
-  Choices: []
-  DescUp: 
-  DescDown: 
-  ManaTypes: 
+  Choices:
+  - Name: Influence 2 (N)
+    Description: Influence 2
+    Super: 0
+    Id: 0
+    ActionType: 3
+  - Name: Influence 5, rep- (S)
+    Description: Influence 5 & Reputation -1
+    Super: 1
+    Id: 1
+    ActionType: 3
+  DescUp: Influence 2
+  DescDown: Influence 5\nReputation -1
+  ManaTypes: 00000000

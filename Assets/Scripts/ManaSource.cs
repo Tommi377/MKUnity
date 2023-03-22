@@ -27,9 +27,4 @@ public class ManaSource {
         ManaType = type;
         OnManaSourceUpdate?.Invoke(this, new OnManaSourceRollArgs() { manaSource = this });
     }
-
-    private static readonly Color[] colors = { Color.red, Color.green, Color.blue, Color.white, Color.yellow, Color.black };
-    public static Color GetColor(Mana.Types type) {
-        return colors[(int)type];
-    }
 }

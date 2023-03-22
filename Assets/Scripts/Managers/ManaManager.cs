@@ -58,17 +58,10 @@ public class ManaManager : MonoBehaviour {
         MouseInputManager.Instance.OnManaTokenClick += MouseInputManager_OnManaTokenClick;
         MouseInputManager.Instance.OnManaCrystalClick += MouseInputManager_OnManaCrystalClick;
 
-
         ButtonInputManager.Instance.OnChannelManaClick += ButtonInputManager_OnChannelManaClick;
-    }
 
-    public void RoundStartSetup() {
-        DeselectManaSource();
-        maxChannels = defaultMaxChannels;
-        manaChanneled = 0;
-        foreach (ManaSource manaSource in manaSources) {
-            manaSource.Roll();
-        }
+        RoundManager.Instance.OnNewRound += RoundManager_OnNewRound;
+        RoundManager.Instance.OnNewTurn += RoundManager_OnNewTurn;
     }
 
     public bool CanChannelMana() => manaChanneled < maxChannels;
@@ -96,6 +89,22 @@ public class ManaManager : MonoBehaviour {
 
     public void IncreaseMaxManaChannels() {
         maxChannels += 1;
+        OnManaChannelUpdate?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void RoundStartSetup() {
+        DeselectManaSource();
+        maxChannels = defaultMaxChannels;
+        manaChanneled = 0;
+        foreach (ManaSource manaSource in manaSources) {
+            manaSource.Roll();
+        }
+        OnManaChannelUpdate?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void TurnStartSetup() {
+        maxChannels = defaultMaxChannels;
+        manaChanneled = 0;
         OnManaChannelUpdate?.Invoke(this, EventArgs.Empty);
     }
 
@@ -174,6 +183,14 @@ public class ManaManager : MonoBehaviour {
                 SelectMana(player.GetInventory().GetCrystalOf(e.crystalCounterVisual.Type));
             }
         }
+    }
+
+    private void RoundManager_OnNewRound(object sender, EventArgs e) {
+        RoundStartSetup();
+    }
+
+    private void RoundManager_OnNewTurn(object sender, EventArgs e) {
+        TurnStartSetup();
     }
 
 }

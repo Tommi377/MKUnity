@@ -14,9 +14,8 @@ public enum EntityTypes {
 
 public abstract class Entity : MonoBehaviour {
     public abstract EntityTypes EntityType { get; }
-    public bool IsAggressive() {
-        return EntityType != EntityTypes.Player;
-    }
+    public virtual bool IsAggressive() => EntityType != EntityTypes.Player;
+
     public Vector3Int Position = Vector3Int.zero;
 
     public void DestroySelf() {
@@ -27,6 +26,8 @@ public abstract class Entity : MonoBehaviour {
     public bool Move(Hex hex) {
         return HexMap.Instance.MoveEntity(Position, hex.Position, this);
     }
+
+    public Hex GetHex() => HexMap.Instance.GetHex(Position);
 
     public bool TryGetHex(out Hex hex) {
         if (HexMap.Instance.TryGetHex(Position, out hex)) {

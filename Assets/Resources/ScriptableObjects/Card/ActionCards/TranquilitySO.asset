@@ -12,9 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6888c3bfc2e8dca4db77a4ad2eb4a8a4, type: 3}
   m_Name: TranquilitySO
   m_EditorClassIdentifier: 
-  Name: 
+  Name: Tranquility
   Type: 0
-  Choices: []
-  DescUp: 
-  DescDown: 
-  ManaTypes: 
+  Choices:
+  - Name: Heal 1 (N)
+    Description: Heal 1
+    Super: 0
+    Id: 0
+    ActionType: 6
+  - Name: Draw 1 (N)
+    Description: Draw 1 Card
+    Super: 0
+    Id: 1
+    ActionType: 4
+  - Name: Heal 2 (S)
+    Description: Heal 2
+    Super: 1
+    Id: 2
+    ActionType: 6
+  - Name: Draw 2 (S)
+    Description: Draw 2 Cards
+    Super: 1
+    Id: 3
+    ActionType: 4
+  DescUp: Heal 1 or Draw a Card
+  DescDown: Heal 2 or Draw two Cards
+  ManaTypes: 01000000

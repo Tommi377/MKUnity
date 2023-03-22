@@ -1,4 +1,4 @@
-using System;
+using UnityEngine;
 
 public class Mana {
     public enum Types {
@@ -11,5 +11,12 @@ public class Mana {
     public Mana(Types type, bool crystal) {
         Type = type;
         Crystal = crystal;
+    }
+
+    public static Types GetRandomType() => (Types)Random.Range(0, 6);
+
+    private static readonly Color[] colors = { Color.red, Color.green, Color.blue, Color.white, Color.yellow, Color.black };
+    public static Color GetColor(Mana.Types type) {
+        return colors[(int)type];
     }
 }

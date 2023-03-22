@@ -27,13 +27,9 @@ public enum TurnPhases {
 public class RoundManager : MonoBehaviour {
     public static RoundManager Instance { get; private set; }
 
-    public int Round { get; private set; }
-    public Time Time { get; private set; }
-    public ActionTypes CurrentAction { get; private set; }
-    public TurnPhases CurrentPhase { get; private set; }
-
     /* EVENT DEFINITIONS - START */
     public event EventHandler OnNewRound;
+    public event EventHandler OnNewTurn;
     public event EventHandler<OnPhaseChangeArgs> OnPhaseChange;
     public class OnPhaseChangeArgs : EventArgs {
         public TurnPhases phase;
@@ -41,14 +37,22 @@ public class RoundManager : MonoBehaviour {
     }
     /* EVENT DEFINITIONS - END */
 
-    private void Awake() {
-        InitRound();
+    public int Round { get; private set; }
+    public int Turn { get; private set; }
+    public Time Time { get; private set; }
+    public ActionTypes CurrentAction { get; private set; }
+    public TurnPhases CurrentPhase { get; private set; }
 
+    private bool endOfRoundFlag = false;
+
+    private void Awake() {
         if (Instance != null && Instance != this) {
             Debug.LogError("More than one instance of a singleton");
         } else {
             Instance = this;
         }
+
+        Init();
     }
 
     private void Start() {
@@ -100,20 +104,36 @@ public class RoundManager : MonoBehaviour {
     public bool IsDay() => Time == Time.Day;
     public bool IsNight() => Time == Time.Night;
 
-    private void InitRound() {
-        Round = 1;
-        Time = Time.Day;
-        SetPhaseAndAction(TurnPhases.Start);
+    private void Init() {
+        Turn = 0;
+        Round = 0;
+        NewRound();
     }
 
     private void NewRound() {
         Round++;
+        Turn = 0;
         Time = Round % 2 == 0 ? Time.Night : Time.Day;
-        SetPhaseAndAction(TurnPhases.Start);
-
-        ManaManager.Instance.RoundStartSetup();
 
         OnNewRound?.Invoke(this, EventArgs.Empty);
+
+        NewTurn();
+    }
+
+    private void NewTurn() {
+        Turn++;
+
+        OnNewTurn?.Invoke(this, EventArgs.Empty);
+
+        SetPhaseAndAction(TurnPhases.Start);
+    }
+
+    private void TurnEnd() {
+        if (endOfRoundFlag) {
+            NewRound();
+        } else {
+            NewTurn();
+        }
     }
 
     public void SetPhaseAndAction(TurnPhases phase, ActionTypes action = ActionTypes.None) {
@@ -129,7 +149,15 @@ public class RoundManager : MonoBehaviour {
             CurrentAction = action;
         }
 
+        if (CurrentPhase == TurnPhases.End) {
+            EndAction();
+        }
+
         OnPhaseChange?.Invoke(this, new OnPhaseChangeArgs { phase = CurrentPhase, actionType = CurrentAction });
+    }
+
+    private void EndAction() {
+        GameManager.Instance.CurrentPlayer.EndAction();
     }
 
     /* ------------------- EVENTS ---------------------- */
@@ -147,6 +175,6 @@ public class RoundManager : MonoBehaviour {
     }
 
     private void ButtonInput_OnEndEndPhaseClick(object sender, EventArgs e) {
-        NewRound();
+        TurnEnd();
     }
 }

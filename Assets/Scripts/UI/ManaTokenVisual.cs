@@ -21,7 +21,7 @@ public class ManaTokenVisual : MonoBehaviour, ISelectableUI {
 
     public void DrawVisual() {
         Image image = visual.GetComponent<Image>();
-        image.color = ManaSource.GetColor(Mana.Type);
+        image.color = Mana.GetColor(Mana.Type);
     }
 
     public void Select() {

@@ -17,7 +17,7 @@ public class MapTile {
         }
     }
 
-    public static MapTile CreateMapTile((HexTypes, HexStructureTypes, EntityTypes?)[] InfoTuple) {
+    public static MapTile CreateMapTile((HexTypes, StructureTypes, EntityTypes?)[] InfoTuple) {
         Assert.AreEqual(InfoTuple.Length, 7);
         HexInfo[] hexes = new HexInfo[7];
 
@@ -35,9 +35,9 @@ public class MapTile {
 
 public struct HexInfo {
     public HexTypes HexType;
-    public HexStructureTypes StructureType;
+    public StructureTypes StructureType;
     public EntityTypes? EntityType;
-    public HexInfo(HexTypes hexType, HexStructureTypes structureType, EntityTypes? entityType) {
+    public HexInfo(HexTypes hexType, StructureTypes structureType, EntityTypes? entityType) {
         HexType = hexType;
         StructureType = structureType;
         EntityType = entityType;
