@@ -31,7 +31,7 @@ public class CrystalCounterVisual : MonoBehaviour, ISelectableUI {
 
     public void DrawVisual() {
         Image image = visual.GetComponent<Image>();
-        image.color = ManaSource.GetColor(Type);
+        image.color = Mana.GetColor(Type);
     }
 
     public void Select() {

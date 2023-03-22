@@ -412,6 +412,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 680e6055562e06a49a041ecc03fd9924, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  crystalRenderers:
+  - {fileID: 3661652990359627082}
+  - {fileID: 5364387899705855862}
+  - {fileID: 1706155170501094309}
+  - {fileID: 8882673480402518582}
+  - {fileID: 4278788516846540543}
+  - {fileID: 933000397454957498}
+  - {fileID: 443886537059056697}
+  - {fileID: 627693206931305410}
+  - {fileID: 4897222958880793187}
+  - {fileID: 8110216718203732677}
 --- !u!1 &2731042550172156078
 GameObject:
   m_ObjectHideFlags: 0

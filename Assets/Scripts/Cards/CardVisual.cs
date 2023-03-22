@@ -34,7 +34,7 @@ public class CardVisual : MonoBehaviour {
                 actionCardVisual.transform.Find("CardInfo/Name").GetComponent<TMP_Text>().SetText(actionCard.Name);
                 actionCardVisual.transform.Find("CardInfo/DescUp").GetComponent<TMP_Text>().SetText(actionCard.DescUp);
                 actionCardVisual.transform.Find("CardInfo/DescDown").GetComponent<TMP_Text>().SetText(actionCard.DescDown);
-                actionCardVisual.GetComponent<Image>().color = ManaSource.GetColor(actionCard.ManaTypes[0]);
+                actionCardVisual.GetComponent<Image>().color = Mana.GetColor(actionCard.ManaTypes[0]);
                 break;
             case Card.Types.Wound:
                 GameObject woundVisual = Instantiate(woundCardPrefab, cardGraphics);
