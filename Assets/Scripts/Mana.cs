@@ -16,7 +16,7 @@ public class Mana {
     public static Types GetRandomType() => (Types)Random.Range(0, 6);
 
     private static readonly Color[] colors = { Color.red, Color.green, Color.blue, Color.white, Color.yellow, Color.black };
-    public static Color GetColor(Mana.Types type) {
+    public static Color GetColor(Types type) {
         return colors[(int)type];
     }
 }

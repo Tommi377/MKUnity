@@ -7,6 +7,6 @@ public class MovePhaseUI : MonoBehaviour {
     [SerializeField] private Button endMoveButton;
 
     private void Awake() {
-        endMoveButton.onClick.AddListener(() => { ButtonInputManager.Instance.EndMovementClick(); });
+        endMoveButton.onClick.AddListener(ButtonInputManager.Instance.EndMovementClick);
     }
 }

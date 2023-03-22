@@ -17,12 +17,4 @@ public abstract class ActionCard : Card {
     private ActionCardSO ActionCardSO => CardSO as ActionCardSO;
 
     public ActionCard(ActionCardSO actionCardSO) : base(actionCardSO) { }
-
-    public override bool CanApply(ActionTypes action, CardChoice cardChoice) {
-        if (cardChoice.ActionType == ActionTypes.Special) return true; // Special cards can be played in any time
-        if (cardChoice.ActionType == ActionTypes.Heal && !GameManager.Instance.CurrentPlayer.IsInCombat()) return true; // Heal cards can only be played out of combat
-        if (action == cardChoice.ActionType) return true; // Actions that match the round action can be played
-
-        return false;
-    }
 }

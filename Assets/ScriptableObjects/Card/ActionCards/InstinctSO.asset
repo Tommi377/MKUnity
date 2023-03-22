@@ -20,41 +20,49 @@ MonoBehaviour:
     Super: 0
     Id: 0
     ActionType: 1
+    ManaTypes: 
   - Name: Influence 2 (N)
     Description: Influence 2
     Super: 0
     Id: 1
     ActionType: 3
+    ManaTypes: 
   - Name: Attack 2 (N)
     Description: Attack 2
     Super: 0
     Id: 2
     ActionType: 2
+    ManaTypes: 
   - Name: Block 2 (S)
     Description: Block 2
     Super: 0
     Id: 3
     ActionType: 2
+    ManaTypes: 
   - Name: Move 4 (S)
     Description: Move 4
     Super: 1
     Id: 4
     ActionType: 1
+    ManaTypes: 00000000
   - Name: Influence 4 (S)
     Description: Influence 4
     Super: 1
     Id: 5
     ActionType: 3
+    ManaTypes: 00000000
   - Name: Attack 4 (S)
     Description: Attack 4
     Super: 1
     Id: 6
     ActionType: 2
+    ManaTypes: 00000000
   - Name: Block 4 (S)
     Description: Block 4
     Super: 1
     Id: 7
     ActionType: 2
+    ManaTypes: 00000000
   DescUp: Move 2, Influence 2, Attack 2 or Block 2
   DescDown: Move 4, Influence 4, Attack 4 or Block 4
   ManaTypes: 00000000

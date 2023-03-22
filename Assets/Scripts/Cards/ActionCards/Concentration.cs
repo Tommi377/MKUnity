@@ -27,7 +27,7 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
         CardChoice targetChoice = target.Item2;
         ActionTypes actionType = RoundManager.Instance.CurrentAction;
 
-        return targetChoice.Super && actionCard.HasPlayableChoices(actionType) && actionCard.CanApply(actionType, targetChoice);
+        return targetChoice.ManaTypes.Any() && actionCard.HasPlayableChoices(actionType) && actionCard.CanApply(actionType, targetChoice);
     }
 
     public void PreTargetSideEffect(CardChoice choice) {

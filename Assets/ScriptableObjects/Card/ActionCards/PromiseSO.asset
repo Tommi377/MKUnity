@@ -20,11 +20,13 @@ MonoBehaviour:
     Super: 0
     Id: 0
     ActionType: 3
+    ManaTypes: 
   - Name: Influence 4 (N)
     Description: Influence 4
     Super: 1
     Id: 1
     ActionType: 3
+    ManaTypes: 03000000
   DescUp: Influence 2
   DescDown: Influence 4
   ManaTypes: 03000000

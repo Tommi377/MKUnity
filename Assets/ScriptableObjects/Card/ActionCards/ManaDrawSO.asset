@@ -20,6 +20,7 @@ MonoBehaviour:
     Super: 0
     Id: 0
     ActionType: 4
+    ManaTypes: 
   - Name: Mana Draw (S)
     Description: Take a mana die from the source and set it to any color except gold.
       Gain two mana tokens of that color. Do not reroll this die when you return
@@ -27,6 +28,7 @@ MonoBehaviour:
     Super: 1
     Id: 1
     ActionType: 4
+    ManaTypes: 03000000
   DescUp: You can use one additional mana die from the Source this turn
   DescDown: Take a mana die from the source and set it to any color except gold.
     Gain two mana tokens of that color. Do not reroll this die when you return it

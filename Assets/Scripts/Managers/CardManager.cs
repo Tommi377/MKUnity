@@ -91,7 +91,7 @@ public class CardManager : MonoBehaviour {
 
         Debug.Log("Play card " + card.Name + " (" + choice.Name + ")");
 
-        if (!options.SkipManaUse && card is ActionCard && choice.Super) {
+        if (!options.SkipManaUse && card is ActionCard && choice.ManaTypes.Any()) {
             ManaManager.Instance.UseSelectedMana();
         }
 

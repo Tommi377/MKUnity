@@ -20,17 +20,20 @@ MonoBehaviour:
     Super: 0
     Id: 0
     ActionType: 2
+    ManaTypes: 
   - Name: Ice Block 3 (N)
     Description: Ice Block 3
     Super: 0
     Id: 1
     ActionType: 2
+    ManaTypes: 
   - Name: "Ice Block 5 +\u03B1 (N)"
     Description: Ice Block 5. Get +1 Ice Block for each ability or color of attack
       depicted on the enemy token you block (unless it has Arcane Immunity)
     Super: 1
     Id: 2
     ActionType: 2
+    ManaTypes: 02000000
   DescUp: Attack 2 or Ice Block 3
   DescDown: Ice Block 5. Get +1 Ice Block for each ability or color of attack depicted
     on the enemy token you block (unless it has Arcane Immunity)

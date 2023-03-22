@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -69,7 +70,7 @@ public class HandUI : MonoBehaviour {
                         List<CardChoice> choices = selectedCardVisual.Card.Choices(RoundManager.Instance.CurrentAction);
 
                         foreach (CardChoice choice in choices) {
-                            bool interactable = !choice.Super || ManaManager.Instance.SelectedManaUsableWithCard(selectedCardVisual.Card);
+                            bool interactable = !choice.ManaTypes.Any() || ManaManager.Instance.SelectedManaUsableWithChoice(choice);
                             Button button = buttonUI.AddButton(choice.Name, () => CardActionClick(selectedCardVisual.Card, choice), interactable);
                         }
                         break;
@@ -78,7 +79,7 @@ public class HandUI : MonoBehaviour {
                         List<CardChoice> choices = selectedCardVisual.Card.Choices(RoundManager.Instance.CurrentAction);
 
                         foreach (CardChoice choice in choices) {
-                            if (choice.Super) buttonUI.AddButton(choice.Name, () => CardActionClick(selectedCardVisual.Card, choice));
+                            if (choice.ManaTypes.Any()) buttonUI.AddButton(choice.Name, () => CardActionClick(selectedCardVisual.Card, choice));
                         }
                         break;
                     }

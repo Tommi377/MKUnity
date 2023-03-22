@@ -20,13 +20,13 @@ MonoBehaviour:
     Super: 0
     Id: 0
     ActionType: 1
+    ManaTypes: 
   - Name: Move 4 (S)
     Description: Move 4
     Super: 1
     Id: 1
     ActionType: 1
+    ManaTypes: 02000000
   DescUp: Move 2
   DescDown: Move 4
   ManaTypes: 02000000
-  ActionTypeList: 01000000
-  ActionTypeRestrictionList: 02000000

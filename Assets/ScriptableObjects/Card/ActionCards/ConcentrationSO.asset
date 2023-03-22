@@ -20,16 +20,19 @@ MonoBehaviour:
     Super: 0
     Id: 0
     ActionType: 4
+    ManaTypes: 
   - Name: Gain white (N)
     Description: Gain a white mana token
     Super: 0
     Id: 1
     ActionType: 4
+    ManaTypes: 
   - Name: Gain red (N)
     Description: Gain a red mana token
     Super: 0
     Id: 2
     ActionType: 4
+    ManaTypes: 
   - Name: Buff card +2 (S)
     Description: When you play this, play another Action card with it. Get the stronger
       effect of that card for free. If that effect gives you Move, Influence, Block
@@ -37,10 +40,9 @@ MonoBehaviour:
     Super: 1
     Id: 3
     ActionType: 4
+    ManaTypes: 01000000
   DescUp: Gain a blue, white or red mana token
   DescDown: When you play this, play another Action card with it. Get the stronger
     effect of that card for free. If that effect gives you Move, Influence, Block
     or any type of Attack, get that amount plus 2
   ManaTypes: 01000000
-  ActionTypeList: 04000000
-  ActionTypeRestrictionList: 02000000
