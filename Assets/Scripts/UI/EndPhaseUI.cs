@@ -14,7 +14,7 @@ public class EndPhaseUI : MonoBehaviour {
         expandingButtonUI.ClearButtons();
         if (GameManager.Instance == null || GameManager.Instance.CurrentPlayer == null) return;
 
-        foreach (BaseAction action in GameManager.Instance.CurrentPlayer.EndOfTurnActions) {
+        foreach (BaseAction action in GameManager.Instance.CurrentPlayer.GetEndOfTurnActions()) {
             expandingButtonUI.AddButton(action.Name, (button) => {
                 action.Action();
                 button.interactable = false;

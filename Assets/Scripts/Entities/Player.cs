@@ -57,10 +57,6 @@ public class Player : Entity {
     private List<Card> hand = new List<Card>();
     private List<Card> discard = new List<Card>();
 
-    // Choices
-    public List<BaseAction> StartOfTurnActions { get; private set; } = new List<BaseAction>();
-    public List<BaseAction> EndOfTurnActions { get; private set; } = new List<BaseAction>();
-
     // Stats
     public int Level { get; private set; } = 1;
     public int Fame { get; private set; } = 0;
@@ -208,6 +204,16 @@ public class Player : Entity {
         return actions;
     }
 
+    public List<BaseAction> GetEndOfTurnActions() {
+        List<BaseAction> actions = new List<BaseAction>();
+
+        if (TryGetHex(out Hex hex) && hex.ContainsStructure()) {
+            actions.AddRange(hex.Structure.EndOfTurnActions(this));
+        }
+
+        return actions;
+    }
+
     private bool TryMove(Hex hex) {
         if (HexMap.HexIsNeigbor(Position, hex.Position)) {
             int moveCost = hex.GetMoveCost();
@@ -235,10 +241,6 @@ public class Player : Entity {
         if (!GetHex().IsSafeTile()) {
             // Force player to retreat
             // Then execute the end of turn
-        }
-
-        if (GetHex().ContainsStructure()) {
-            EndOfTurnActions.AddRange(GetHex().Structure.EndOfTurnActions(this));
         }
     }
 
@@ -285,7 +287,6 @@ public class Player : Entity {
     }
 
     private void TurnStartInit() {
-        EndOfTurnActions.Clear();
         inventory.RemoveAllTokens();
         DrawToHandLimit();
     }
