@@ -27,7 +27,7 @@ public class Enemy : Entity {
     public List<EnemyAttack> Attacks => EnemySO.Attacks;
     public List<EnemyAbilities> Abilities => EnemySO.Abilities;
     public Sprite sprite => EnemySO.Sprite;
-    public bool Roaming { get; protected set; }
+    public bool Rampaging { get; protected set; }
 
     public event EventHandler OnInit;
 
@@ -39,7 +39,7 @@ public class Enemy : Entity {
         OnInit = null;
     }
 
-    public void SetRoaming(bool roaming = true) {
-        this.Roaming = roaming;
+    public void SetRampaging(bool rampaging = true) {
+        this.Rampaging = rampaging;
     }
 }

@@ -6,6 +6,7 @@ using UnityEngine.Assertions;
 
 public class HexMap : MonoBehaviour {
     [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private StructurePrefabMapSO structurePrefabMapSO;
 
     public static HexMap Instance { get; private set; }
 
@@ -21,24 +22,26 @@ public class HexMap : MonoBehaviour {
     };
 
     public GameObject HexPrefab;
-    public MapTile MapStart = MapTile.CreateMapTile(new (HexTypes, HexStructureTypes, EntityTypes?)[]{
-            (HexTypes.Plains, HexStructureTypes.None, null), (HexTypes.Forest, HexStructureTypes.None, null),
-            (HexTypes.Inaccessable, HexStructureTypes.None, null), (HexTypes.Plains, HexStructureTypes.Portal, null), (HexTypes.Plains, HexStructureTypes.None, null),
-            (HexTypes.Inaccessable, HexStructureTypes.None, null), (HexTypes.Inaccessable, HexStructureTypes.None, null)
+    public MapTile MapStart = MapTile.CreateMapTile(new (HexTypes, StructureTypes, EntityTypes?)[]{
+            (HexTypes.Plains, StructureTypes.None, null), (HexTypes.Forest, StructureTypes.None, null),
+            (HexTypes.Inaccessable, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.None, null),
+            (HexTypes.Inaccessable, StructureTypes.None, null), (HexTypes.Inaccessable, StructureTypes.None, null)
     });
 
     public MapTile[] MapCountryside = {
-        MapTile.CreateMapTile(new (HexTypes, HexStructureTypes, EntityTypes?)[]{
-            (HexTypes.Forest, HexStructureTypes.None, EntityTypes.Orc), (HexTypes.Lake, HexStructureTypes.None, null),
-            (HexTypes.Forest, HexStructureTypes.None, null), (HexTypes.Forest, HexStructureTypes.MagicalGlade, null), (HexTypes.Plains, HexStructureTypes.Village, null),
-            (HexTypes.Plains, HexStructureTypes.None, null), (HexTypes.Plains, HexStructureTypes.None, null)
+        MapTile.CreateMapTile(new (HexTypes, StructureTypes, EntityTypes?)[]{
+            (HexTypes.Forest, StructureTypes.None, EntityTypes.Orc), (HexTypes.Lake, StructureTypes.None, null),
+            (HexTypes.Forest, StructureTypes.None, null), (HexTypes.Forest, StructureTypes.MagicalGlade, null), (HexTypes.Plains, StructureTypes.Village, null),
+            (HexTypes.Plains, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.None, null)
         }),
-        MapTile.CreateMapTile(new (HexTypes, HexStructureTypes, EntityTypes?)[]{
-            (HexTypes.Hills, HexStructureTypes.None, EntityTypes.Orc), (HexTypes.Forest, HexStructureTypes.MagicalGlade, null),
-            (HexTypes.Plains, HexStructureTypes.None, null), (HexTypes.Hills, HexStructureTypes.None, null), (HexTypes.Plains, HexStructureTypes.Village, null),
-            (HexTypes.Hills, HexStructureTypes.CrystalMine, null), (HexTypes.Plains, HexStructureTypes.None, null)
+        MapTile.CreateMapTile(new (HexTypes, StructureTypes, EntityTypes?)[]{
+            (HexTypes.Hills, StructureTypes.None, EntityTypes.Orc), (HexTypes.Forest, StructureTypes.MagicalGlade, null),
+            (HexTypes.Plains, StructureTypes.None, null), (HexTypes.Hills, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.Village, null),
+            (HexTypes.Hills, StructureTypes.CrystalMine, null), (HexTypes.Plains, StructureTypes.None, null)
         })
     };
+
+    public Dictionary<StructureTypes, GameObject> StructurePrefabMap { get; private set; }
 
 
     private void Awake() {
@@ -47,6 +50,8 @@ public class HexMap : MonoBehaviour {
         } else {
             Instance = this;
         }
+
+        StructurePrefabMap = structurePrefabMapSO.Map();
     }
 
     private void Start() {
@@ -56,6 +61,8 @@ public class HexMap : MonoBehaviour {
 
         microCoordinates[Vector3Int.zero].PlaceEntity(player);
     }
+
+    public Hex GetHex(Vector3Int microCoordinate) => microCoordinates[microCoordinate];
 
     public bool TryGetHex(Vector3Int microCoordinate, out Hex hex) {
         if (microCoordinates.TryGetValue(microCoordinate, out hex)) {
@@ -127,8 +134,7 @@ public class HexMap : MonoBehaviour {
     public List<Hex> GetNeighbors(Vector3Int coord) {
         List<Hex> neigbors = new List<Hex>();
         foreach (Vector3Int direction in hexDirections) {
-            microCoordinates.TryGetValue(coord + direction, out Hex hex);
-            if (hex) {
+            if (microCoordinates.TryGetValue(coord + direction, out Hex hex)) {
                 neigbors.Add(hex);
             }
         }

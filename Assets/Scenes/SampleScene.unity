@@ -4198,11 +4198,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47d4fcb6119a3a94390214170c855570, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startPhaseUI: {fileID: 409220382}
-  movePhaseUI: {fileID: 1277201214}
-  choosePhaseUI: {fileID: 232041398}
-  combatPhaseUI: {fileID: 1517354996}
-  endPhaseUI: {fileID: 775444827}
+  startPhaseUI: {fileID: 409220383}
+  movePhaseUI: {fileID: 1277201216}
+  choosePhaseUI: {fileID: 232041400}
+  combatPhaseUI: {fileID: 1517354997}
+  endPhaseUI: {fileID: 775444828}
 --- !u!1 &1198809018
 GameObject:
   m_ObjectHideFlags: 0
@@ -5541,6 +5541,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyPrefab: {fileID: 7099094337889812422, guid: d74b6b30e5492684d8378a04df5bbd9f, type: 3}
+  structurePrefabMapSO: {fileID: 11400000, guid: 20568d5553db4b04880e20719d1776a8, type: 2}
   player: {fileID: 1954453628}
   HexPrefab: {fileID: 2262680798046734203, guid: 83f224d738bcf6449b01c22985c3f035, type: 3}
 --- !u!4 &1770873917

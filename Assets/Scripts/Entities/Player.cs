@@ -141,6 +141,36 @@ public class Player : Entity {
         }
     }
 
+    public List<ActionTypes> GetPossibleActions() {
+        List<ActionTypes> actions = new List<ActionTypes>();
+        Hex currentHex = GetHex();
+
+        if (currentHex.Entities.Any(e => e.IsAggressive())) {
+            // Ended movement on a nonsafe tile
+            actions.Add(ActionTypes.Combat);
+        } else {
+            // Structure actions
+            if (currentHex.ContainsStructure() && currentHex.Structure.CanInfluence(this)) {
+                actions.Add(ActionTypes.Influence);
+            }
+
+            // Check if combat possible with rampaging enemies
+            List<Enemy> rampaging = new List<Enemy>();
+            foreach (Hex neighbor in HexMap.Instance.GetNeighbors(Position)) {
+                foreach (Enemy enemy in neighbor.GetEnemies()) {
+                    if (enemy.Rampaging) rampaging.Add(enemy);
+                }
+            }
+            if (rampaging.Any()) actions.Add(ActionTypes.Combat);
+
+            // TODO: Add card action turn if applicable
+
+            actions.Add(ActionTypes.None); // End turn without doing actions
+        }
+
+        return actions;
+    }
+
     private bool TryMove(Hex hex) {
         if (HexMap.HexIsNeigbor(Position, hex.Position)) {
             int moveCost = hex.GetMoveCost();
@@ -160,34 +190,6 @@ public class Player : Entity {
     }
 
     private void EndMovement() {
-        // Find possible actions for action phase
-        if (!TryGetHex(out Hex currentHex)) {
-            Debug.Log("Hex doesn't exist");
-            return;
-        }
-
-        // TODO: restrict actions depending on whether they are executable
-        List<ActionTypes> actions = new List<ActionTypes>();
-        switch (currentHex.StructureType) {
-            case HexStructureTypes.MagicalGlade:
-                // TODO: add influence if demons in recruit row
-                break;
-            case HexStructureTypes.Village:
-            case HexStructureTypes.MageTower:
-            case HexStructureTypes.Monastery:
-            case HexStructureTypes.Keep:
-                if (currentHex.Entities.Any(e => e.IsAggressive())) {
-                    actions.Add(ActionTypes.Combat);
-                } else {
-                    actions.Add(ActionTypes.Influence);
-                }
-                break;
-            case HexStructureTypes.AncientRuins:
-                // TODO: add ancient ruins stuff
-                break;
-            default:
-                break;
-        }
         ResetValues();
     }
 

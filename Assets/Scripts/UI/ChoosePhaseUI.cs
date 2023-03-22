@@ -13,4 +13,13 @@ public class ChoosePhaseUI : MonoBehaviour {
         selectInfluenceButton.onClick.AddListener(() => { ButtonInputManager.Instance.ActionChooseClick(ActionTypes.Influence); });
         selectSkipButton.onClick.AddListener(() => { ButtonInputManager.Instance.ActionChooseClick(ActionTypes.None); });
     }
+
+    private void OnEnable() {
+        if (GameManager.Instance == null || GameManager.Instance.CurrentPlayer == null) return;
+
+        List<ActionTypes> actionTypes = GameManager.Instance.CurrentPlayer.GetPossibleActions();
+        selectCombatButton.gameObject.SetActive(actionTypes.Contains(ActionTypes.Combat));
+        selectInfluenceButton.gameObject.SetActive(actionTypes.Contains(ActionTypes.Influence));
+        selectSkipButton.gameObject.SetActive(actionTypes.Contains(ActionTypes.None));
+    }
 }

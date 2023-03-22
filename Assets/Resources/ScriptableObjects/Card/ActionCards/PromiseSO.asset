@@ -12,9 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6888c3bfc2e8dca4db77a4ad2eb4a8a4, type: 3}
   m_Name: PromiseSO
   m_EditorClassIdentifier: 
-  Name: 
+  Name: Promise
   Type: 0
-  Choices: []
-  DescUp: 
-  DescDown: 
-  ManaTypes: 
+  Choices:
+  - Name: Influence 2 (N)
+    Description: Influence 2
+    Super: 0
+    Id: 0
+    ActionType: 3
+  - Name: Influence 4 (N)
+    Description: Influence 4
+    Super: 1
+    Id: 1
+    ActionType: 3
+  DescUp: Influence 2
+  DescDown: Influence 4
+  ManaTypes: 03000000

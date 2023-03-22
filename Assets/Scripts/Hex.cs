@@ -14,7 +14,7 @@ public enum HexTypes {
     Mountain,
     Inaccessable
 }
-public enum HexStructureTypes {
+public enum StructureTypes {
     None,
     Portal,
     MagicalGlade,
@@ -27,12 +27,8 @@ public enum HexStructureTypes {
 }
 
 public class Hex : MonoBehaviour {
-    Transform _entityContainerTransform;
+    [SerializeField] Transform entityContainerTransform;
 
-#nullable enable
-    [SerializeField]
-    GameObject? _structureGameObject;
-#nullable disable
     List<Entity> _entities = new List<Entity>();
     public ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
 
@@ -45,16 +41,9 @@ public class Hex : MonoBehaviour {
     public int S { get; private set; }
     public Vector3Int Position { get => new Vector3Int(Q, R, S); }
     public HexTypes HexType { get; private set; }
-    public HexStructureTypes StructureType { get; private set; }
+    public StructureTypes StructureType { get; private set; }
 
-
-#nullable enable
-    public GameObject? StructureGameObject { get => _structureGameObject; private set => _structureGameObject = value; }
-#nullable disable
-
-    void Awake() {
-        _entityContainerTransform = transform.Find("EntityContainer");
-    }
+    public  Structure Structure { get; private set; }
 
     public void Initialize(Vector3Int coordinate, HexInfo hexInfo) {
         Initialize(coordinate.x, coordinate.y, coordinate.z, hexInfo);
@@ -67,21 +56,28 @@ public class Hex : MonoBehaviour {
         StructureType = hexInfo.StructureType;
         EntityTypes? entityType = hexInfo.EntityType;
 
-        // TODO: make this pick random
         if (entityType != null) {
             Entity entity = HexMap.Instance.SpawnRandomEntity(this, (EntityTypes)entityType);
             if (entity != null) {
                 switch (entityType) {
                     case EntityTypes.Orc:
-                        ((Enemy)entity).SetRoaming();
+                        ((Enemy)entity).SetRampaging();
                         break;
                 }
             }
         }
 
+        if (StructureType != StructureTypes.None) {
+            GameObject prefab = HexMap.Instance.StructurePrefabMap[StructureType];
+            Structure structure = Instantiate(prefab, transform).GetComponent<Structure>();
+            Structure = structure;
+        }
+
         RenderHex();
     }
     public bool Occupied { get => _entities.Count > 0; }
+
+    public bool ContainsStructure() => StructureType != StructureTypes.None;
 
     public List<Enemy> GetEnemies() {
         List<Enemy> enemies = new List<Enemy>();
@@ -95,7 +91,7 @@ public class Hex : MonoBehaviour {
 
     public void PlaceEntity(Entity entity) {
         entity.Position = Position;
-        entity.gameObject.transform.SetParent(_entityContainerTransform, false);
+        entity.gameObject.transform.SetParent(entityContainerTransform, false);
         _entities.Add(entity);
     }
 

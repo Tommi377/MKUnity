@@ -12,9 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6888c3bfc2e8dca4db77a4ad2eb4a8a4, type: 3}
   m_Name: ManaDrawSO
   m_EditorClassIdentifier: 
-  Name: 
+  Name: Mana Draw
   Type: 0
-  Choices: []
-  DescUp: 
-  DescDown: 
-  ManaTypes: 
+  Choices:
+  - Name: Channel +1 (N)
+    Description: You can use one additional mana die from the Source this turn
+    Super: 0
+    Id: 0
+    ActionType: 4
+  - Name: Mana Draw (S)
+    Description: Take a mana die from the source and set it to any color except gold.
+      Gain two mana tokens of that color. Do not reroll this die when you return
+      it to the Source
+    Super: 1
+    Id: 1
+    ActionType: 4
+  DescUp: You can use one additional mana die from the Source this turn
+  DescDown: Take a mana die from the source and set it to any color except gold.
+    Gain two mana tokens of that color. Do not reroll this die when you return it
+    to the Source
+  ManaTypes: 03000000

@@ -28,6 +28,8 @@ public abstract class Entity : MonoBehaviour {
         return HexMap.Instance.MoveEntity(Position, hex.Position, this);
     }
 
+    public Hex GetHex() => HexMap.Instance.GetHex(Position);
+
     public bool TryGetHex(out Hex hex) {
         if (HexMap.Instance.TryGetHex(Position, out hex)) {
             return true;
