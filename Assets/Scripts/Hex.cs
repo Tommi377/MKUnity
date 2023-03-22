@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using UnityEngine;
 
 public enum HexTypes {
@@ -79,6 +80,8 @@ public class Hex : MonoBehaviour {
 
     public bool ContainsStructure() => StructureType != StructureTypes.None;
 
+    public bool IsSafeTile() => GetEnemies().Any(enemy => enemy.IsAggressive());
+
     public List<Enemy> GetEnemies() {
         List<Enemy> enemies = new List<Enemy>();
         foreach (Entity entity in _entities) {
@@ -108,7 +111,7 @@ public class Hex : MonoBehaviour {
         return defaultMoveCosts[(int)HexType, (int)RoundManager.Instance.Time];
     }
 
-    private static int[,] defaultMoveCosts = new int[,] { { 2, 2 }, { 3, 3 }, { 3, 5 }, { 4, 4 }, { 5, 3 }, { 5, 5 }, { -1, -1 }, { -1, -1 } };
+    private static readonly int[,] defaultMoveCosts = new int[,] { { 2, 2 }, { 3, 3 }, { 3, 5 }, { 4, 4 }, { 5, 3 }, { 5, 5 }, { -1, -1 }, { -1, -1 } };
 
     private void RenderHex() {
         Renderer mr = GetComponentInChildren<Renderer>();

@@ -1,4 +1,4 @@
-using System;
+using UnityEngine;
 
 public class Mana {
     public enum Types {
@@ -12,4 +12,6 @@ public class Mana {
         Type = type;
         Crystal = crystal;
     }
+
+    public static Types GetRandomType() => (Types)Random.Range(0, 6);
 }

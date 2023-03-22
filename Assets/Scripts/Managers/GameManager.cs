@@ -7,10 +7,7 @@ public class GameManager : MonoBehaviour {
     public static GameManager Instance { get; private set; }
 
     public Player CurrentPlayer { get; private set; }
-
-#nullable enable
-    public Combat? Combat { get; private set; } = null;
-#nullable disable
+    public Combat Combat { get; private set; }
 
     public bool DoneInitializing { get; private set; } = false;
 
@@ -31,7 +28,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private void Start() {
-        SetCurrentPlayer(GameObject.FindWithTag("Player").GetComponent<Player>());
+        SetCurrentPlayer(GameObject.FindWithTag("Player").GetComponent<Player>()); // TODO: temp
 
         Combat.OnCombatEnd += Combat_OnCombatEnd;
 

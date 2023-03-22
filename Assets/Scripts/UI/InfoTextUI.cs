@@ -21,6 +21,7 @@ public class InfoTextUI : MonoBehaviour {
         debugText += $"Move: {GameManager.Instance.CurrentPlayer.Movement}\n";
         debugText += $"Influence: {GameManager.Instance.CurrentPlayer.Influence}\n\n";
         debugText += $"Round: {RoundManager.Instance.Round}\n";
+        debugText += $"Turn: {RoundManager.Instance.Turn}\n";
         debugText += $"Time: {RoundManager.Instance.Time}\n";
 
         debugPlayerInfoText.SetText(debugText);

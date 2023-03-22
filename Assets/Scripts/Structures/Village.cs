@@ -7,13 +7,11 @@ public class Village : Structure {
     private List<Player> plundered = new List<Player>();
 
     private void Start() {
-        RoundManager.Instance.OnNewRound += RoundManager_OnNewRound;
+        RoundManager.Instance.OnNewTurn += RoundManager_OnNewTurn;
     }
 
-    public override List<StructureAction> PreTurnChoices(Player player) {
-        if (plundered.Contains(player)) return new List<StructureAction>();
-        return new List<StructureAction>() { new StructureAction("Plunder", "Burn the village for 2 cards", PlunderVillage) };
-    }
+    public override List<BaseAction> StartOfTurnActions(Player player) => VillageActionList(player);
+    // public override List<BaseAction> EndOfTurnActions(Player player) => VillageActionList(player);/
 
     public override bool CanInfluence(Player player) => true;
 
@@ -22,13 +20,18 @@ public class Village : Structure {
         // TODO: Add recruitment
     };
 
+    private List<BaseAction> VillageActionList(Player player) {
+        if (plundered.Contains(player)) return new List<BaseAction>();
+        return new List<BaseAction>() { new BaseAction("Plunder", "Burn the village for 2 cards", () => PlunderVillage(player)) };
+    }
+
     private void PlunderVillage(Player player) {
         player.ReduceReputation(1);
         player.DrawCards(2);
         plundered.Add(player);
     }
 
-    private void RoundManager_OnNewRound(object sender, EventArgs e) {
+    private void RoundManager_OnNewTurn(object sender, EventArgs e) {
         plundered.Clear();
     }
 }

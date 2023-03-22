@@ -15,7 +15,7 @@ public class RoundActionUI : MonoBehaviour {
 
         RoundManager.Instance.OnPhaseChange += RoundManager_OnPhaseChange;
 
-        combatPhaseUI.GetComponent<CombatUI>().Initialize();
+        combatPhaseUI.Initialize();
     }
 
     private void UpdateUI() {

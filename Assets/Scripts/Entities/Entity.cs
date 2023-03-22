@@ -14,9 +14,8 @@ public enum EntityTypes {
 
 public abstract class Entity : MonoBehaviour {
     public abstract EntityTypes EntityType { get; }
-    public bool IsAggressive() {
-        return EntityType != EntityTypes.Player;
-    }
+    public virtual bool IsAggressive() => EntityType != EntityTypes.Player;
+
     public Vector3Int Position = Vector3Int.zero;
 
     public void DestroySelf() {

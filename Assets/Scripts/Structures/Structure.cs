@@ -3,18 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StructureAction {
-    public string Name;
-    public string Description;
-    public Action<Player> Apply;
-
-    public StructureAction(string name, string description, Action<Player> apply) {
-        Name = name;
-        Description = description;
-        Apply = apply;
-    }
-}
-
 public class InfluenceAction {
     public string Name;
     public string Description;
@@ -30,9 +18,10 @@ public class InfluenceAction {
 }
 
 public abstract class Structure : MonoBehaviour {
-    public virtual void StartOfTurn(Player player) { }
-    public virtual void EndOfTurn(Player player) { }
-    public virtual List<StructureAction> PreTurnChoices(Player player) => new List<StructureAction>();
+    private static readonly List<BaseAction> emptyList = new List<BaseAction>();
+
+    public virtual List<BaseAction> StartOfTurnActions(Player player) => emptyList;
+    public virtual List<BaseAction> EndOfTurnActions(Player player) => emptyList;
 
     public virtual bool CanInfluence(Player player) => false;
     public virtual bool CanFight(Player player) => false;
