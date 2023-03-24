@@ -4,10 +4,11 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Deck {
-    private List<Card> cards = new List<Card>();
+public class Deck : MonoBehaviour {
+    [SerializeField] private CardListSO cardListSO;
+    [SerializeField] private List<Card> cards = new List<Card>();
 
-    public Deck(CardListSO cardListSO) {
+    private void Awake() {
         cards.AddRange(Card.GetCardsFromSO(cardListSO.cards));
         Shuffle();
     }

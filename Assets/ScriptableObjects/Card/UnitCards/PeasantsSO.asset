@@ -17,26 +17,22 @@ MonoBehaviour:
   Choices:
   - Name: Attack 2
     Description: Attack 2
-    Super: 0
     Id: 0
     ActionType: 2
     ManaTypes: 
   - Name: Block 2
     Description: Block 2
-    Super: 0
-    Id: 0
+    Id: 1
     ActionType: 2
     ManaTypes: 
   - Name: Influence 2
     Description: Influence 2
-    Super: 0
-    Id: 0
+    Id: 2
     ActionType: 3
     ManaTypes: 
   - Name: Move 2
     Description: Move 2
-    Super: 0
-    Id: 0
+    Id: 3
     ActionType: 1
     ManaTypes: 
   Level: 1

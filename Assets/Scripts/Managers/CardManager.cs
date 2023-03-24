@@ -31,6 +31,11 @@ public class CardManager : MonoBehaviour {
     public static CardManager Instance;
 
     /* EVENT DEFINITIONS - START */
+    public event EventHandler<OnPlayCardArgs> OnPlayCard;
+    public class OnPlayCardArgs : EventArgs {
+        public Player player;
+        public Card card;
+    }
     public event EventHandler<OnChoiceEffectCardArgs> OnChoiceEffectCard;
     public class OnChoiceEffectCardArgs : EventArgs {
         public CardChoice Choice;
@@ -104,7 +109,7 @@ public class CardManager : MonoBehaviour {
                     Card = card,
                     Choice = choice,
                 };
-                Player.DiscardCard(card);
+                DiscardIfApplicable(card);
                 targetingCard.PreTargetSideEffect(choice);
 
                 OnStartTargeting?.Invoke(this, new OnStartTargetingArgs { Card = targetingCard });
@@ -135,7 +140,8 @@ public class CardManager : MonoBehaviour {
             ExecuteUnresolvedCards();
         }
 
-        Player.DiscardCard(card);
+        OnPlayCard?.Invoke(this, new OnPlayCardArgs { card = card, player = GameManager.Instance.CurrentPlayer });
+        DiscardIfApplicable(card);
     }
 
     private bool SetTarget<T>(T target) {
@@ -165,6 +171,10 @@ public class CardManager : MonoBehaviour {
         targetingCard = null;
         ApplyCard(targeter as Card, req.Choice, defaultPlayCardOptions);
         return true;
+    }
+
+    private void DiscardIfApplicable(Card card) {
+        if (card is not UnitCard) Player.DiscardCard(card);
     }
 
     private void ChooseChoiceEffect(int choiceId) {

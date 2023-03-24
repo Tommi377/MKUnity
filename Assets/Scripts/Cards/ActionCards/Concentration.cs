@@ -31,14 +31,14 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
     }
 
     public void PreTargetSideEffect(CardChoice choice) {
-        EventSignalManager.ChangeHandUIMode(this, HandUI.Modes.OnlySuper);
+        EventSignalManager.ChangeHandUIMode(this, HandUI.SelectionMode.OnlySuper);
     }
 
     public void TargetSideEffect(CardChoice choice, (Card, CardChoice) target) {
         suppliedCard = target.Item1 as ActionCard;
         suppliedChoice = target.Item2;
         GameManager.Instance.CurrentPlayer.DiscardCard(suppliedCard);
-        EventSignalManager.ChangeHandUIMode(this, HandUI.Modes.Default);
+        EventSignalManager.ChangeHandUIMode(this, HandUI.SelectionMode.Default);
     }
 
     public override void Apply(CardChoice choice) {

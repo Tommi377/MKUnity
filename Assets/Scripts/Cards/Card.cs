@@ -53,7 +53,23 @@ public abstract class Card {
 
     public virtual bool CanPlay(ActionTypes action) => HasPlayableChoices(action);
 
+    public virtual List<CardChoice> Choices(ActionTypes actionType) => CardSO.Choices.Where((choice) => CanApply(actionType, choice)).ToList();
+    public abstract void Apply(CardChoice choice);
+
     public override string ToString() => $"{Name} ({Type})";
+
+    public bool HasPlayableChoices(ActionTypes actionType) => Choices(actionType).Any();
+
+    protected Combat GetCombat(Player player) {
+        if (player.TryGetCombat(out Combat combat)) {
+            return combat;
+        } else {
+            Debug.LogError("Accessing combat while no combat in progress!");
+            return null;
+        }
+    }
+
+    protected Player GetPlayer() => GameManager.Instance.CurrentPlayer;
 
     public static List<Card> GetCardsFromSO(IEnumerable<CardSO> cardSOs) {
         List<Card> cards = new List<Card>();
@@ -77,47 +93,5 @@ public abstract class Card {
         }
         Debug.Log("Card matching SO not found");
         return null;
-    }
-
-    public virtual List<CardChoice> Choices(ActionTypes actionType) {
-        List<CardChoice> choices = new List<CardChoice>() {
-            new CardChoice("Influence 1 (D)", "Influence 1 (D)", -4, ActionTypes.Influence),
-            new CardChoice("Block 1 (D)", "Block 1 (D)", -3, ActionTypes.Combat),
-            new CardChoice("Attack 1 (D)", "Attack 1 (D)", -2, ActionTypes.Combat),
-            new CardChoice("Move 1 (D)", "Move 1 (D)", -1, ActionTypes.Move),
-        };
-
-        choices.AddRange(CardSO.Choices);
-
-        return choices.Where((choice) => CanApply(actionType, choice)).ToList();
-    }
-
-    public bool HasPlayableChoices(ActionTypes actionType) => Choices(actionType).Any();
-
-    public virtual void Apply(CardChoice choice) {
-        Player player = GameManager.Instance.CurrentPlayer;
-        switch (choice.Id) {
-            case -1:
-                player.AddMovement(1);
-                break;
-            case -2:
-                GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Normal, CombatElements.Physical));
-                break;
-            case -3:
-                GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Block, CombatElements.Physical));
-                break;
-            case -4:
-                player.AddInfluence(1);
-                break;
-        }
-    }
-
-    protected Combat GetCombat(Player player) {
-        if (player.TryGetCombat(out Combat combat)) {
-            return combat;
-        } else {
-            Debug.LogError("Playing combat card while not in combat!");
-            return null;
-        }
     }
 }

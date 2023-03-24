@@ -81,11 +81,11 @@ public class DeckUI : MonoBehaviour {
     private Player GetPlayer() => GameManager.Instance.CurrentPlayer;
 
 
-    private void Player_OnPlayerDrawCard(object sender, Player.OnPlayerDrawCardArgs e) {
+    private void Player_OnPlayerDrawCard(object sender, Player.CardEventArgs e) {
         UpdateUI();
     }
 
-    private void Player_OnPlayerDiscardCard(object sender, Player.OnPlayerDiscardCardArgs e) {
+    private void Player_OnPlayerDiscardCard(object sender, Player.CardEventArgs e) {
         UpdateUI();
     }
 

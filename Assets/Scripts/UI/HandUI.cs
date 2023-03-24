@@ -6,11 +6,16 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class HandUI : MonoBehaviour {
+    [SerializeField] private Transform cardContainer;
     [SerializeField] private ExpandingButtonUI buttonUI;
     [SerializeField] private GameObject cardVisualPrefab;
+    [SerializeField] private Button changeStateButton;
 
-    private Modes mode = Modes.Default;
-    public enum Modes {
+    private State state = State.Hand;
+    private enum State { Hand, Unit }
+
+    private SelectionMode mode = SelectionMode.Default;
+    public enum SelectionMode {
         Default,
         OnlySuper
     }
@@ -18,6 +23,10 @@ public class HandUI : MonoBehaviour {
 #nullable enable
     private CardVisual? selectedCardVisual;
 #nullable disable
+
+    private void Awake() {
+        changeStateButton.onClick.AddListener(()  => SetState(state == State.Hand ? State.Unit : State.Hand));
+    }
 
     private void Start() {
         MouseInputManager.Instance.OnCardClick += MouseInput_OnCardClick;
@@ -33,7 +42,24 @@ public class HandUI : MonoBehaviour {
         EventSignalManager.OnChangeHandUIMode += EventSignalManager_OnChangeHandUIMode;
     }
 
-    private void SelectMode(Modes mode) {
+    private void SetState(State state) {
+        DeselectCard();
+        foreach(Transform child in cardContainer) {
+            Destroy(child.gameObject);
+        }
+
+        this.state = state;
+        switch (state) {
+            case State.Hand:
+                GameManager.Instance.CurrentPlayer.GetHand().ForEach((card) => AddCard(card));
+                break;
+            case State.Unit:
+                GameManager.Instance.CurrentPlayer.GetUnits().ForEach((card) => AddCard(card));
+                break;
+        }
+    }
+
+    private void SelectMode(SelectionMode mode) {
         this.mode = mode;
         DeselectCard();
     }
@@ -66,7 +92,7 @@ public class HandUI : MonoBehaviour {
         buttonUI.ClearButtons();
         if (selectedCardVisual != null) {
             switch (mode) {
-                case Modes.Default: {
+                case SelectionMode.Default: {
                         List<CardChoice> choices = selectedCardVisual.Card.Choices(RoundManager.Instance.CurrentAction);
 
                         foreach (CardChoice choice in choices) {
@@ -75,7 +101,7 @@ public class HandUI : MonoBehaviour {
                         }
                         break;
                     }
-                case Modes.OnlySuper: {
+                case SelectionMode.OnlySuper: {
                         List<CardChoice> choices = selectedCardVisual.Card.Choices(RoundManager.Instance.CurrentAction);
 
                         foreach (CardChoice choice in choices) {
@@ -97,14 +123,19 @@ public class HandUI : MonoBehaviour {
     }
 
     private bool HandContains(CardVisual cardVisual) {
-        foreach (Transform child in transform) {
+        foreach (Transform child in cardContainer) {
             if (child.GetComponent<CardVisual>() == cardVisual) return true;
         }
         return false;
     }
 
+    private void AddCard(Card card) {
+        CardVisual cardVisual = Instantiate(cardVisualPrefab, cardContainer).GetComponent<CardVisual>();
+        cardVisual.Init(card);
+    }
+
     private void RemoveCard(Card card) {
-        foreach (Transform child in transform) {
+        foreach (Transform child in cardContainer) {
             if (child.GetComponent<CardVisual>().Card == card) {
                 Destroy(child.gameObject);
                 return;
@@ -133,12 +164,13 @@ public class HandUI : MonoBehaviour {
     }
 
 
-    private void Player_OnPlayerDrawCard(object sender, Player.OnPlayerDrawCardArgs e) {
-        CardVisual cardVisual = Instantiate(cardVisualPrefab, transform).GetComponent<CardVisual>();
-        cardVisual.Init(e.card);
+    private void Player_OnPlayerDrawCard(object sender, Player.CardEventArgs e) {
+        if (state == State.Hand) {
+            AddCard(e.card);
+        }
     }
 
-    private void Player_OnPlayerDiscardCard(object sender, Player.OnPlayerDiscardCardArgs e) {
+    private void Player_OnPlayerDiscardCard(object sender, Player.CardEventArgs e) {
         // TODO: Discard the card that was actually discarded (currently only discards the first matching)
         if (selectedCardVisual != null && selectedCardVisual.Card == e.card) {
             Destroy(selectedCardVisual.gameObject);
@@ -150,12 +182,11 @@ public class HandUI : MonoBehaviour {
         }
     }
 
-    private void Player_OnPlayerTrashCard(object sender, Player.OnPlayerTrashCardArgs e) {
+    private void Player_OnPlayerTrashCard(object sender, Player.CardEventArgs e) {
         RemoveCard(e.card);
     }
 
     private void EventSignalManager_OnChangeHandUIMode(object sender, EventSignalManager.OnChangeHandUIModeArgs e) {
-        Debug.Log(e.mode);
         SelectMode(e.mode);
     }
 }

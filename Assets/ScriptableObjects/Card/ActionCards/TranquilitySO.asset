@@ -17,31 +17,21 @@ MonoBehaviour:
   Choices:
   - Name: Heal 1 (N)
     Description: Heal 1
-    Super: 0
     Id: 0
     ActionType: 6
     ManaTypes: 
   - Name: Draw 1 (N)
     Description: Draw 1 Card
-    Super: 0
     Id: 1
     ActionType: 4
     ManaTypes: 
   - Name: Heal 2 (S)
     Description: Heal 2
-    Super: 1
     Id: 2
     ActionType: 6
     ManaTypes: 01000000
   - Name: Draw 2 (S)
     Description: Draw 2 Cards
-    Super: 1
-    Id: 3
-    ActionType: 4
-    ManaTypes: 
-  - Name: Draw 2 (S)
-    Description: Draw 2 Cards
-    Super: 1
     Id: 3
     ActionType: 4
     ManaTypes: 01000000

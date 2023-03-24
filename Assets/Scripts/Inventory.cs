@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
-using static UnityEngine.UI.GridLayoutGroup;
+
 //   Red, Green, Blue, White, Gold, Black
-public class Inventory {
+[RequireComponent(typeof(Player))]
+public class Inventory : MonoBehaviour {
     public Player Owner {  get; private set; }
 
     public static event EventHandler<OnInventoryUpdateArgs> OnInventoryUpdate;
@@ -30,8 +30,8 @@ public class Inventory {
     };
     private List<Mana> tokenList = new List<Mana>();
 
-    public Inventory(Player owner) {
-        Owner = owner;
+    private void Awake() {
+        Owner = GetComponent<Player>();
     }
 
     public int GetCrystalCount(Mana.Types type) => crystalDict[type].Count;

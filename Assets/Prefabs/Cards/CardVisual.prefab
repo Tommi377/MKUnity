@@ -114,6 +114,7 @@ MonoBehaviour:
   highlight: {fileID: 0}
   actionCardPrefab: {fileID: 6418075880832274891, guid: e3bdc80920a4f054b9cd32dcf09203f5, type: 3}
   woundCardPrefab: {fileID: 6418075880832274891, guid: 783a51ec381c06b4290a6146f80a9c1b, type: 3}
+  unitCardPrefab: {fileID: 0}
 --- !u!1 &4259816940899787778
 GameObject:
   m_ObjectHideFlags: 0
@@ -266,3 +267,4 @@ MonoBehaviour:
   highlight: {fileID: 2275746571364019111}
   actionCardPrefab: {fileID: 6418075880832274891, guid: e3bdc80920a4f054b9cd32dcf09203f5, type: 3}
   woundCardPrefab: {fileID: 6418075880832274891, guid: 783a51ec381c06b4290a6146f80a9c1b, type: 3}
+  unitCardPrefab: {fileID: 6418075880832274891, guid: 6a7b98ed8068cd64d8b4dadfbefb3550, type: 3}
