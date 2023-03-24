@@ -9,30 +9,33 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6888c3bfc2e8dca4db77a4ad2eb4a8a4, type: 3}
-  m_Name: RageSO
+  m_Script: {fileID: 11500000, guid: 2bfd1856fa64c6f469501a8cb7e829a3, type: 3}
+  m_Name: PeasantsSO
   m_EditorClassIdentifier: 
-  Name: Rage
-  Type: 0
+  Name: Peasants
+  Type: 4
   Choices:
-  - Name: Attack 2 (N)
+  - Name: Attack 2
     Description: Attack 2
-    Super: 0
     Id: 0
     ActionType: 2
     ManaTypes: 
-  - Name: Block 2 (N)
+  - Name: Block 2
     Description: Block 2
-    Super: 0
     Id: 1
     ActionType: 2
     ManaTypes: 
-  - Name: Attack 4 (S)
-    Description: Attack 4
-    Super: 1
+  - Name: Influence 2
+    Description: Influence 2
     Id: 2
-    ActionType: 2
-    ManaTypes: 00000000
-  DescUp: Attack or Block 2
-  DescDown: Attack 4
-  ManaTypes: 00000000
+    ActionType: 3
+    ManaTypes: 
+  - Name: Move 2
+    Description: Move 2
+    Id: 3
+    ActionType: 1
+    ManaTypes: 
+  Level: 1
+  Influence: 4
+  Armor: 3
+  resistances: 

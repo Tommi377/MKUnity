@@ -16,26 +16,20 @@ public class BaseAction {
     }
 }
 
+[RequireComponent(typeof(Deck))]
+[RequireComponent(typeof(Inventory))]
 public class Player : Entity {
     [SerializeField] private CardSO woundSO;
-    [SerializeField] private CardListSO startingDeckSO;
+    [SerializeField] private UnitCardSO tempSO;
 
     public override EntityTypes EntityType { get { return EntityTypes.Player; } }
 
     /* EVENT DEFINITIONS - START */
-    public static event EventHandler<OnPlayerDrawCardArgs> OnPlayerDrawCard;
-    public class OnPlayerDrawCardArgs : EventArgs {
-        public Player player;
-        public Card card;
-    }
-    public static event EventHandler<OnPlayerDiscardCardArgs> OnPlayerDiscardCard;
-    public class OnPlayerDiscardCardArgs : EventArgs {
-        public Player player;
-        public Card card;
-    }
     public static event EventHandler OnShuffleDiscardToDeck;
-    public static event EventHandler<OnPlayerTrashCardArgs> OnPlayerTrashCard;
-    public class OnPlayerTrashCardArgs : EventArgs {
+    public static event EventHandler<CardEventArgs> OnPlayerDrawCard;
+    public static event EventHandler<CardEventArgs> OnPlayerDiscardCard;
+    public static event EventHandler<CardEventArgs> OnPlayerTrashCard;
+    public class CardEventArgs : EventArgs {
         public Player player;
         public Card card;
     }
@@ -52,10 +46,13 @@ public class Player : Entity {
     public int Movement { get; private set; } = 0;
     public int Influence { get; private set; } = 0;
 
+    // Components
     private Inventory inventory;
     private Deck deck;
+
     private List<Card> hand = new List<Card>();
     private List<Card> discard = new List<Card>();
+    private List<UnitCard> units = new List<UnitCard>();
 
     // Stats
     public int Level { get; private set; } = 1;
@@ -68,9 +65,22 @@ public class Player : Entity {
     private readonly int[] levelToArmor = new int[] { 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5 };
     private readonly int[] levelToHandLimit = new int[] { 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7 };
 
+    public Inventory GetInventory() => inventory;
+    public Deck GetDeck() => deck;
+    public List<Card> GetHand() => hand;
+    public List<UnitCard> GetUnits() => units;
+
+
+    public int GetDeckCount() => deck.Count;
+    public int GetDiscardCount() => discard.Count;
+    public bool IsInCombat() => GameManager.Instance.Combat != null && GameManager.Instance.Combat.Player == this;
+
+    public ReadOnlyCollection<Card> DiscardPile => discard.AsReadOnly();
+
     private void Awake() {
-        inventory = new Inventory(this);
-        deck = new Deck(startingDeckSO);
+        inventory = GetComponent<Inventory>();
+        deck = GetComponent<Deck>();
+        units.Add(new Peasants(tempSO));
     }
 
     private void Start() {
@@ -87,13 +97,6 @@ public class Player : Entity {
         ButtonInputManager.Instance.OnShuffleDiscardClick += ButtonInput_OnShuffleDiscardClick;
         ButtonInputManager.Instance.OnDrawCardClick += ButtonInput_OnDrawCardClick;
     }
-
-    public Inventory GetInventory() => inventory;
-    public int GetDeckCount() => deck.Count;
-    public int GetDiscardCount() => discard.Count;
-    public bool IsInCombat() => GameManager.Instance.Combat != null && GameManager.Instance.Combat.Player == this;
-
-    public ReadOnlyCollection<Card> DiscardPile => discard.AsReadOnly();
 
     public bool TryGetCombat(out Combat combat) {
         if (IsInCombat()) {
@@ -149,7 +152,7 @@ public class Player : Entity {
             Card found = hand.Find((card) => card is Wound);
             if (found != null) {
                 hand.Remove(found);
-                OnPlayerTrashCard?.Invoke(this, new OnPlayerTrashCardArgs { player = this, card = found });
+                OnPlayerTrashCard?.Invoke(this, new CardEventArgs { player = this, card = found });
             }
         }
     }
@@ -263,14 +266,14 @@ public class Player : Entity {
 
     private void AddCardToHand(Card card) {
         hand.Add(card);
-        OnPlayerDrawCard?.Invoke(this, new OnPlayerDrawCardArgs { player = this, card = card });
+        OnPlayerDrawCard?.Invoke(this, new CardEventArgs { player = this, card = card });
     }
 
     public void DiscardCard(Card card) {
         Debug.Log("Discarded: " + card);
         discard.Add(card);
         hand.Remove(card);
-        OnPlayerDiscardCard?.Invoke(this, new OnPlayerDiscardCardArgs { player = this, card = card });
+        OnPlayerDiscardCard?.Invoke(this, new CardEventArgs { player = this, card = card });
     }
 
     private void ShuffleDiscardToDeck() {
@@ -284,6 +287,9 @@ public class Player : Entity {
 
     private void RoundStartInit() {
         ShuffleDiscardToDeck();
+        foreach (UnitCard unitCard in units) {
+            unitCard.RoundStartInit();
+        }
     }
 
     private void TurnStartInit() {

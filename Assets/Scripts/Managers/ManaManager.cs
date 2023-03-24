@@ -71,12 +71,10 @@ public class ManaManager : MonoBehaviour {
         DeselectManaSource();
     }
 
-    public bool SelectedManaUsableWithCard(Card card) {
-        if (card is ActionCard actionCard) {
-            if (SelectedMana == null) return false;
-            if (SelectedMana.Type == Mana.Types.Gold && RoundManager.Instance.IsDay()) return true;
-            if (actionCard.ManaTypes.Contains(SelectedMana.Type)) return true;
-        }
+    public bool SelectedManaUsableWithChoice(CardChoice choice) {
+        if (SelectedMana == null) return false;
+        if (SelectedMana.Type == Mana.Types.Gold && RoundManager.Instance.IsDay()) return true;
+        if (choice.ManaTypes.Contains(SelectedMana.Type)) return true;
         return false;
     }
 

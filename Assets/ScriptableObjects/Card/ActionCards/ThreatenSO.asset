@@ -20,11 +20,13 @@ MonoBehaviour:
     Super: 0
     Id: 0
     ActionType: 3
+    ManaTypes: 
   - Name: Influence 5, rep- (S)
     Description: Influence 5 & Reputation -1
     Super: 1
     Id: 1
     ActionType: 3
+    ManaTypes: 00000000
   DescUp: Influence 2
   DescDown: Influence 5\nReputation -1
   ManaTypes: 00000000

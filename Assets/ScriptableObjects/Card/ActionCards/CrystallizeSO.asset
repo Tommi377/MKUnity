@@ -21,11 +21,13 @@ MonoBehaviour:
     Super: 0
     Id: 0
     ActionType: 4
+    ManaTypes: 
   - Name: Gain crystal (S)
     Description: Gain a crystal of any color to your inventory
     Super: 1
     Id: 1
     ActionType: 4
+    ManaTypes: 02000000
   DescUp: When you play this, also pay one mana of a basic color. Gain a crystal
     of that color to your inventory
   DescDown: Gain a crystal of any color to your inventory

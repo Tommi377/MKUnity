@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public enum ActionTypeRestriction {
@@ -18,11 +19,34 @@ public abstract class ActionCard : Card {
 
     public ActionCard(ActionCardSO actionCardSO) : base(actionCardSO) { }
 
-    public override bool CanApply(ActionTypes action, CardChoice cardChoice) {
-        if (cardChoice.ActionType == ActionTypes.Special) return true; // Special cards can be played in any time
-        if (cardChoice.ActionType == ActionTypes.Heal && !GameManager.Instance.CurrentPlayer.IsInCombat()) return true; // Heal cards can only be played out of combat
-        if (action == cardChoice.ActionType) return true; // Actions that match the round action can be played
+    public override List<CardChoice> Choices(ActionTypes actionType) {
+        List<CardChoice> choices = new List<CardChoice>() {
+            new CardChoice("Influence 1 (D)", "Influence 1 (D)", -4, ActionTypes.Influence),
+            new CardChoice("Block 1 (D)", "Block 1 (D)", -3, ActionTypes.Combat),
+            new CardChoice("Attack 1 (D)", "Attack 1 (D)", -2, ActionTypes.Combat),
+            new CardChoice("Move 1 (D)", "Move 1 (D)", -1, ActionTypes.Move),
+        };
 
-        return false;
+        choices.AddRange(CardSO.Choices);
+
+        return choices.Where((choice) => CanApply(actionType, choice)).ToList();
+    }
+
+    public override void Apply(CardChoice choice) {
+        Player player = GameManager.Instance.CurrentPlayer;
+        switch (choice.Id) {
+            case -1:
+                player.AddMovement(1);
+                break;
+            case -2:
+                GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Normal, CombatElements.Physical));
+                break;
+            case -3:
+                GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Block, CombatElements.Physical));
+                break;
+            case -4:
+                player.AddInfluence(1);
+                break;
+        }
     }
 }

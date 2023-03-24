@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -70,10 +71,9 @@ public class RoundManager : MonoBehaviour {
 
         if (!CanPlayCard(card)) return false; // Can't play if card actions does not include round action
 
-        // Action card specific
-        if (!options.SkipManaUse && card is ActionCard && actionChoice.Super) {
-            ActionCard actionCard = card as ActionCard;
-            if (!ManaManager.Instance.SelectedManaUsableWithCard(actionCard)) {
+        // Use mana
+        if (!options.SkipManaUse && card is ActionCard && actionChoice.ManaTypes.Any()) {
+            if (!ManaManager.Instance.SelectedManaUsableWithChoice(actionChoice)) {
                 Debug.Log("Selected mana not suitable for casting");
                 return false;
             }
