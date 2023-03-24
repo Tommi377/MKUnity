@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour {
     public static GameManager Instance { get; private set; }
@@ -36,6 +37,43 @@ public class GameManager : MonoBehaviour {
         ButtonInputManager.Instance.OnActionChooseClick += ButtonInput_OnActionChooseClick;
 
         SetDoneInitializing();
+    }
+
+    public List<ActionTypes> GetPossibleActions() {
+        List<ActionTypes> actions = new List<ActionTypes>();
+        Hex currentHex = CurrentPlayer.GetHex();
+
+        if (currentHex.Entities.Any(e => e.IsAggressive())) {
+            // Ended movement on a nonsafe tile
+            actions.Add(ActionTypes.Combat);
+        } else {
+            // Structure actions
+            if (CanInfluence()) {
+                actions.Add(ActionTypes.Influence);
+            }
+
+            // Check if combat possible with rampaging enemies
+            List<Enemy> rampaging = new List<Enemy>();
+            foreach (Hex neighbor in HexMap.Instance.GetNeighbors(CurrentPlayer.Position)) {
+                foreach (Enemy enemy in neighbor.GetEnemies()) {
+                    if (enemy.Rampaging) rampaging.Add(enemy);
+                }
+            }
+            if (rampaging.Any()) actions.Add(ActionTypes.Combat);
+
+            // TODO: Add card action turn if applicable
+
+            actions.Add(ActionTypes.None); // End turn without doing actions
+        }
+
+        return actions;
+    }
+
+    private bool CanInfluence() {
+        Hex currentHex = CurrentPlayer.GetHex();
+        if (currentHex.ContainsStructure() && currentHex.Structure.CanInfluence(CurrentPlayer)) return true;
+        if (UnitManager.Instance.GetUnitOfferForStructure(currentHex.StructureType).Any()) return true;
+        return false;
     }
 
     private void SetDoneInitializing() {

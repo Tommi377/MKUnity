@@ -14,6 +14,7 @@ public class ButtonInputManager : MonoBehaviour {
     public event EventHandler OnEndStartPhaseClick;
     public event EventHandler OnEndMovementClick;
     public event EventHandler OnEndEndPhaseClick;
+    public event EventHandler OnEndInfluencePhaseClick;
     public event EventHandler<OnActionChooseClickArgs> OnActionChooseClick;
     public class OnActionChooseClickArgs : EventArgs {
         public ActionTypes actionType;
@@ -79,6 +80,10 @@ public class ButtonInputManager : MonoBehaviour {
 
     public void EndEndPhaseClick() {
         OnEndEndPhaseClick?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void EndInfluencePhaseClick() {
+        OnEndInfluencePhaseClick?.Invoke(this, EventArgs.Empty);
     }
 
     public void ActionChooseClick(ActionTypes actionType) {

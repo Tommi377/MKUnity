@@ -8,6 +8,7 @@ public class RoundActionUI : MonoBehaviour {
     [SerializeField] private MovePhaseUI movePhaseUI;
     [SerializeField] private ChoosePhaseUI choosePhaseUI;
     [SerializeField] private CombatUI combatPhaseUI;
+    [SerializeField] private InfluenceUI influencePhaseUI;
     [SerializeField] private EndPhaseUI endPhaseUI;
 
     private void Start() {
@@ -16,6 +17,7 @@ public class RoundActionUI : MonoBehaviour {
         RoundManager.Instance.OnPhaseChange += RoundManager_OnPhaseChange;
 
         combatPhaseUI.Initialize();
+        influencePhaseUI.Initialize();
     }
 
     private void UpdateUI() {
@@ -37,6 +39,9 @@ public class RoundActionUI : MonoBehaviour {
                 switch (RoundManager.Instance.CurrentAction) {
                     case ActionTypes.Combat:
                         combatPhaseUI.gameObject.SetActive(true);
+                        break;
+                    case ActionTypes.Influence:
+                        influencePhaseUI.gameObject.SetActive(true);
                         break;
                 }
                 break;

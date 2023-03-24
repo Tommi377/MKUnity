@@ -10,33 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2bfd1856fa64c6f469501a8cb7e829a3, type: 3}
-  m_Name: PeasantsSO
+  m_Name: ForestersSO
   m_EditorClassIdentifier: 
-  Name: Peasants
-  Type: 4
+  Name: Foresters
+  Type: 0
   Choices:
-  - Name: Attack 2
-    Description: Attack 2
+  - Name: Move 2 (-1 cost on F, H, S)
+    Description: Move 2. The move cost of forests, hills and swamps is reduced by
+      1 this turn, to a minimum of 0
     Id: 0
-    ActionType: 2
+    ActionType: 1
     ManaTypes: 
-  - Name: Block 2
-    Description: Block 2
+  - Name: Block 3
+    Description: Block 3
     Id: 1
     ActionType: 2
     ManaTypes: 
-  - Name: Influence 2
-    Description: Influence 2
-    Id: 2
-    ActionType: 3
-    ManaTypes: 
-  - Name: Move 2
-    Description: Move 2
-    Id: 3
-    ActionType: 1
-    ManaTypes: 
   Level: 1
-  Influence: 4
-  Armor: 3
+  Influence: 5
+  Armor: 4
   Resistances: 
   Locations: 04000000

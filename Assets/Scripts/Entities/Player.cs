@@ -16,6 +16,17 @@ public class BaseAction {
     }
 }
 
+public struct LevelStats {
+    public int Armor;
+    public int HandLimit;
+    public int UnitLimit;
+    public LevelStats(int armor, int handLimit, int unitLimit) {
+        Armor = armor;
+        HandLimit = handLimit;
+        UnitLimit = unitLimit;
+    }
+}
+
 [RequireComponent(typeof(Deck))]
 [RequireComponent(typeof(Inventory))]
 public class Player : Entity {
@@ -58,18 +69,28 @@ public class Player : Entity {
     public int Level { get; private set; } = 1;
     public int Fame { get; private set; } = 0;
     public int Reputation { get; private set; } = 0;
-    public int Armor => levelToArmor[Level - 1];
-    public int HandLimit => levelToHandLimit[Level - 1];
+    public int Armor => levelStats[Level / 2].Armor;
+    public int HandLimit => levelStats[Level / 2].HandLimit;
+    public int UnitLimit => levelStats[Level / 2].UnitLimit;
 
     private readonly int[] levelThreshold = new int[] { 2, 7, 14, 23, 34, 47, 62, 79, 98, 119 };
-    private readonly int[] levelToArmor = new int[] { 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5 };
-    private readonly int[] levelToHandLimit = new int[] { 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7 };
+
+    private readonly List<LevelStats> levelStats = new List<LevelStats>() {
+        new LevelStats(2, 5, 1),
+        new LevelStats(3, 5, 2),
+        new LevelStats(3, 6, 3),
+        new LevelStats(4, 6, 4),
+        new LevelStats(4, 7, 5),
+        new LevelStats(5, 7, 6),
+    };
 
     public Inventory GetInventory() => inventory;
     public Deck GetDeck() => deck;
     public List<Card> GetHand() => hand;
     public List<UnitCard> GetUnits() => units;
 
+    // Modifier functions
+    List<Func<Hex, int, int>> MoveModifiers = new List<Func<Hex, int, int>>();
 
     public int GetDeckCount() => deck.Count;
     public int GetDiscardCount() => discard.Count;
@@ -80,7 +101,7 @@ public class Player : Entity {
     private void Awake() {
         inventory = GetComponent<Inventory>();
         deck = GetComponent<Deck>();
-        units.Add(new Peasants(tempSO));
+        units.Add(new Foresters(tempSO));
     }
 
     private void Start() {
@@ -90,10 +111,10 @@ public class Player : Entity {
 
         RoundManager.Instance.OnNewRound += RoundManager_OnNewRound;
         RoundManager.Instance.OnNewTurn += RoundManager_OnNewTurn;
+        RoundManager.Instance.OnPhaseChange += RoundManager_OnPhaseChange;
 
         MouseInputManager.Instance.OnHexClick += MouseInput_OnHexClick;
 
-        ButtonInputManager.Instance.OnEndMovementClick += ButtonInput_OnEndMovementClick;
         ButtonInputManager.Instance.OnShuffleDiscardClick += ButtonInput_OnShuffleDiscardClick;
         ButtonInputManager.Instance.OnDrawCardClick += ButtonInput_OnDrawCardClick;
     }
@@ -157,36 +178,6 @@ public class Player : Entity {
         }
     }
 
-    public List<ActionTypes> GetPossibleActions() {
-        List<ActionTypes> actions = new List<ActionTypes>();
-        Hex currentHex = GetHex();
-
-        if (currentHex.Entities.Any(e => e.IsAggressive())) {
-            // Ended movement on a nonsafe tile
-            actions.Add(ActionTypes.Combat);
-        } else {
-            // Structure actions
-            if (currentHex.ContainsStructure() && currentHex.Structure.CanInfluence(this)) {
-                actions.Add(ActionTypes.Influence);
-            }
-
-            // Check if combat possible with rampaging enemies
-            List<Enemy> rampaging = new List<Enemy>();
-            foreach (Hex neighbor in HexMap.Instance.GetNeighbors(Position)) {
-                foreach (Enemy enemy in neighbor.GetEnemies()) {
-                    if (enemy.Rampaging) rampaging.Add(enemy);
-                }
-            }
-            if (rampaging.Any()) actions.Add(ActionTypes.Combat);
-
-            // TODO: Add card action turn if applicable
-
-            actions.Add(ActionTypes.None); // End turn without doing actions
-        }
-
-        return actions;
-    }
-
     public void DrawCards(int count = 1) {
         for (int i = 0; i < count; i++) {
             if (deck.Empty) {
@@ -220,6 +211,10 @@ public class Player : Entity {
     private bool TryMove(Hex hex) {
         if (HexMap.HexIsNeigbor(Position, hex.Position)) {
             int moveCost = hex.GetMoveCost();
+            foreach (Func<Hex, int, int> modFunc in MoveModifiers) {
+                moveCost = modFunc(hex, moveCost);
+            }
+
             Debug.Log("Attempting to move to hex with move cost of " + moveCost);
             if (Movement >= moveCost) {
                 if (Move(hex)) {
@@ -235,15 +230,19 @@ public class Player : Entity {
         return false;
     }
 
-    private void EndMovement() {
-        ResetValues();
-    }
-
     public void EndAction() {
         ResetValues();
         if (!GetHex().IsSafeTile()) {
             // Force player to retreat
             // Then execute the end of turn
+        }
+    }
+
+    public void AddModifierFunction<T>(T func) {
+        if (func is Func<Hex, int, int>) {
+            MoveModifiers.Add(func as Func<Hex, int, int>);
+        } else {
+            Debug.Log("No modifier type: " + typeof(T).Name);
         }
     }
 
@@ -288,7 +287,7 @@ public class Player : Entity {
     private void RoundStartInit() {
         ShuffleDiscardToDeck();
         foreach (UnitCard unitCard in units) {
-            unitCard.RoundStartInit();
+            unitCard.Ready();
         }
     }
 
@@ -300,12 +299,18 @@ public class Player : Entity {
     private void ResetValues() {
         Movement = 0;
         Influence = 0;
+
+        MoveModifiers.Clear();
     }
 
     /* ------------------- EVENTS ---------------------- */
 
     private void Combat_OnCombatEnd(object sender, Combat.OnCombatEndArgs e) {
         GainFame(e.result.TotalFame);
+    }
+
+    private void RoundManager_OnPhaseChange(object sender, RoundManager.OnPhaseChangeArgs e) {
+        ResetValues();
     }
 
     private void RoundManager_OnNewRound(object sender, EventArgs e) {
@@ -318,10 +323,6 @@ public class Player : Entity {
 
     private void MouseInput_OnHexClick(object sender, MouseInputManager.OnHexClickArgs e) {
         TryMove(e.hex);
-    }
-
-    private void ButtonInput_OnEndMovementClick(object sender, EventArgs e) {
-        EndMovement();
     }
 
     private void ButtonInput_OnShuffleDiscardClick(object sender, EventArgs e) {

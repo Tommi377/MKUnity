@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -38,6 +37,16 @@ public abstract class Card {
 
     public Card(CardSO cardSO) {
         CardSO = cardSO;
+
+        if (cardSO == null) {
+            Debug.LogError("CardSO can't be null");
+            return;
+        }
+
+        if (cardSO.Name.Replace(" ", "") != GetType().Name) {
+            Debug.LogError("CardSO name field does not match the class name");
+            return;
+        }
     }
 
     public abstract string Name { get; }
@@ -82,11 +91,10 @@ public abstract class Card {
 
     public static Card GetCardFromSO(CardSO cardSO) {
         switch (cardSO.Type) {
+            case Types.Unit:
+                return (UnitCard)Activator.CreateInstance(System.Type.GetType(cardSO.Name.Replace(" ", "")), new object[] { cardSO as UnitCardSO });
             case Types.Action:
-                ActionCardSO actionCardSO = cardSO as ActionCardSO;
-
-                Type type = System.Type.GetType(cardSO.Name.Replace(" ", ""));
-                return (ActionCard)Activator.CreateInstance(type, new object[] { actionCardSO });
+                return (ActionCard)Activator.CreateInstance(System.Type.GetType(cardSO.Name.Replace(" ", "")), new object[] { cardSO as ActionCardSO });
             case Types.Wound:
                 return new Wound(cardSO);
 

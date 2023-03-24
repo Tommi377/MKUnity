@@ -15,6 +15,7 @@ public abstract class UnitCard : Card {
     public int Level => UnitCardSO.Level;
     public int Influence => UnitCardSO.Influence;
     public int Armor => UnitCardSO.Armor;
+    public List<StructureTypes> Locations => UnitCardSO.Locations;
 
     // Variables
     public bool Exhausted { get; private set; } = false;
@@ -34,7 +35,7 @@ public abstract class UnitCard : Card {
         OnUnitExhaustChanged?.Invoke(this, new OnUnitExhaustChangedArgs { Card = this, Exhausted = Exhausted });
     }
 
-    public void RoundStartInit() {
+    public void Ready() {
         Exhausted = false;
         OnUnitExhaustChanged?.Invoke(this, new OnUnitExhaustChangedArgs { Card = this, Exhausted = Exhausted });
     }
