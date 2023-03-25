@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static ButtonInputManager;
 
 public class ButtonInputManager : MonoBehaviour {
     public static ButtonInputManager Instance;
@@ -47,9 +48,17 @@ public class ButtonInputManager : MonoBehaviour {
     public class OnChoiceEffectDoneClickArgs : EventArgs {
         public int choiceId;
     }
+    public event EventHandler<OnRecruitUnitClickArgs> OnRecruitUnitClick;
+    public class OnRecruitUnitClickArgs : EventArgs {
+        public UnitCard unitCard;
+    }
 
     /* MISC RELATED */
     public event EventHandler OnChannelManaClick;
+    public event EventHandler<OnInfluenceChoiceClickArgs> OnInfluenceChoiceClick;
+    public class OnInfluenceChoiceClickArgs : EventArgs {
+        public InfluenceAction influenceAction;
+    }
 
     /* ----------------------- */
     /* EVENT DEFINITIONS - END 
@@ -118,7 +127,15 @@ public class ButtonInputManager : MonoBehaviour {
         OnChoiceEffectDoneClick?.Invoke(this, new OnChoiceEffectDoneClickArgs { choiceId = id });
     }
 
+    public void RecruitUnitClick(UnitCard unitCard) {
+        OnRecruitUnitClick?.Invoke(this, new OnRecruitUnitClickArgs { unitCard = unitCard });
+    }
+
     public void ChannelManaClick() {
         OnChannelManaClick?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void InfluenceChoiceClick(InfluenceAction influenceAction) {
+        OnInfluenceChoiceClick?.Invoke(this, new OnInfluenceChoiceClickArgs { influenceAction = influenceAction });
     }
 }

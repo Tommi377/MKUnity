@@ -13,3 +13,8 @@ MonoBehaviour:
   m_Name: UnitListNormalSO
   m_EditorClassIdentifier: 
   Elite: 0
+  List:
+  - Unit: {fileID: 11400000, guid: 66f3e697920d17740ac25911363716b9, type: 2}
+    Count: 3
+  - Unit: {fileID: 11400000, guid: 1e2dd575eb72b024d83bc8598d281662, type: 2}
+    Count: 2

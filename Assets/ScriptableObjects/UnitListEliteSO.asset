@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c92d35336307f694bba59411e17de9cf, type: 3}
   m_Name: UnitListEliteSO
   m_EditorClassIdentifier: 
-  Elite: 0
+  Elite: 1
   List: []

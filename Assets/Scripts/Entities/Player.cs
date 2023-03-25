@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class BaseAction {
@@ -31,7 +32,6 @@ public struct LevelStats {
 [RequireComponent(typeof(Inventory))]
 public class Player : Entity {
     [SerializeField] private CardSO woundSO;
-    [SerializeField] private UnitCardSO tempSO;
 
     public override EntityTypes EntityType { get { return EntityTypes.Player; } }
 
@@ -41,8 +41,15 @@ public class Player : Entity {
     public static event EventHandler<CardEventArgs> OnPlayerDiscardCard;
     public static event EventHandler<CardEventArgs> OnPlayerTrashCard;
     public class CardEventArgs : EventArgs {
-        public Player player;
-        public Card card;
+        public Player Player;
+        public Card Card;
+    }
+
+
+    public static event EventHandler<IntEventArgs> OnPlayerInfluenceUpdate;
+    public class IntEventArgs : EventArgs {
+        public Player Player;
+        public int Value;
     }
 
     public static void ResetStaticData() {
@@ -69,11 +76,13 @@ public class Player : Entity {
     public int Level { get; private set; } = 1;
     public int Fame { get; private set; } = 0;
     public int Reputation { get; private set; } = 0;
+    public int ReputationBonus => reputationBonuses[Math.Min(Math.Max(Reputation + 7, 0), reputationBonuses.Length - 1)];
     public int Armor => levelStats[Level / 2].Armor;
     public int HandLimit => levelStats[Level / 2].HandLimit;
     public int UnitLimit => levelStats[Level / 2].UnitLimit;
 
-    private readonly int[] levelThreshold = new int[] { 2, 7, 14, 23, 34, 47, 62, 79, 98, 119 };
+    private readonly int[] reputationBonuses = new int[] { -99, -5, -3, -2, -1, -1, 0, 0, 0, 1, 1, 2, 2, 3, 3 };
+    private readonly int[] levelThresholds = new int[] { 2, 7, 14, 23, 34, 47, 62, 79, 98, 119 };
 
     private readonly List<LevelStats> levelStats = new List<LevelStats>() {
         new LevelStats(2, 5, 1),
@@ -101,7 +110,6 @@ public class Player : Entity {
     private void Awake() {
         inventory = GetComponent<Inventory>();
         deck = GetComponent<Deck>();
-        units.Add(new Foresters(tempSO));
     }
 
     private void Start() {
@@ -115,8 +123,10 @@ public class Player : Entity {
 
         MouseInputManager.Instance.OnHexClick += MouseInput_OnHexClick;
 
-        ButtonInputManager.Instance.OnShuffleDiscardClick += ButtonInput_OnShuffleDiscardClick;
-        ButtonInputManager.Instance.OnDrawCardClick += ButtonInput_OnDrawCardClick;
+        ButtonInputManager.Instance.OnShuffleDiscardClick += ButtonInputManager_OnShuffleDiscardClick;
+        ButtonInputManager.Instance.OnDrawCardClick += ButtonInputManager_OnDrawCardClick;
+        ButtonInputManager.Instance.OnInfluenceChoiceClick += ButtonInputManager_OnInfluenceChoiceClick;
+        ButtonInputManager.Instance.OnRecruitUnitClick += ButtonInputManager_OnRecruitUnitClick;
     }
 
     public bool TryGetCombat(out Combat combat) {
@@ -146,10 +156,12 @@ public class Player : Entity {
 
     public void AddInfluence(int influence) {
         Influence += influence;
+        OnPlayerInfluenceUpdate?.Invoke(this, new IntEventArgs { Player = this, Value = Influence });
     }
 
     public void ReduceInfluence(int influence) {
         Influence -= influence;
+        OnPlayerInfluenceUpdate?.Invoke(this, new IntEventArgs { Player = this, Value = Influence });
     }
 
     public void AddReputation(int reputation) {
@@ -173,7 +185,7 @@ public class Player : Entity {
             Card found = hand.Find((card) => card is Wound);
             if (found != null) {
                 hand.Remove(found);
-                OnPlayerTrashCard?.Invoke(this, new CardEventArgs { player = this, card = found });
+                OnPlayerTrashCard?.Invoke(this, new CardEventArgs { Player = this, Card = found });
             }
         }
     }
@@ -211,6 +223,11 @@ public class Player : Entity {
     private bool TryMove(Hex hex) {
         if (HexMap.HexIsNeigbor(Position, hex.Position)) {
             int moveCost = hex.GetMoveCost();
+            if (moveCost < 0) {
+                Debug.Log("Inaccessable tile");
+                return false;
+            }
+
             foreach (Func<Hex, int, int> modFunc in MoveModifiers) {
                 moveCost = modFunc(hex, moveCost);
             }
@@ -253,7 +270,7 @@ public class Player : Entity {
     private void GainFame(int amount) {
         // TODO: account for multiple level ups at once
         Fame += amount;
-        if (levelThreshold[Level - 1] < Fame) {
+        if (levelThresholds[Level - 1] < Fame) {
             LevelUp();
         }
     }
@@ -265,14 +282,14 @@ public class Player : Entity {
 
     private void AddCardToHand(Card card) {
         hand.Add(card);
-        OnPlayerDrawCard?.Invoke(this, new CardEventArgs { player = this, card = card });
+        OnPlayerDrawCard?.Invoke(this, new CardEventArgs { Player = this, Card = card });
     }
 
     public void DiscardCard(Card card) {
         Debug.Log("Discarded: " + card);
         discard.Add(card);
         hand.Remove(card);
-        OnPlayerDiscardCard?.Invoke(this, new CardEventArgs { player = this, card = card });
+        OnPlayerDiscardCard?.Invoke(this, new CardEventArgs { Player = this, Card = card });
     }
 
     private void ShuffleDiscardToDeck() {
@@ -282,6 +299,28 @@ public class Player : Entity {
         discard.Clear();
 
         OnShuffleDiscardToDeck?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void ApplyInfluenceAction(InfluenceAction action) {
+        int trueCost = action.Cost - ReputationBonus;
+        if (Influence < trueCost) { 
+            Debug.Log("Not enough influence for action");
+            return;
+        }
+        ReduceInfluence(trueCost);
+        action.Apply(this);
+    }
+
+    private void RecruitUnit(UnitCard unitCard) {
+        int trueCost = unitCard.Influence - ReputationBonus;
+        if (Influence < trueCost) {
+            Debug.Log("Not enough influence for recruit");
+            return;
+        }
+        ReduceInfluence(trueCost);
+        // TODO: make replace unit if at cap
+        units.Add(unitCard);
+        UnitManager.Instance.RecruitUnit(unitCard);
     }
 
     private void RoundStartInit() {
@@ -325,11 +364,19 @@ public class Player : Entity {
         TryMove(e.hex);
     }
 
-    private void ButtonInput_OnShuffleDiscardClick(object sender, EventArgs e) {
+    private void ButtonInputManager_OnShuffleDiscardClick(object sender, EventArgs e) {
         ShuffleDiscardToDeck();
     }
 
-    private void ButtonInput_OnDrawCardClick(object sender, EventArgs e) {
+    private void ButtonInputManager_OnDrawCardClick(object sender, EventArgs e) {
         DrawCards();
+    }
+
+    private void ButtonInputManager_OnInfluenceChoiceClick(object sender, ButtonInputManager.OnInfluenceChoiceClickArgs e) {
+        ApplyInfluenceAction(e.influenceAction);
+    }
+
+    private void ButtonInputManager_OnRecruitUnitClick(object sender, ButtonInputManager.OnRecruitUnitClickArgs e) {
+        RecruitUnit(e.unitCard);
     }
 }
