@@ -7,14 +7,14 @@ public  class ColdToughness : ActionCard {
     public override void Apply(CardChoice choice) {
         switch (choice.Id) {
             case 0:
-                GetCombat(GetPlayer()).PlayCombatCard(new CombatData(2, CombatTypes.Normal, CombatElements.Physical));
+                GetCombat(GetPlayer()).PlayAttackCard(2, CombatTypes.Normal, CombatElements.Physical);
                 break;
             case 1:
-                GetCombat(GetPlayer()).PlayCombatCard(new CombatData(3, CombatTypes.Block, CombatElements.Ice));
+                GetCombat(GetPlayer()).PlayBlockCard(3, CombatElements.Ice);
                 break;
             case 2:
-                GetCombat(GetPlayer()).PlayCombatCard(new CombatData(4, CombatTypes.Block, CombatElements.Physical, (enemies) => {
-                    Enemy enemy = enemies[0];
+                GetCombat(GetPlayer()).PlayBlockCard(4, CombatElements.Physical, (combatBlock) => {
+                    Enemy enemy = combatBlock.Enemy;
                     int bonusBlock = enemy.Abilities.Count();
                     foreach (EnemyAttack attack in enemy.Attacks) {
                         if (attack.Element == CombatElements.Ice || attack.Element == CombatElements.Fire) bonusBlock += 1;
@@ -23,7 +23,7 @@ public  class ColdToughness : ActionCard {
                     Debug.Log("Bonus " + bonusBlock);
                     return bonusBlock;
 
-                }));
+                });
                 break;
         }
     }

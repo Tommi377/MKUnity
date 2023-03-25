@@ -41,7 +41,7 @@ public abstract class UnitCard : Card {
         OnUnitExhaustChanged?.Invoke(this, new OnUnitExhaustChangedArgs { Card = this, Exhausted = Exhausted });
     }
 
-    public void Wound(bool poison) {
+    public void WoundUnit(bool poison = false) {
         Wounds++;
         if (poison) Wounds++;
     }

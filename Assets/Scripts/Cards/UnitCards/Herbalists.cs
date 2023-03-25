@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 public class Herbalists : UnitCard, ITargetingCard<UnitCard> {
     private UnitCard cachedTarget;
