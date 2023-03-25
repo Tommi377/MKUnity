@@ -19,7 +19,7 @@ public abstract class ActionCard : Card {
 
     public ActionCard(ActionCardSO actionCardSO) : base(actionCardSO) { }
 
-    public override List<CardChoice> Choices(ActionTypes actionType) {
+    public override List<CardChoice> Choices() {
         List<CardChoice> choices = new List<CardChoice>() {
             new CardChoice("Influence 1 (D)", "Influence 1 (D)", -4, ActionTypes.Influence),
             new CardChoice("Block 1 (D)", "Block 1 (D)", -3, ActionTypes.Combat),
@@ -29,24 +29,28 @@ public abstract class ActionCard : Card {
 
         choices.AddRange(CardSO.Choices);
 
-        return choices.Where((choice) => CanApply(actionType, choice)).ToList();
+        return choices;
     }
 
-    public override void Apply(CardChoice choice) {
+    public override void ApplyChoice(CardChoice choice) {
         Player player = GameManager.Instance.CurrentPlayer;
-        switch (choice.Id) {
-            case -1:
-                player.AddMovement(1);
-                break;
-            case -2:
-                GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Normal, CombatElements.Physical));
-                break;
-            case -3:
-                GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Block, CombatElements.Physical));
-                break;
-            case -4:
-                player.AddInfluence(1);
-                break;
+        if (choice.Id < 0) {
+            switch (choice.Id) {
+                case -1:
+                    player.AddMovement(1);
+                    break;
+                case -2:
+                    GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Normal, CombatElements.Physical));
+                    break;
+                case -3:
+                    GetCombat(player).PlayCombatCard(new CombatData(1, CombatTypes.Block, CombatElements.Physical));
+                    break;
+                case -4:
+                    player.AddInfluence(1);
+                    break;
+            }
+        } else {
+            Apply(choice);
         }
     }
 }

@@ -42,38 +42,35 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
     }
 
     public override void Apply(CardChoice choice) {
-        base.Apply(choice);
-        Player player = GameManager.Instance.CurrentPlayer;
-
         switch (choice.Id) {
             case 0:
-                player.GetInventory().AddToken(Mana.Types.Blue);
+                GetPlayer().GetInventory().AddToken(Mana.Types.Blue);
                 break;
             case 1:
-                player.GetInventory().AddToken(Mana.Types.White);
+                GetPlayer().GetInventory().AddToken(Mana.Types.White);
                 break;
             case 2:
-                player.GetInventory().AddToken(Mana.Types.Red);
+                GetPlayer().GetInventory().AddToken(Mana.Types.Red);
                 break;
             case 3:
-                int initMovement = player.Movement;
-                int initInfluence = player.Influence;
-                int combatCardCount = player.IsInCombat() ? GetCombat(player).CombatCards.Count() : 0;
+                int initMovement = GetPlayer().Movement;
+                int initInfluence = GetPlayer().Influence;
+                int combatCardCount = GetPlayer().IsInCombat() ? GetCombat(GetPlayer()).CombatCards.Count() : 0;
 
                 CardManager.Instance.AddUnresolvedCard(this, () => {
                     switch (RoundManager.Instance.CurrentAction) {
                         case ActionTypes.Move:
-                            if (player.Movement > initMovement) {
-                                player.AddMovement(2);
+                            if (GetPlayer().Movement > initMovement) {
+                                GetPlayer().AddMovement(2);
                             }
                             break;
                         case ActionTypes.Influence:
-                            if (player.Influence > initInfluence) {
-                                player.AddInfluence(2);
+                            if (GetPlayer().Influence > initInfluence) {
+                                GetPlayer().AddInfluence(2);
                             }
                             break;
                         case ActionTypes.Combat:
-                            Combat combat = GetCombat(player);
+                            Combat combat = GetCombat(GetPlayer());
                             if (combat.CombatCards.Count() > combatCardCount) {
                                 CombatData combatCard = combat.CombatCards.Last();
 

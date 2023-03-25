@@ -6,8 +6,6 @@ public class Peasants : UnitCard {
     public Peasants(UnitCardSO UnitCardSO) : base(UnitCardSO) { }
 
     public override void Apply(CardChoice choice) {
-        base.Apply(choice);
-
         switch(choice.Id) {
             case 0:
                 GetCombat(GetPlayer()).PlayCombatCard(new CombatData(2, CombatTypes.Normal, CombatElements.Physical));

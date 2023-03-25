@@ -9,14 +9,12 @@ public class ManaDraw : ActionCard, ITargetingCard<ManaSource>, IChoiceEffect {
     public TargetTypes TargetType => TargetTypes.ManaSource;
 
     public override void Apply(CardChoice choice) {
-        base.Apply(choice);
-        Player player = GameManager.Instance.CurrentPlayer;
         switch (choice.Id) {
             case 0:
                 ManaManager.Instance.IncreaseMaxManaChannels();
                 break;
             case 1:
-                player.AddMovement(4);
+                GetPlayer().AddMovement(4);
                 break;
         }
     }

@@ -18,7 +18,7 @@ public class Wound : Card {
 
     public override void Apply(CardChoice choice) { }
 
-    public override List<CardChoice> Choices(ActionTypes actionType) {
+    public override List<CardChoice> Choices() {
         return new List<CardChoice>();
     }
 }

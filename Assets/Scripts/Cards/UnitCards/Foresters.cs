@@ -8,8 +8,6 @@ public class Foresters : UnitCard {
     private List<HexTypes> discounted = new List<HexTypes> { HexTypes.Forest, HexTypes.Hills, HexTypes.Swamp };
 
     public override void Apply(CardChoice choice) {
-        base.Apply(choice);
-
         switch(choice.Id) {
             case 0:
                 GetPlayer().AddMovement(2);

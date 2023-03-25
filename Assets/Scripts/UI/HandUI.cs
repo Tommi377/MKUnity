@@ -107,7 +107,7 @@ public class HandUI : MonoBehaviour {
         if (selectedCardVisual != null) {
             switch (mode) {
                 case SelectionMode.Default: {
-                        List<CardChoice> choices = selectedCardVisual.Card.Choices(RoundManager.Instance.CurrentAction);
+                        List<CardChoice> choices = selectedCardVisual.Card.GetChoices(RoundManager.Instance.CurrentAction);
 
                         foreach (CardChoice choice in choices) {
                             bool interactable = !choice.ManaTypes.Any() || ManaManager.Instance.SelectedManaUsableWithChoice(choice);
@@ -116,7 +116,7 @@ public class HandUI : MonoBehaviour {
                         break;
                     }
                 case SelectionMode.OnlySuper: {
-                        List<CardChoice> choices = selectedCardVisual.Card.Choices(RoundManager.Instance.CurrentAction);
+                        List<CardChoice> choices = selectedCardVisual.Card.GetChoices(RoundManager.Instance.CurrentAction);
 
                         foreach (CardChoice choice in choices) {
                             if (choice.ManaTypes.Any()) buttonUI.AddButton(choice.Name, () => CardActionClick(selectedCardVisual.Card, choice));
