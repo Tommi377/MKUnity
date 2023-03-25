@@ -7,4 +7,6 @@ public class ActionCardSO : CardSO {
     public string DescUp;
     public string DescDown;
     public List<Mana.Types> ManaTypes;
+
+    public override Card.Types Type => Card.Types.Action;
 }

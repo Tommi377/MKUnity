@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4341604b6249304891cfccf9cb00d49, type: 3}
   m_Name: OrcListSO
   m_EditorClassIdentifier: 
+  Type: 1
   List:
   - {fileID: 11400000, guid: 4428c6796b0cf714fbdab7243cf9a632, type: 2}
   - {fileID: 11400000, guid: 687dcd1d6b27f0d4dacbf3e3ba9d5925, type: 2}

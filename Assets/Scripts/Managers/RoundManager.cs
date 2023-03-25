@@ -63,6 +63,7 @@ public class RoundManager : MonoBehaviour {
         ButtonInputManager.Instance.OnEndStartPhaseClick += ButtonInput_OnEndStartPhaseClick;
         ButtonInputManager.Instance.OnEndMovementClick += ButtonInput_OnEndMovementClick;
         ButtonInputManager.Instance.OnEndEndPhaseClick += ButtonInput_OnEndEndPhaseClick;
+        ButtonInputManager.Instance.OnEndInfluencePhaseClick += ButtonInput_OnEndInfluencePhaseClick;
     }
 
     // Tests if a card's action is playable with the selected action
@@ -176,5 +177,9 @@ public class RoundManager : MonoBehaviour {
 
     private void ButtonInput_OnEndEndPhaseClick(object sender, EventArgs e) {
         TurnEnd();
+    }
+
+    private void ButtonInput_OnEndInfluencePhaseClick(object sender, EventArgs e) {
+        SetPhaseAndAction(TurnPhases.End);
     }
 }

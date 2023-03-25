@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +10,7 @@ public class HandUI : MonoBehaviour {
     [SerializeField] private ExpandingButtonUI buttonUI;
     [SerializeField] private GameObject cardVisualPrefab;
     [SerializeField] private Button changeStateButton;
+    [SerializeField] private TMP_Text changeStateButtonText;
 
     private State state = State.Hand;
     private enum State { Hand, Unit }
@@ -39,16 +40,23 @@ public class HandUI : MonoBehaviour {
         ManaManager.Instance.OnManaSelected += ManaManager_OnManaSelected;
         ManaManager.Instance.OnManaDeselected += ManaManager_OnManaDeselected;
 
+        RoundManager.Instance.OnPhaseChange += RoundManager_OnPhaseChange;
+
+        UnitManager.Instance.OnUnitRecruit += UnitManager_OnUnitRecruit;
+
         EventSignalManager.OnChangeHandUIMode += EventSignalManager_OnChangeHandUIMode;
     }
 
     private void SetState(State state) {
         DeselectCard();
-        foreach(Transform child in cardContainer) {
-            Destroy(child.gameObject);
-        }
 
         this.state = state;
+        changeStateButtonText.SetText(state == State.Hand ? "Units" : "Hand");
+        DrawHand();
+    }
+
+    private void DrawHand() {
+        ClearHand();
         switch (state) {
             case State.Hand:
                 GameManager.Instance.CurrentPlayer.GetHand().ForEach((card) => AddCard(card));
@@ -56,6 +64,12 @@ public class HandUI : MonoBehaviour {
             case State.Unit:
                 GameManager.Instance.CurrentPlayer.GetUnits().ForEach((card) => AddCard(card));
                 break;
+        }
+    }
+
+    private void ClearHand() {
+        foreach (Transform child in cardContainer) {
+            Destroy(child.gameObject);
         }
     }
 
@@ -163,27 +177,34 @@ public class HandUI : MonoBehaviour {
         UpdateChoices();
     }
 
+    private void RoundManager_OnPhaseChange(object sender, RoundManager.OnPhaseChangeArgs e) {
+        DeselectCard();
+    }
+
+    private void UnitManager_OnUnitRecruit(object sender, UnitManager.OnUnitRecruitArgs e) {
+        DrawHand();
+    }
 
     private void Player_OnPlayerDrawCard(object sender, Player.CardEventArgs e) {
         if (state == State.Hand) {
-            AddCard(e.card);
+            AddCard(e.Card);
         }
     }
 
     private void Player_OnPlayerDiscardCard(object sender, Player.CardEventArgs e) {
         // TODO: Discard the card that was actually discarded (currently only discards the first matching)
-        if (selectedCardVisual != null && selectedCardVisual.Card == e.card) {
+        if (selectedCardVisual != null && selectedCardVisual.Card == e.Card) {
             Destroy(selectedCardVisual.gameObject);
             selectedCardVisual = null;
             return;
         } else {
             Debug.Log("HandUI discarded card not found");
-            RemoveCard(e.card);
+            RemoveCard(e.Card);
         }
     }
 
     private void Player_OnPlayerTrashCard(object sender, Player.CardEventArgs e) {
-        RemoveCard(e.card);
+        RemoveCard(e.Card);
     }
 
     private void EventSignalManager_OnChangeHandUIMode(object sender, EventSignalManager.OnChangeHandUIModeArgs e) {

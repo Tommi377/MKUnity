@@ -111,7 +111,7 @@ public class Hex : MonoBehaviour {
         return defaultMoveCosts[(int)HexType, (int)RoundManager.Instance.Time];
     }
 
-    private static readonly int[,] defaultMoveCosts = new int[,] { { 2, 2 }, { 3, 3 }, { 3, 5 }, { 4, 4 }, { 5, 3 }, { 5, 5 }, { -1, -1 }, { -1, -1 } };
+    private static readonly int[,] defaultMoveCosts = new int[,] { { 2, 2 }, { 3, 3 }, { 3, 5 }, { 4, 4 }, { 5, 3 }, { 5, 5 }, { -1, -1 }, { -1, -1 }, { -1, -1 } };
 
     private void RenderHex() {
         Renderer mr = GetComponentInChildren<Renderer>();
