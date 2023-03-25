@@ -10,32 +10,32 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2bfd1856fa64c6f469501a8cb7e829a3, type: 3}
-  m_Name: PeasantsSO
+  m_Name: UtemSwordsmenSO
   m_EditorClassIdentifier: 
-  Name: Peasants
+  Name: Utem Swordsmen
   Choices:
-  - Name: Attack 2
-    Description: Attack 2
+  - Name: Attack 3
+    Description: Attack 3
     Id: 0
     ActionType: 2
     ManaTypes: 
-  - Name: Block 2
-    Description: Block 2
+  - Name: Block 3
+    Description: Block 3
     Id: 1
     ActionType: 2
     ManaTypes: 
-  - Name: Influence 2
-    Description: Influence 2
+  - Name: Attack 6 + Wound
+    Description: Attack 6. This Unit becomes Wounded
     Id: 2
-    ActionType: 3
+    ActionType: 2
     ManaTypes: 
-  - Name: Move 2
-    Description: Move 2
+  - Name: Block 6 + Wound
+    Description: Block 6. This Unit becomes Wounded
     Id: 3
-    ActionType: 1
+    ActionType: 2
     ManaTypes: 
-  Level: 1
-  Influence: 4
-  Armor: 3
+  Level: 2
+  Influence: 6
+  Armor: 4
   Resistances: 
-  Locations: 04000000
+  Locations: 07000000

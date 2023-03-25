@@ -6,7 +6,7 @@ public class Crystallize : ActionCard, ITargetingCard<Mana>, IChoiceEffect {
 
     public Crystallize(ActionCardSO actionCardSO) : base(actionCardSO) { }
 
-    public TargetTypes TargetType => TargetTypes.Mana;
+    public TargetTypes TargetType => TargetTypes.AnyMana;
     public bool HasTarget(CardChoice choice) => choice.Id == 0;
     public bool HasChoice(CardChoice choice) => choice.Id == 1;
 

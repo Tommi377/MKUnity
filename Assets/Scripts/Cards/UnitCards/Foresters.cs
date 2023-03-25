@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class Foresters : UnitCard {
     public Foresters(UnitCardSO UnitCardSO) : base(UnitCardSO) { }
@@ -14,7 +13,7 @@ public class Foresters : UnitCard {
                 GetPlayer().AddModifierFunction<Func<Hex, int, int>>((Hex hex, int cost) => discounted.Contains(hex.HexType) ? cost - 1 : cost);
                 break;
             case 1:
-                GetCombat(GetPlayer()).PlayCombatCard(new CombatData(3, CombatTypes.Block, CombatElements.Physical));
+                GetCombat(GetPlayer()).PlayBlockCard(3, CombatElements.Physical);
                 break;
         }
     }

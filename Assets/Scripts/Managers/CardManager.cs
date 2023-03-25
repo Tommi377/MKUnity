@@ -66,6 +66,7 @@ public class CardManager : MonoBehaviour {
     }
 
     private void Start() {
+        MouseInputManager.Instance.OnCardClick += MouseInputManager_OnCardClick;
         ButtonInputManager.Instance.OnCardActionClick += ButtonInputManager_OnCardActionClick;
         ButtonInputManager.Instance.OnChoiceEffectDoneClick += ButtonInputManager_OnChoiceEffectDoneClick;
 
@@ -74,18 +75,34 @@ public class CardManager : MonoBehaviour {
     }
 
     public bool CanPlay() {
-        return choiceCard == null && (targetingCard == null || targetingCard.TargetType == TargetTypes.Action);
+        return choiceCard == null && (targetingCard == null || targetingCard.TargetType == TargetTypes.ActionCardChoice);
     }
 
-    public void HandleCard(Card card, CardChoice choice) {
+    public void HandleCard(Card card) {
+        if (targetingCard != null) {
+            switch (targetingCard.TargetType) {
+                case TargetTypes.AnyCard:
+                    SetTarget(card);
+                    break;
+                case TargetTypes.UnitCard:
+                    SetTarget(card as UnitCard);
+                    break;
+            }
+        }
+    }
+
+    public void HandleCardChoice(Card card, CardChoice choice) {
         if (targetingCard == null) {
             PlayCard(card, choice);
-        } else if (targetingCard.TargetType == TargetTypes.Card) {
-            SetTarget(card);
-        } else if (targetingCard.TargetType == TargetTypes.Action) {
-            SetTarget((card, choice));
         } else {
-            Debug.Log("Can't play a card when another card is unresolved!!");
+            switch(targetingCard.TargetType) {
+                case TargetTypes.ActionCardChoice:
+                    SetTarget((card, choice));
+                    break;
+                default:
+                    Debug.Log("Can't play a card when another card is unresolved!!");
+                    break;
+            }
         }
     }
 
@@ -192,8 +209,12 @@ public class CardManager : MonoBehaviour {
 
     /* ------------------- EVENTS ---------------------- */
 
+    private void MouseInputManager_OnCardClick(object sender, MouseInputManager.OnCardClickArgs e) {
+        HandleCard(e.cardVisual.Card);
+    }
+
     private void ButtonInputManager_OnCardActionClick(object sender, ButtonInputManager.OnCardActionClickArgs e) {
-        HandleCard(e.card, e.choice);
+        HandleCardChoice(e.card, e.choice);
     }
 
     private void ButtonInputManager_OnChoiceEffectDoneClick(object sender, ButtonInputManager.OnChoiceEffectDoneClickArgs e) {
@@ -201,7 +222,7 @@ public class CardManager : MonoBehaviour {
     }
 
     private void ManaManager_OnManaSelected(object sender, ManaManager.OnManaSelectedArgs e) {
-        if (targetingCard != null && targetingCard.TargetType == TargetTypes.Mana) {
+        if (targetingCard != null && targetingCard.TargetType == TargetTypes.AnyMana) {
             SetTarget(e.mana);
         }
     }

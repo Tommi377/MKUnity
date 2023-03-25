@@ -52,10 +52,10 @@ public class HandUI : MonoBehaviour {
 
         this.state = state;
         changeStateButtonText.SetText(state == State.Hand ? "Units" : "Hand");
-        DrawHand();
+        UpdateHand();
     }
 
-    private void DrawHand() {
+    private void UpdateHand() {
         ClearHand();
         switch (state) {
             case State.Hand:
@@ -111,15 +111,22 @@ public class HandUI : MonoBehaviour {
 
                         foreach (CardChoice choice in choices) {
                             bool interactable = !choice.ManaTypes.Any() || ManaManager.Instance.SelectedManaUsableWithChoice(choice);
-                            Button button = buttonUI.AddButton(choice.Name, () => CardActionClick(selectedCardVisual.Card, choice), interactable);
+                            Color? manaColor = choice.ManaTypes.Any() ? Mana.GetColor(choice.ManaTypes[0]) : null;
+                            Button button = buttonUI.AddButton(
+                                choice.Name, () => CardActionClick(selectedCardVisual.Card, choice),
+                                new ExpandingButtonUI.Options() { Interactable = interactable, BackgroundColor = manaColor }
+                            );
                         }
                         break;
                     }
                 case SelectionMode.OnlySuper: {
                         List<CardChoice> choices = selectedCardVisual.Card.GetChoices(RoundManager.Instance.CurrentAction);
-
                         foreach (CardChoice choice in choices) {
-                            if (choice.ManaTypes.Any()) buttonUI.AddButton(choice.Name, () => CardActionClick(selectedCardVisual.Card, choice));
+                            Color? manaColor = choice.ManaTypes.Any() ? Mana.GetColor(choice.ManaTypes[0]) : null;
+                            if (choice.ManaTypes.Any()) buttonUI.AddButton(
+                                choice.Name, () => CardActionClick(selectedCardVisual.Card, choice),
+                                new ExpandingButtonUI.Options() { BackgroundColor = manaColor }
+                            );
                         }
                         break;
                     }
@@ -182,7 +189,7 @@ public class HandUI : MonoBehaviour {
     }
 
     private void UnitManager_OnUnitRecruit(object sender, UnitManager.OnUnitRecruitArgs e) {
-        DrawHand();
+        UpdateHand();
     }
 
     private void Player_OnPlayerDrawCard(object sender, Player.CardEventArgs e) {

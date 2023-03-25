@@ -7,10 +7,16 @@ public class InfluenceUI : MonoBehaviour {
     [SerializeField] private ExpandingButtonUI buttonContainer;
     [SerializeField] private TMP_Text influenceText;
 
-    public void Initialize() {
+    private void OnEnable() {
         Player.OnPlayerInfluenceUpdate += Player_OnPlayerInfluenceUpdate;
+        UnitManager.Instance.OnUnitRecruit += UnitManager_OnUnitRecruit;
 
-        RoundManager.Instance.OnPhaseChange += RoundManager_OnPhaseChange;
+        UpdateUI();
+    }
+
+    private void OnDisable() {
+        Player.OnPlayerInfluenceUpdate -= Player_OnPlayerInfluenceUpdate;
+        UnitManager.Instance.OnUnitRecruit -= UnitManager_OnUnitRecruit;
     }
 
     private void UpdateUI() {
@@ -18,11 +24,18 @@ public class InfluenceUI : MonoBehaviour {
         int influence = GameManager.Instance.CurrentPlayer.Influence + GameManager.Instance.CurrentPlayer.ReputationBonus;
 
         foreach (InfluenceAction action in GetStructureActions()) {
-            buttonContainer.AddButton(action.Name + "\nCost: " + action.Cost, () => ButtonInputManager.Instance.InfluenceChoiceClick(action), action.Cost <= influence);
+            buttonContainer.AddButton(
+                action.Name + "\nCost: " + action.Cost,
+                () => ButtonInputManager.Instance.InfluenceChoiceClick(action),
+                new ExpandingButtonUI.Options() { Interactable = action.Cost <= influence }
+            );
         }
         foreach (UnitCard unitCard in GetUnitOffer()) {
             string text = "Recruit\n" + unitCard.Name + "\nCost: " + unitCard.Influence;
-            buttonContainer.AddButton(text, () => ButtonInputManager.Instance.RecruitUnitClick(unitCard), unitCard.Influence <= influence);
+            buttonContainer.AddButton(
+                text, () => ButtonInputManager.Instance.RecruitUnitClick(unitCard),
+                new ExpandingButtonUI.Options() { Interactable = unitCard.Influence <= influence }
+            );
         }
 
         buttonContainer.AddButton("End\nInfluence\nPhase", () => ButtonInputManager.Instance.EndInfluencePhaseClick());
@@ -48,9 +61,7 @@ public class InfluenceUI : MonoBehaviour {
         UpdateUI();
     }
 
-    private void RoundManager_OnPhaseChange(object sender, RoundManager.OnPhaseChangeArgs e) {
-        if (e.actionType == ActionTypes.Influence) {
-            UpdateUI();
-        }
+    private void UnitManager_OnUnitRecruit(object sender, UnitManager.OnUnitRecruitArgs e) {
+        UpdateUI();
     }
 }

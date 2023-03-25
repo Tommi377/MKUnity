@@ -10,32 +10,32 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2bfd1856fa64c6f469501a8cb7e829a3, type: 3}
-  m_Name: PeasantsSO
+  m_Name: RedCapeMonksSO
   m_EditorClassIdentifier: 
-  Name: Peasants
+  Name: Red Cape Monks
   Choices:
-  - Name: Attack 2
-    Description: Attack 2
+  - Name: Attack 3
+    Description: Attack 3
     Id: 0
     ActionType: 2
     ManaTypes: 
-  - Name: Block 2
-    Description: Block 2
+  - Name: Block 3
+    Description: Block 3
     Id: 1
     ActionType: 2
     ManaTypes: 
-  - Name: Influence 2
-    Description: Influence 2
+  - Name: Fire Attack 4
+    Description: Fire Attack 4
     Id: 2
-    ActionType: 3
-    ManaTypes: 
-  - Name: Move 2
-    Description: Move 2
+    ActionType: 2
+    ManaTypes: 00000000
+  - Name: Fire Block 4
+    Description: Fire Block 4
     Id: 3
-    ActionType: 1
-    ManaTypes: 
-  Level: 1
-  Influence: 4
-  Armor: 3
+    ActionType: 2
+    ManaTypes: 00000000
+  Level: 2
+  Influence: 7
+  Armor: 4
   Resistances: 
-  Locations: 04000000
+  Locations: 06000000

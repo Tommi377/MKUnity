@@ -31,13 +31,15 @@ public class CombatData {
     public int Damage;
     public CombatTypes CombatType;
     public CombatElements CombatElement;
-    public Func<List<Enemy>, int> CombatFunc;
+    public Func<CombatAttack, int> CombatAttackModifier;
+    public Func<CombatBlock, int> CombatBlockModifier;
 
-    public CombatData(int damage, CombatTypes combatType, CombatElements combatElement, Func<List<Enemy>, int> combatFunc = null) {
+    public CombatData(int damage, CombatTypes combatType, CombatElements combatElement, Func<CombatAttack, int> attackFunc = null, Func<CombatBlock, int> blockFunc = null) {
         Damage = damage;
         CombatType = combatType;
         CombatElement = combatElement;
-        CombatFunc = combatFunc;
+        CombatAttackModifier = attackFunc;
+        CombatBlockModifier = blockFunc;
     }
 
     public override string ToString() {
@@ -116,6 +118,13 @@ public class Combat {
     public ReadOnlyCollection<CombatData> CombatCards => combatCards.AsReadOnly();
 
     public bool CombatEnded { get => CombatPhase == CombatPhases.End; }
+
+    public void PlayAttackCard(int damage, CombatTypes combatType, CombatElements combatElement, Func<CombatAttack, int> attackFunc = null) {
+        PlayCombatCard(new CombatData(damage, combatType, combatElement, attackFunc));
+    }
+    public void PlayBlockCard(int damage, CombatElements combatElement, Func<CombatBlock, int> blockFunc = null) {
+        PlayCombatCard(new CombatData(damage, CombatTypes.Block, combatElement, null, blockFunc));
+    }
 
     public void PlayCombatCard(CombatData combatData) {
         combatCards.Add(combatData);
@@ -232,11 +241,11 @@ public class Combat {
 }
 
 public class CombatAttack {
-    Player Player;
-    List<Enemy> Enemies;
+    public Player Player { get; private set; }
+    public List<Enemy> Enemies { get; private set; }
 
-    List<CombatData> CombatCards;
-    CombatPhases CombatPhase;
+    public List<CombatData> CombatCards { get; private set; }
+    public CombatPhases CombatPhase { get; private set; }
 
     public int TotalArmor { get; private set; } = 0;
 
@@ -253,7 +262,7 @@ public class CombatAttack {
         }
     }
 
-    void DealDamage(CombatData combatCard) {
+    private void DealDamage(CombatData combatCard) {
         if (combatCard.CombatType == CombatTypes.Block) {
             return;
         }
@@ -262,18 +271,19 @@ public class CombatAttack {
         // TODO: add siege checking
         if (CombatPhase == CombatPhases.Range) {
             if (combatCard.CombatType == CombatTypes.Range || combatCard.CombatType == CombatTypes.Siege) {
-                TotalArmor -= combatCard.Damage;
-                if (combatCard.CombatFunc != null) {
-                    TotalArmor -= combatCard.CombatFunc(Enemies);
-                }
+                ReduceArmor(combatCard);
             }
         } else if (CombatPhase == CombatPhases.Attack) {
-            TotalArmor -= combatCard.Damage;
-            if (combatCard.CombatFunc != null) {
-                TotalArmor -= combatCard.CombatFunc(Enemies);
-            }
+            ReduceArmor(combatCard);
         } else {
             Debug.Log("Can't deal damage with this card");
+        }
+    }
+
+    private void ReduceArmor(CombatData combatCard) {
+        TotalArmor -= combatCard.Damage;
+        if (combatCard.CombatAttackModifier != null) {
+            TotalArmor -= combatCard.CombatAttackModifier(this);
         }
     }
 
@@ -282,42 +292,46 @@ public class CombatAttack {
     }
 }
 public class CombatBlock {
-    private Player player;
-    private Enemy enemy;
-    private List<CombatData> combatCards;
+    public Player Player { get; private set; }
+    public Enemy Enemy { get; private set; }
+    public List<CombatData> CombatCards { get; private set; }
 
-    private int totalDamage = 0;
-    private int totalBlock = 0;
+    public int TotalDamage { get; private set; } = 0;
+    public int TotalBlock { get; private set; } = 0;
+
+    private bool combatPrevented = false;
 
     public CombatBlock(Player player, Enemy enemy, List<CombatData> combatCards) {
-        this.player = player;
-        this.enemy = enemy;
-        this.combatCards = combatCards;
+        Player = player;
+        Enemy = enemy;
+        CombatCards = combatCards;
 
         // Modify this attack depending on modifiers
-        totalDamage = 0;
+        TotalDamage = 0;
         foreach (EnemyAttack attack in enemy.Attacks) {
-            totalDamage += attack.Damage;
+            TotalDamage += attack.Damage;
         }
 
         foreach (CombatData combatCard in combatCards) {
             BlockDamage(combatCard);
         }
     }
+    public int PlayerReceivedDamage() {
+        return FullyBlocked ? 0 : TotalDamage;
+    }
+
+    public bool FullyBlocked { get => combatPrevented || TotalDamage <= TotalBlock; }
+
+    public void PreventEnemyAttack() => combatPrevented = true;
 
     private void BlockDamage(CombatData combatCard) {
         if (combatCard.CombatType != CombatTypes.Block) {
             return;
         }
         // TODO: add resistance and other checking
-        totalBlock += combatCard.Damage;
-        if (combatCard.CombatFunc != null) {
-            totalBlock += combatCard.CombatFunc(new List<Enemy>() { enemy });
+        TotalBlock += combatCard.Damage;
+        if (combatCard.CombatBlockModifier != null) {
+            TotalBlock += combatCard.CombatBlockModifier(this);
         }
     }
-    public int PlayerReceivedDamage() {
-        return FullyBlocked ? 0 : totalDamage;
-    }
-
-    public bool FullyBlocked { get => totalDamage <= totalBlock; }
 }

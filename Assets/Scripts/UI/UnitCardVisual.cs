@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -30,6 +31,9 @@ public class UnitCardVisual : MonoBehaviour {
         foreach (CardChoice choice in unitCard.UnitCardSO.Choices) {
             TMP_Text text = Instantiate(abilityTemplate, abilityContainer).GetComponent<TMP_Text>();
             text.SetText(choice.Description);
+            if (choice.ManaTypes.Any()) {
+                text.color = Mana.GetColor(choice.ManaTypes[0]);
+            }
             text.gameObject.SetActive(true);
         }
         SetExhaustedStatus();
