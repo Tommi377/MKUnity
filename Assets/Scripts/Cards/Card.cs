@@ -62,12 +62,17 @@ public abstract class Card {
 
     public virtual bool CanPlay(ActionTypes action) => HasPlayableChoices(action);
 
-    public virtual List<CardChoice> Choices(ActionTypes actionType) => CardSO.Choices.Where((choice) => CanApply(actionType, choice)).ToList();
+    public virtual List<CardChoice> GetChoices(ActionTypes actionType) => Choices().Where((choice) => CanApply(actionType, choice)).ToList();
+
+    public virtual List<CardChoice> Choices() => CardSO.Choices;
+
+    public virtual void ApplyChoice(CardChoice choice) => Apply(choice);
+
     public abstract void Apply(CardChoice choice);
 
     public override string ToString() => $"{Name} ({Type})";
 
-    public bool HasPlayableChoices(ActionTypes actionType) => Choices(actionType).Any();
+    public bool HasPlayableChoices(ActionTypes actionType) => GetChoices(actionType).Any();
 
     protected Combat GetCombat(Player player) {
         if (player.TryGetCombat(out Combat combat)) {

@@ -5,17 +5,15 @@ public  class ColdToughness : ActionCard {
     public ColdToughness(ActionCardSO actionCardSO) : base(actionCardSO) { }
 
     public override void Apply(CardChoice choice) {
-        base.Apply(choice);
-        Player player = GameManager.Instance.CurrentPlayer;
         switch (choice.Id) {
             case 0:
-                GetCombat(player).PlayCombatCard(new CombatData(2, CombatTypes.Normal, CombatElements.Physical));
+                GetCombat(GetPlayer()).PlayCombatCard(new CombatData(2, CombatTypes.Normal, CombatElements.Physical));
                 break;
             case 1:
-                GetCombat(player).PlayCombatCard(new CombatData(3, CombatTypes.Block, CombatElements.Ice));
+                GetCombat(GetPlayer()).PlayCombatCard(new CombatData(3, CombatTypes.Block, CombatElements.Ice));
                 break;
             case 2:
-                GetCombat(player).PlayCombatCard(new CombatData(4, CombatTypes.Block, CombatElements.Physical, (enemies) => {
+                GetCombat(GetPlayer()).PlayCombatCard(new CombatData(4, CombatTypes.Block, CombatElements.Physical, (enemies) => {
                     Enemy enemy = enemies[0];
                     int bonusBlock = enemy.Abilities.Count();
                     foreach (EnemyAttack attack in enemy.Attacks) {

@@ -30,9 +30,10 @@ public abstract class UnitCard : Card {
         return !Exhausted;
     }
 
-    public override void Apply(CardChoice choice) {
+    public override void ApplyChoice(CardChoice choice) {
         Exhausted = true;
         OnUnitExhaustChanged?.Invoke(this, new OnUnitExhaustChangedArgs { Card = this, Exhausted = Exhausted });
+        Apply(choice);
     }
 
     public void Ready() {

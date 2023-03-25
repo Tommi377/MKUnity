@@ -19,13 +19,10 @@ public class Crystallize : ActionCard, ITargetingCard<Mana>, IChoiceEffect {
     }
 
     public override void Apply(CardChoice choice) {
-        base.Apply(choice);
-        Player player = GameManager.Instance.CurrentPlayer;
-
         switch(choice.Id) {
             case 0:
-                player.GetInventory().AddCrystal(suppliedMana.Type);
-                player.GetInventory().RemoveMana(suppliedMana);
+                GetPlayer().GetInventory().AddCrystal(suppliedMana.Type);
+                GetPlayer().GetInventory().RemoveMana(suppliedMana);
                 break;
         }
     }
@@ -36,7 +33,7 @@ public class Crystallize : ActionCard, ITargetingCard<Mana>, IChoiceEffect {
     public List<string> EffectChoices(CardChoice choice) => effectChoices;
 
     public void ApplyEffect(int id) {
-        Inventory inventory = GameManager.Instance.CurrentPlayer.GetInventory();
+        Inventory inventory = GetPlayer().GetInventory();
         Mana.Types manaType = (Mana.Types)id; // Only works because the choices are in order
         inventory.AddCrystal(manaType);
     }

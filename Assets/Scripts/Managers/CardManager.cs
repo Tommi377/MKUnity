@@ -125,7 +125,7 @@ public class CardManager : MonoBehaviour {
     }
 
     private void ApplyCard(Card card, CardChoice choice, PlayCardOptions options) {
-        card.Apply(choice);
+        card.ApplyChoice(choice);
 
         if (card is IChoiceEffect) {
             IChoiceEffect choiceEffectCard = card as IChoiceEffect;
