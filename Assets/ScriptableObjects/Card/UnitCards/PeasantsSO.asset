@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: PeasantsSO
   m_EditorClassIdentifier: 
   Name: Peasants
-  Type: 4
   Choices:
   - Name: Attack 2
     Description: Attack 2

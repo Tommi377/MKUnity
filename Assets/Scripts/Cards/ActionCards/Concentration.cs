@@ -17,7 +17,7 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
             RoundManager.Instance.CurrentAction == ActionTypes.Combat;
     }
 
-    public TargetTypes TargetType => TargetTypes.Action;
+    public TargetTypes TargetType => TargetTypes.ActionCardChoice;
     public bool HasTarget(CardChoice choice) => choice.Id == 3;
 
     public bool ValidTarget(CardChoice choice, (Card, CardChoice) target) {
