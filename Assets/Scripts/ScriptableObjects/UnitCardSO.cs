@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,4 +12,8 @@ public class UnitCardSO : CardSO {
     public List<StructureTypes> Locations;
 
     public override Card.Types Type => Card.Types.Unit;
+    public override Card CreateInstance() {
+        Type type = System.Type.GetType(Name.Replace(" ", ""));
+        return (UnitCard)Activator.CreateInstance(type, new object[] { this });
+    }
 }

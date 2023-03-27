@@ -36,12 +36,12 @@ public class UnitManager : MonoBehaviour {
 
         foreach (UnitCardCount cardCount in unitListNormalSO.List) {
             for (int i = 0; i < cardCount.Count; i++) {
-                unitsNormal.Add(Card.GetCardFromSO(cardCount.Unit) as UnitCard);
+                unitsNormal.Add(cardCount.Unit.CreateInstance() as UnitCard);
             }
         }
         foreach (UnitCardCount cardCount in unitListEliteSO.List) {
             for (int i = 0; i < cardCount.Count; i++) {
-                unitsElite.Add(Card.GetCardFromSO(cardCount.Unit) as UnitCard);
+                unitsElite.Add(cardCount.Unit.CreateInstance() as UnitCard);
             }
         }
         unitCardNormalStack = new Stack<UnitCard>(unitsNormal.OrderBy(x => UnityEngine.Random.value).ToList());

@@ -141,7 +141,7 @@ public class Player : Entity {
     public void TakeWounds(int amount) {
         Debug.Log("Taking " + amount + " wounds!");
         for (int i = 0; i < amount; i++) {
-            Wound wound = Card.GetCardFromSO(woundSO) as Wound;
+            Wound wound = woundSO.CreateInstance() as Wound;
             AddCardToHand(wound);
         }
     }
