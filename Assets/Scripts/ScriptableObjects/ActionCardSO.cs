@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,4 +10,8 @@ public class ActionCardSO : CardSO {
     public List<Mana.Types> ManaTypes;
 
     public override Card.Types Type => Card.Types.Action;
+    public override Card CreateInstance() {
+        Type type = System.Type.GetType(Name.Replace(" ", ""));
+        return (ActionCard)Activator.CreateInstance(type, new object[] { this });
+    }
 }

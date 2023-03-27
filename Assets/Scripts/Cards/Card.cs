@@ -84,27 +84,4 @@ public abstract class Card {
     }
 
     protected Player GetPlayer() => GameManager.Instance.CurrentPlayer;
-
-    public static List<Card> GetCardsFromSO(IEnumerable<CardSO> cardSOs) {
-        List<Card> cards = new List<Card>();
-        foreach (CardSO cardSO in cardSOs) {
-            Card card = GetCardFromSO(cardSO);
-            if (card != null) cards.Add(card);
-        }
-        return cards;
-    }
-
-    public static Card GetCardFromSO(CardSO cardSO) {
-        switch (cardSO.Type) {
-            case Types.Unit:
-                return (UnitCard)Activator.CreateInstance(System.Type.GetType(cardSO.Name.Replace(" ", "")), new object[] { cardSO as UnitCardSO });
-            case Types.Action:
-                return (ActionCard)Activator.CreateInstance(System.Type.GetType(cardSO.Name.Replace(" ", "")), new object[] { cardSO as ActionCardSO });
-            case Types.Wound:
-                return new Wound(cardSO);
-
-        }
-        Debug.Log("Card matching SO not found");
-        return null;
-    }
 }

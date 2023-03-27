@@ -9,7 +9,7 @@ public class Deck : MonoBehaviour {
     [SerializeField] private List<Card> cards = new List<Card>();
 
     private void Awake() {
-        cards.AddRange(Card.GetCardsFromSO(cardListSO.cards));
+        cardListSO.cards.ForEach(cardSO  => cards.Add(cardSO.CreateInstance()));
         Shuffle();
     }
 
