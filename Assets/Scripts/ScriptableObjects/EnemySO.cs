@@ -20,4 +20,6 @@ public class EnemySO : ScriptableObject {
 public class EnemyAttack {
     public int Damage;
     public CombatElements Element;
+
+    public override string ToString() => Damage + " " + Element + " attack";
 }

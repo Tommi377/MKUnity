@@ -1,14 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class StateMachine {
-    private TransitionTable transitionTable;
     private State currentState;
 
-    public StateMachine(TransitionTable transitionTable) {
-        this.transitionTable = transitionTable;
-        currentState = transitionTable.GetInitialState();
+    public StateMachine(State initialState, List<StateTransition> transitions) {
+        currentState = initialState;
+
+        var fromStates = transitions.GroupBy(transition => transition.FromState);
+        foreach (var fromState in fromStates) {
+            State state = fromState.Key;
+
+            foreach (StateTransition transition in fromState) {
+                state.AddTransition(transition);
+            }
+        }
     }
 
     public State GetCurrentState() => currentState;

@@ -28,7 +28,7 @@ public class Enemy : Entity {
     public override EntityTypes EntityType => EnemySO.EntityType;
     public List<EnemyAttack> Attacks => EnemySO.Attacks;
     public List<EnemyAbilities> Abilities => EnemySO.Abilities;
-    public Sprite sprite => EnemySO.Sprite;
+    public Sprite Sprite => EnemySO.Sprite;
     public bool Rampaging { get; protected set; }
 
     public event EventHandler OnInit;

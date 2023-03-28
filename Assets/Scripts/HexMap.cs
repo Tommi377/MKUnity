@@ -23,8 +23,8 @@ public class HexMap : MonoBehaviour {
 
     public GameObject HexPrefab;
     public MapTile MapStart = MapTile.CreateMapTile(new (HexTypes, StructureTypes, EntityTypes?)[]{
-            (HexTypes.Plains, StructureTypes.None, null), (HexTypes.Forest, StructureTypes.None, null),
-            (HexTypes.Inaccessable, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.Village, null), (HexTypes.Plains, StructureTypes.None, null),
+            (HexTypes.Plains, StructureTypes.None, EntityTypes.Orc), (HexTypes.Forest, StructureTypes.None, null),
+            (HexTypes.Inaccessable, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.None, null),
             (HexTypes.Inaccessable, StructureTypes.None, null), (HexTypes.Inaccessable, StructureTypes.None, null)
     });
 

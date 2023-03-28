@@ -105,6 +105,9 @@ public class Player : Entity {
     public int GetDiscardCount() => discard.Count;
     public bool IsInCombat() => GameManager.Instance.Combat != null && GameManager.Instance.Combat.Player == this;
 
+    public bool CanLevelUp(int fame) => levelThresholds[Level - 1] < Fame + fame;
+    public int GetReputationBonus(int repdiff = 0) => reputationBonuses[Math.Min(Math.Max(Reputation + repdiff + 7, 0), reputationBonuses.Length - 1)];
+
     public ReadOnlyCollection<Card> DiscardPile => discard.AsReadOnly();
 
     private void Awake() {
@@ -344,8 +347,8 @@ public class Player : Entity {
 
     /* ------------------- EVENTS ---------------------- */
 
-    private void Combat_OnCombatEnd(object sender, Combat.OnCombatEndArgs e) {
-        GainFame(e.result.TotalFame);
+    private void Combat_OnCombatEnd(object sender, Combat.OnCombatResultArgs e) {
+        GainFame(e.result.Fame);
     }
 
     private void RoundManager_OnPhaseChange(object sender, RoundManager.OnPhaseChangeArgs e) {

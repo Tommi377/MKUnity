@@ -105,7 +105,7 @@ public class OldCombatUI : MonoBehaviour {
     }
 
     private void ToggleEnemy(Combat combat, Enemy enemy) {
-        if (!combat.Enemies.Contains(enemy)) {
+        if (!combat.Alive.Contains(enemy)) {
             Debug.Log("Enemy is not in combat");
         }
 

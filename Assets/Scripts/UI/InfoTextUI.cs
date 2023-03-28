@@ -50,7 +50,7 @@ public class InfoTextUI : MonoBehaviour {
         updateActionText();
     }
 
-    private void Combat_OnCombatEnd(object sender, Combat.OnCombatEndArgs e) {
+    private void Combat_OnCombatEnd(object sender, Combat.OnCombatResultArgs e) {
         combatPhase = null;
         updateActionText();
     }

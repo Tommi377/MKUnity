@@ -1,6 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using UnityEngine;
 
 public class StateTransition : IStateComponent {
     public State FromState;
@@ -18,7 +17,9 @@ public class StateTransition : IStateComponent {
         return state != null;
     }
 
-    private bool CanTransition() => condition();
+    private bool CanTransition() {
+        return condition();
+    }
 
     public virtual void Awake(StateMachine stateMachine) { }
     public virtual void OnStateEnter() { }

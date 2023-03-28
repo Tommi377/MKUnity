@@ -131,7 +131,7 @@ public class GameManager : MonoBehaviour {
 
     /* ------------------- EVENTS ---------------------- */
 
-    private void Combat_OnCombatEnd(object sender, Combat.OnCombatEndArgs e) {
+    private void Combat_OnCombatEnd(object sender, Combat.OnCombatResultArgs e) {
         EndOfCombat(e.result);
     }
 
