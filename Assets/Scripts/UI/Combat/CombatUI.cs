@@ -20,11 +20,11 @@ public class CombatUI : MonoBehaviour {
 
     [SerializeField] private TMP_Text headerText;
     [SerializeField] private TMP_Text subheaderText;
+    [SerializeField] private TMP_Text infoText;
     [SerializeField] private TMP_Text resultText;
     [SerializeField] private TMP_Text resultDetailText;
 
     private Combat combat;
-    private CombatResult result;
     private Combat.States state;
     private List<EnemyButtonVisual> enemyVisuals = new List<EnemyButtonVisual>();
 
@@ -38,14 +38,17 @@ public class CombatUI : MonoBehaviour {
 
         Combat.OnCombatStateEnter += Combat_OnCombatStateEnter;
         Combat.OnGenerateCombatResult += Combat_OnGenerateCombatResult;
+        Combat.OnCombatCardPlayed += Combat_OnCombatCardPlayed;
+        Combat.OnCombatDamageAssign += Combat_OnCombatDamageAssign;
     }
 
     private void OnDisable() {
         Combat.OnCombatStateEnter -= Combat_OnCombatStateEnter;
         Combat.OnGenerateCombatResult -= Combat_OnGenerateCombatResult;
+        Combat.OnCombatCardPlayed -= Combat_OnCombatCardPlayed;
+        Combat.OnCombatDamageAssign -= Combat_OnCombatDamageAssign;
 
         combat = null;
-        result = null;
 
         enemyVisuals.ForEach(visual => visual.DestroySelf());
         enemyVisuals.Clear();
@@ -67,6 +70,7 @@ public class CombatUI : MonoBehaviour {
         
         UpdateEnemies();
         UpdateUI();
+        UpdateInfoText();
     }
 
     private void UpdateUI() {
@@ -200,6 +204,28 @@ public class CombatUI : MonoBehaviour {
         }
     }
 
+    private void UpdateInfoText() {
+        switch (state) {
+            case Combat.States.AttackPlay:
+            case Combat.States.RangedPlay:
+                string attackText = "Enemy armor: " + combat.CalculateEnemyArmor();
+                attackText += "\nCurrent attack: " + combat.CalculateDamage(state == Combat.States.RangedPlay);
+                infoText.SetText(attackText);
+                break;
+            case Combat.States.BlockPlay:
+                string blockText = "Blocking: " + combat.AttackToHandle;
+                blockText += "\nCurrent block: " + combat.CalculateBlock();
+                infoText.SetText(blockText);
+                break;
+            case Combat.States.AssignDamage:
+                infoText.SetText("Damage Remaining: " + combat.DamageToAssign);
+                break;
+            default:
+                infoText.SetText("");
+                break;
+        }
+    }
+
     private void SelectTargets() {
         CombatAction.TargetsSelectedClick(this, GetTargets());
     }
@@ -234,6 +260,14 @@ public class CombatUI : MonoBehaviour {
 
     private void Combat_OnGenerateCombatResult(object sender, Combat.OnCombatResultArgs e) {
         DrawResult(e.result);
+    }
+
+    private void Combat_OnCombatCardPlayed(object sender, EventArgs e) {
+        UpdateInfoText();
+    }
+
+    private void Combat_OnCombatDamageAssign(object sender, EventArgs e) {
+        UpdateInfoText();
     }
 }
 
