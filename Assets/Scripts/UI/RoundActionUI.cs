@@ -7,7 +7,7 @@ public class RoundActionUI : MonoBehaviour {
     [SerializeField] private StartPhaseUI startPhaseUI;
     [SerializeField] private MovePhaseUI movePhaseUI;
     [SerializeField] private ChoosePhaseUI choosePhaseUI;
-    [SerializeField] private CombatUI combatPhaseUI;
+    [SerializeField] private OldCombatUI combatPhaseUI;
     [SerializeField] private InfluenceUI influencePhaseUI;
     [SerializeField] private EndPhaseUI endPhaseUI;
 

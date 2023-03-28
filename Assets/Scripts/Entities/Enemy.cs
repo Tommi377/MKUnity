@@ -19,6 +19,8 @@ public enum EnemyAbilities {
 }
 
 public class Enemy : Entity {
+    public EnemySO EnemySO;
+
     public string Name => EnemySO.Name;
     public int Armor => EnemySO.Armor;
     public int Fame => EnemySO.Fame;
@@ -30,8 +32,6 @@ public class Enemy : Entity {
     public bool Rampaging { get; protected set; }
 
     public event EventHandler OnInit;
-
-    public EnemySO EnemySO { get; private set; }
 
     public void Init(EnemySO enemySO) {
         this.EnemySO = enemySO;

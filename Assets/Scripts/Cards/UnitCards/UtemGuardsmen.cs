@@ -9,7 +9,7 @@ public class UtemGuardsmen : UnitCard {
                 break;
             case 1:
                 GetCombat(GetPlayer()).PlayBlockCard(4, CombatElements.Physical, (combatBlock) => {
-                    if (combatBlock.Enemy.Abilities.Contains(EnemyAbilities.Swift)) return 4;
+                    if (combatBlock.UnassignedAttack.Enemy.Abilities.Contains(EnemyAbilities.Swift)) return 4;
                     return 0;
                 });
                 break;
