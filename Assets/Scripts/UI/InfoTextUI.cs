@@ -5,12 +5,12 @@ public class InfoTextUI : MonoBehaviour {
     [SerializeField] private TMP_Text phaseInfoText;
     [SerializeField] private TMP_Text debugPlayerInfoText;
 
-    private CombatPhases? combatPhase = null;
+    private Combat.States? combatState = null;
 
     private void Start() {
         RoundManager.Instance.OnPhaseChange += RoundManager_OnPhaseChange;
 
-        Combat.OnCombatPhaseChange += Combat_OnCombatPhaseChange;
+        Combat.OnCombatStateEnter += Combat_OnCombatStateEnter;
         Combat.OnCombatEnd += Combat_OnCombatEnd;
 
         updateActionText();
@@ -34,8 +34,8 @@ public class InfoTextUI : MonoBehaviour {
 
         text += "\nCurrent action:\n" + action;
 
-        if (combatPhase != null) {
-            text += "\nCurrent action:\n" + combatPhase;
+        if (combatState != null) {
+            text += "\nCurrent action:\n" + combatState;
         }
 
         phaseInfoText.SetText(text);
@@ -45,13 +45,13 @@ public class InfoTextUI : MonoBehaviour {
         updateActionText();
     }
 
-    private void Combat_OnCombatPhaseChange(object sender, Combat.OnCombatPhaseChangeArgs e) {
-        combatPhase = e.phase;
+    private void Combat_OnCombatStateEnter(object sender, Combat.OnCombatStateEnterArgs e) {
+        combatState = e.State;
         updateActionText();
     }
 
-    private void Combat_OnCombatEnd(object sender, Combat.OnCombatEndArgs e) {
-        combatPhase = null;
+    private void Combat_OnCombatEnd(object sender, Combat.OnCombatResultArgs e) {
+        combatState = null;
         updateActionText();
     }
 }

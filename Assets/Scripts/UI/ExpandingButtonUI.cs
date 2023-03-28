@@ -36,6 +36,11 @@ public class ExpandingButtonUI : MonoBehaviour {
         gameObject.SetActive(false);
     }
 
+    public void SetText(Button button, string text) {
+        TMP_Text buttonText = button.transform.Find("Text").GetComponent<TMP_Text>();
+        buttonText.SetText(text);
+    }
+
     private Button CreateButton(string text, Options options) {
         if (!gameObject.activeSelf) {
             gameObject.SetActive(true);

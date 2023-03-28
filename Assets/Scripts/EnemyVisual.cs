@@ -4,7 +4,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Enemy))]
 public class EnemyVisual : MonoBehaviour {
     [SerializeField] private Image image;
     [SerializeField] private TMP_Text armorText;
@@ -14,27 +13,27 @@ public class EnemyVisual : MonoBehaviour {
     [SerializeField] private Transform abilityContainer;
     [SerializeField] private GameObject abilityVisualPrefab;
 
-    private Enemy enemy;
-
-    private void Awake() {
-        enemy = GetComponent<Enemy>();
-    }
+    private EnemySO enemySO;
 
     private void Start() {
-        if (enemy.EnemySO) {
-            Init();
-        } else {
-            enemy.OnInit += Enemy_OnInit;
+        if (TryGetComponent(out Enemy enemy)) {
+            if (enemy.EnemySO) {
+                Init(enemy.EnemySO);
+            } else {
+                enemy.OnInit += Enemy_OnInit;
+            }
         }
     }
 
-    public void Init() {
-        gameObject.name = enemy.Name;
-        image.sprite = enemy.sprite;
-        armorText.SetText(enemy.Armor.ToString());
-        fameText.SetText(enemy.Fame.ToString());
+    public void Init(EnemySO enemySO) {
+        this.enemySO = enemySO;
 
-        foreach (CombatElements resistance in enemy.Resistances) {
+        gameObject.name = enemySO.Name;
+        image.sprite = enemySO.Sprite;
+        armorText.SetText(enemySO.Armor.ToString());
+        fameText.SetText(enemySO.Fame.ToString());
+
+        foreach (CombatElements resistance in enemySO.Resistances) {
             AbilityVisual resistanceVisual = Instantiate(abilityVisualPrefab, resistanceContainer).GetComponent<AbilityVisual>();
             resistanceVisual.SetText("");
             switch (resistance) {
@@ -47,7 +46,7 @@ public class EnemyVisual : MonoBehaviour {
             }
         }
 
-        foreach (EnemyAttack attack in enemy.Attacks) {
+        foreach (EnemyAttack attack in enemySO.Attacks) {
             AbilityVisual attackVisual = Instantiate(abilityVisualPrefab, attackContainer).GetComponent<AbilityVisual>();
             attackVisual.SetText(attack.Damage.ToString());
             switch(attack.Element) {
@@ -64,13 +63,13 @@ public class EnemyVisual : MonoBehaviour {
         }
 
 
-        foreach (EnemyAbilities ability in enemy.Abilities) {
+        foreach (EnemyAbilities ability in enemySO.Abilities) {
             AbilityVisual abilityVisual = Instantiate(abilityVisualPrefab, abilityContainer).GetComponent<AbilityVisual>();
             abilityVisual.SetText(ability.ToString()[..2]); // TODO: Make ability visual
         }
     }
 
     private void Enemy_OnInit(object sender, System.EventArgs e) {
-        Init();
+        Init((sender as Enemy).EnemySO);
     }
 }
