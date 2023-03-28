@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemyButtonVisual : MonoBehaviour {
@@ -17,7 +16,7 @@ public class EnemyButtonVisual : MonoBehaviour {
 
     public Enemy Enemy { get; private set; }
 
-    public event Action<int> OnButtonClick;
+    public event Action<Enemy, int> OnButtonClick;
 
     public void Init(Combat.States state, Enemy enemy, bool disableName = false) {
         Enemy = enemy;
@@ -48,12 +47,14 @@ public class EnemyButtonVisual : MonoBehaviour {
                 break;
             case Combat.States.BlockStart:
             case Combat.States.AssignStart:
-                for (int i = 0; i < Enemy.Attacks.Count; i++) {
-                    int choiceIndex = i;
-                    EnemyAttack attack = Enemy.Attacks[i];
-                    buttonContainer.AddButton(attack.ToString(), () => {
-                        OnButtonClick?.Invoke(choiceIndex);
-                    });
+                if (GameManager.Instance.Combat.UnassignedAttacks.TryGetValue(Enemy, out List<EnemyAttack> attacks)) {
+                    for (int i = 0; i < Enemy.Attacks.Count; i++) {
+                        int choiceIndex = i;
+                        EnemyAttack attack = Enemy.Attacks[i];
+                        var options = new ExpandingButtonUI.Options() { Interactable = attacks.Contains(attack) };
+
+                        buttonContainer.AddButton(attack.ToString(), () => OnButtonClick?.Invoke(Enemy, choiceIndex), options);
+                    }
                 }
                 break;
             default:
@@ -68,7 +69,7 @@ public class EnemyButtonVisual : MonoBehaviour {
             Select();
         }
 
-        OnButtonClick?.Invoke(0);
+        OnButtonClick?.Invoke(Enemy, 0);
     }
 
     public void SetDead() {

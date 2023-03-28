@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class CombatUI : MonoBehaviour {
     [SerializeField] private Transform enemyContainer;
+    [SerializeField] private ExpandingButtonUI middleButtonContainer;
     [SerializeField] private ExpandingButtonUI bottomRightButtonContainer;
 
     [SerializeField] private Transform aliveTab;
@@ -72,7 +73,9 @@ public class CombatUI : MonoBehaviour {
         if (combat == null) return;
 
         gameObject.SetActive(true);
+        enemyContainer.gameObject.SetActive(true);
 
+        middleButtonContainer.ClearButtons();
         bottomRightButtonContainer.ClearButtons();
 
         switch (state) {
@@ -82,36 +85,46 @@ public class CombatUI : MonoBehaviour {
 
                 bottomRightButtonContainer.AddButton("Start\nCombat", () => CombatAction.CombatNextStateClick(this));
                 break;
+            case Combat.States.AttackStart:
             case Combat.States.RangedStart:
-                headerText.SetText("Ranged Phase");
+                headerText.SetText(state == Combat.States.AttackStart ? "Attack phase" : "Ranged Phase");
                 subheaderText.SetText("Select enemies to target:");
 
-
                 var options = new ExpandingButtonUI.Options() { Interactable = GetTargets().Count > 0 };
-                string nextPhaseText = combat.EveryEnemyDefeated() ? "End\nCombat" : "To\nBlock\nPhase";
+                string rangedPhaseText = state == Combat.States.AttackStart || combat.EveryEnemyDefeated() ? "End\nCombat" : "To\nBlock\nPhase";
 
                 bottomRightButtonContainer.AddButton("Attack\nEnemies", () => {
                     SelectTargets();
                     CombatAction.CombatNextStateClick(this);
                 }, options);
-                bottomRightButtonContainer.AddButton(nextPhaseText, () => CombatAction.CombatNextStateClick(this));
+                bottomRightButtonContainer.AddButton(rangedPhaseText, () => CombatAction.CombatNextStateClick(this));
                 break;
+            case Combat.States.AttackPlay:
             case Combat.States.RangedPlay:
-                subheaderText.SetText("Play ranged cards to damage");
+                subheaderText.SetText(state == Combat.States.AttackStart ? "Play attack cards to damage" : "Play ranged cards to damage");
 
                 bottomRightButtonContainer.AddButton("Finish\nPlaying\nCards", () => CombatAction.CombatNextStateClick(this));
                 break;
+            case Combat.States.AssignStart:
             case Combat.States.BlockStart:
+                headerText.SetText(state == Combat.States.BlockStart ? "Block Phase" : "Damage Phase");
+                subheaderText.SetText(state == Combat.States.BlockStart ? "Select attack to block:" : "Select attack to receive");
+
+                if (state == Combat.States.BlockStart) {
+                    string blockPhaseText = combat.HasUnassignedAttacks() ? "To\nDamage\nPhase" : "To\nAttack\nPhase";
+                    bottomRightButtonContainer.AddButton(blockPhaseText, () => CombatAction.CombatNextStateClick(this));
+                }
                 break;
             case Combat.States.BlockPlay:
-                break;
-            case Combat.States.AssignStart:
+                subheaderText.SetText("Play block cards to block");
+
+                bottomRightButtonContainer.AddButton("Finish\nPlaying\nCards", () => CombatAction.CombatNextStateClick(this));
                 break;
             case Combat.States.AssignDamage:
-                break;
-            case Combat.States.AttackStart:
-                break;
-            case Combat.States.AttackPlay:
+                middleButtonContainer.AddButton("Self", () => {
+                    CombatAction.DamageAssignClick(this, -1);
+                    CombatAction.CombatNextStateClick(this);
+                });
                 break;
             case Combat.States.Result:
                 headerText.SetText("End of Combat");
@@ -162,6 +175,7 @@ public class CombatUI : MonoBehaviour {
     }
 
     private void DrawEnemies() {
+        Debug.Log("enems" + combat.Enemies.Count);
         foreach (Enemy enemy in combat.Enemies) {
             EnemyButtonVisual visual = Instantiate(enemyButtonVisualTemplate, enemyContainer).GetComponent<EnemyButtonVisual>();
             visual.Init(state, enemy);
@@ -200,8 +214,18 @@ public class CombatUI : MonoBehaviour {
         return targets;
     }
 
-    private void EnemyButtonVisual_OnButtonClick(int choiceId) {
-        UpdateUI();
+    private void EnemyButtonVisual_OnButtonClick(Enemy enemy, int choiceId) {
+        switch (state) {
+            case Combat.States.AttackStart:
+            case Combat.States.RangedStart:
+                UpdateUI();
+                break;
+            case Combat.States.BlockStart:
+            case Combat.States.AssignStart:
+                CombatAction.AttackSelectedClick(this, enemy, enemy.Attacks[choiceId]);
+                CombatAction.CombatNextStateClick(this);
+                break;
+        }
     }
 
     private void Combat_OnCombatStateEnter(object sender, Combat.OnCombatStateEnterArgs e) {
@@ -219,6 +243,15 @@ public static class CombatAction {
     public class OnTargetsSelectedClickArgs : EventArgs {
         public List<Enemy> Targets;
     }
+    public static event EventHandler<OnAttackSelectedClickArgs> OnAttackSelectedClick;
+    public class OnAttackSelectedClickArgs : EventArgs {
+        public Enemy Target;
+        public EnemyAttack Attack;
+    }
+    public static event EventHandler<OnDamageAssignClickArgs> OnDamageAssignClick;
+    public class OnDamageAssignClickArgs : EventArgs {
+        public int ChoiceId;
+    }
 
     public static void CombatNextStateClick(object sender) {
         OnCombatNextStateClick?.Invoke(sender, EventArgs.Empty);
@@ -226,5 +259,13 @@ public static class CombatAction {
 
     public static void TargetsSelectedClick(object sender, List<Enemy> targets) {
         OnTargetsSelectedClick?.Invoke(sender, new OnTargetsSelectedClickArgs { Targets = targets });
+    }
+
+    public static void AttackSelectedClick(object sender, Enemy enemy, EnemyAttack attack) {
+        OnAttackSelectedClick?.Invoke(sender, new OnAttackSelectedClickArgs { Target = enemy, Attack = attack });
+    }
+
+    public static void DamageAssignClick(object sender, int choiceId) {
+        OnDamageAssignClick?.Invoke(sender, new OnDamageAssignClickArgs { ChoiceId = choiceId });
     }
 }
