@@ -16,10 +16,11 @@ MonoBehaviour:
   Name: Orc Skirmishers
   Armor: 4
   Fame: 2
-  EntityType: 1
+  EntityType: 2
   Attacks:
   - Damage: 1
     Element: 0
   - Damage: 1
     Element: 0
+  Resistances: 
   Abilities: 

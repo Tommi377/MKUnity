@@ -9,14 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a47b774e044d3ca45b1c4aadadac5ea8, type: 3}
-  m_Name: OrcSummonersSO
+  m_Script: {fileID: 11500000, guid: 772bdcd3ae60690499f69800dd0d84aa, type: 3}
+  m_Name: CountrysideTileListSO
   m_EditorClassIdentifier: 
-  Sprite: {fileID: -1762794629, guid: a7ae09f8cdf9241429a55de01cf57bff, type: 3}
-  Name: Orc Summoners
-  Armor: 4
-  Fame: 4
-  EntityType: 2
-  Attacks: []
-  Resistances: 
-  Abilities: 00000000
+  TileType: 0
+  TileList:
+  - {fileID: 11400000, guid: 235b718dcc24ae24ea75791b64290f41, type: 2}
+  - {fileID: 11400000, guid: c5192d245e5c8fe4aadf0c0d5b35e9c5, type: 2}

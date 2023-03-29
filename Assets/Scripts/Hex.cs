@@ -55,10 +55,10 @@ public class Hex : MonoBehaviour {
         S = s;
         HexType = hexInfo.HexType;
         StructureType = hexInfo.StructureType;
-        EntityTypes? entityType = hexInfo.EntityType;
+        EntityTypes entityType = hexInfo.EntityType;
 
-        if (entityType != null) {
-            Entity entity = HexMap.Instance.SpawnRandomEntity(this, (EntityTypes)entityType);
+        if (entityType != EntityTypes.None) {
+            Entity entity = HexMap.Instance.SpawnRandomEntity(this, entityType);
             if (entity != null) {
                 switch (entityType) {
                     case EntityTypes.Orc:

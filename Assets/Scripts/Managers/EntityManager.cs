@@ -7,10 +7,9 @@ using UnityEngine;
 public class EntityManager : MonoBehaviour {
     public static EntityManager Instance;
 
-    [SerializeField] private List<EntityTypes> enemyListKeys;
     [SerializeField] private List<EnemyListSO> enemyListValues;
 
-    private Dictionary<EntityTypes, EnemyListSO> enemyListSOMap = new Dictionary<EntityTypes, EnemyListSO>();
+    private Dictionary<EntityTypes, List<EnemySO>> enemyListSOMap = new Dictionary<EntityTypes, List<EnemySO>>();
 
     private void Awake() {
         if (Instance != null && Instance != this) {
@@ -19,14 +18,14 @@ public class EntityManager : MonoBehaviour {
             Instance = this;
         }
 
-        for (int i = 0; i < enemyListKeys.Count; i++) {
-            enemyListSOMap.Add(enemyListKeys[i], enemyListValues[i]);
+        for (int i = 0; i < enemyListValues.Count; i++) {
+            enemyListSOMap.Add(enemyListValues[i].Type, enemyListValues[i].List);
         }
     }
 
     public List<EnemySO> GetEntitySOs(EntityTypes type) {
-        if (enemyListSOMap.TryGetValue(type, out EnemyListSO enemyListSO)) {
-            return enemyListSO.List;
+        if (enemyListSOMap.TryGetValue(type, out List<EnemySO> enemyListSO)) {
+            return enemyListSO;
         }
         return new List<EnemySO>();
     }

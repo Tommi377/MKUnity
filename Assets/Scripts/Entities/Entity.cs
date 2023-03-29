@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 public enum EntityTypes {
+    None,
     Player,
     Orc,
     Guard,
@@ -14,7 +15,7 @@ public enum EntityTypes {
 
 public abstract class Entity : MonoBehaviour {
     public abstract EntityTypes EntityType { get; }
-    public virtual bool IsAggressive() => EntityType != EntityTypes.Player;
+    public virtual bool IsAggressive() => EntityType != EntityTypes.Player || EntityType != EntityTypes.None;
 
     public Vector3Int Position = Vector3Int.zero;
 
