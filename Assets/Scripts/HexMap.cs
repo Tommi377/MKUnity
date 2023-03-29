@@ -161,7 +161,6 @@ public class HexMap : MonoBehaviour {
     public Entity SpawnRandomEntity(Hex hex, EntityTypes type) {
         List<EnemySO> entitySOs = EntityManager.Instance.GetEntitySOs(type);
 
-        Debug.Log(type);
         if (entitySOs.Count > 0) {
             EnemySO enemySO = entitySOs[Random.Range(0, entitySOs.Count)];
             Enemy enemy = Instantiate(enemyPrefab).GetComponent<Enemy>();

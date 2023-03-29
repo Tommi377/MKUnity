@@ -15,7 +15,7 @@ public enum EntityTypes {
 
 public abstract class Entity : MonoBehaviour {
     public abstract EntityTypes EntityType { get; }
-    public virtual bool IsAggressive() => EntityType != EntityTypes.Player || EntityType != EntityTypes.None;
+    public virtual bool IsAggressive() => EntityType != EntityTypes.Player && EntityType != EntityTypes.None;
 
     public Vector3Int Position = Vector3Int.zero;
 

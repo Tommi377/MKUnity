@@ -47,8 +47,10 @@ public class UnitManager : MonoBehaviour {
         unitCardNormalStack = new Stack<UnitCard>(unitsNormal.OrderBy(x => UnityEngine.Random.value).ToList());
         unitCardEliteStack = new Stack<UnitCard>(unitsElite.OrderBy(x => UnityEngine.Random.value).ToList());
 
+        Debug.Log("Unit offer: ");
         for (int i = 0; i < unitOfferLimit; i++) {
             UnitOffer.Add(unitCardNormalStack.Pop());
+            Debug.Log(UnitOffer.Last());
         }
     }
 

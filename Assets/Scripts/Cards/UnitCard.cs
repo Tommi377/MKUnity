@@ -4,11 +4,8 @@ using UnityEngine;
 
 public abstract class UnitCard : Card {
 
-    public static event EventHandler<OnUnitExhaustChangedArgs> OnUnitExhaustChanged;
-    public class OnUnitExhaustChangedArgs : EventArgs {
-        public UnitCard Card;
-        public bool Exhausted;
-    }
+    public event EventHandler OnUnitExhaustChanged;
+    public event EventHandler OnUnitWoundChanged;
 
     public override string Name => UnitCardSO.Name; 
     public override Types Type => Types.Unit;
@@ -27,23 +24,25 @@ public abstract class UnitCard : Card {
 
     public override bool CanApply(ActionTypes action, CardChoice cardChoice) {
         if (!base.CanApply(action, cardChoice)) return false;
+        if (Wounds > 0) return false;
         return !Exhausted;
     }
 
     public override void ApplyChoice(CardChoice choice) {
         Exhausted = true;
-        OnUnitExhaustChanged?.Invoke(this, new OnUnitExhaustChangedArgs { Card = this, Exhausted = Exhausted });
+        OnUnitExhaustChanged?.Invoke(this, EventArgs.Empty);
         Apply(choice);
     }
 
     public void Ready() {
         Exhausted = false;
-        OnUnitExhaustChanged?.Invoke(this, new OnUnitExhaustChangedArgs { Card = this, Exhausted = Exhausted });
+        OnUnitExhaustChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void WoundUnit(bool poison = false) {
         Wounds++;
         if (poison) Wounds++;
+        OnUnitWoundChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void Heal() {
@@ -52,5 +51,8 @@ public abstract class UnitCard : Card {
             return;
         }
         Wounds--;
+        OnUnitWoundChanged?.Invoke(this, EventArgs.Empty);
     }
+
+    public override string ToString() => Name + " lvl: " + Level;
 }
