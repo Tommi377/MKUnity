@@ -16,7 +16,7 @@ MonoBehaviour:
   Name: Orc Stonethrower
   Armor: 2
   Fame: 4
-  EntityType: 1
+  EntityType: 2
   Attacks:
   - Damage: 7
     Element: 0

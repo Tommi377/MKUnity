@@ -16,7 +16,7 @@ MonoBehaviour:
   Name: Orc Trackers
   Armor: 3
   Fame: 3
-  EntityType: 1
+  EntityType: 2
   Attacks:
   - Damage: 4
     Element: 0

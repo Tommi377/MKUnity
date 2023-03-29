@@ -8,12 +8,15 @@ public class HexMap : MonoBehaviour {
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private StructurePrefabMapSO structurePrefabMapSO;
 
+    [SerializeField] private MapTileSO mapStart;
+    [SerializeField] private MapTileListSO countrysideTiles;
+
     public static HexMap Instance { get; private set; }
 
     public Player player;
 
-    Stack<MapTile[]> MapStack = new Stack<MapTile[]>();
-    Dictionary<Vector3Int, MapTile> macroCoordinates = new Dictionary<Vector3Int, MapTile>();
+    Stack<MapTileSO[]> MapStack = new Stack<MapTileSO[]>();
+    Dictionary<Vector3Int, MapTileSO> macroCoordinates = new Dictionary<Vector3Int, MapTileSO>();
     Dictionary<Vector3Int, Hex> microCoordinates = new Dictionary<Vector3Int, Hex>();
 
     Vector3Int[] hexDirections = {
@@ -22,24 +25,24 @@ public class HexMap : MonoBehaviour {
     };
 
     public GameObject HexPrefab;
-    public MapTile MapStart = MapTile.CreateMapTile(new (HexTypes, StructureTypes, EntityTypes?)[]{
-            (HexTypes.Plains, StructureTypes.None, EntityTypes.Orc), (HexTypes.Forest, StructureTypes.None, null),
-            (HexTypes.Inaccessable, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.None, null),
-            (HexTypes.Inaccessable, StructureTypes.None, null), (HexTypes.Inaccessable, StructureTypes.None, null)
-    });
+    //public MapTile MapStart = MapTile.CreateMapTile(new (HexTypes, StructureTypes, EntityTypes?)[]{
+    //        (HexTypes.Plains, StructureTypes.None, EntityTypes.Orc), (HexTypes.Forest, StructureTypes.None, null),
+    //        (HexTypes.Inaccessable, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.None, null),
+    //        (HexTypes.Inaccessable, StructureTypes.None, null), (HexTypes.Inaccessable, StructureTypes.None, null)
+    //});
 
-    public MapTile[] MapCountryside = {
-        MapTile.CreateMapTile(new (HexTypes, StructureTypes, EntityTypes?)[]{
-            (HexTypes.Forest, StructureTypes.None, EntityTypes.Orc), (HexTypes.Lake, StructureTypes.None, null),
-            (HexTypes.Forest, StructureTypes.None, null), (HexTypes.Forest, StructureTypes.MagicalGlade, null), (HexTypes.Plains, StructureTypes.Village, null),
-            (HexTypes.Plains, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.None, null)
-        }),
-        MapTile.CreateMapTile(new (HexTypes, StructureTypes, EntityTypes?)[]{
-            (HexTypes.Hills, StructureTypes.None, EntityTypes.Orc), (HexTypes.Forest, StructureTypes.MagicalGlade, null),
-            (HexTypes.Plains, StructureTypes.None, null), (HexTypes.Hills, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.Village, null),
-            (HexTypes.Hills, StructureTypes.CrystalMine, null), (HexTypes.Plains, StructureTypes.None, null)
-        })
-    };
+    //public MapTile[] MapCountryside = {
+    //    MapTile.CreateMapTile(new (HexTypes, StructureTypes, EntityTypes?)[]{
+    //        (HexTypes.Forest, StructureTypes.None, EntityTypes.Orc), (HexTypes.Lake, StructureTypes.None, null),
+    //        (HexTypes.Forest, StructureTypes.None, null), (HexTypes.Forest, StructureTypes.MagicalGlade, null), (HexTypes.Plains, StructureTypes.Village, null),
+    //        (HexTypes.Plains, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.None, null)
+    //    }),
+    //    MapTile.CreateMapTile(new (HexTypes, StructureTypes, EntityTypes?)[]{
+    //        (HexTypes.Hills, StructureTypes.None, EntityTypes.Orc), (HexTypes.Forest, StructureTypes.MagicalGlade, null),
+    //        (HexTypes.Plains, StructureTypes.None, null), (HexTypes.Hills, StructureTypes.None, null), (HexTypes.Plains, StructureTypes.Village, null),
+    //        (HexTypes.Hills, StructureTypes.CrystalMine, null), (HexTypes.Plains, StructureTypes.None, null)
+    //    })
+    //};
 
     public Dictionary<StructureTypes, GameObject> StructurePrefabMap { get; private set; }
 
@@ -56,8 +59,8 @@ public class HexMap : MonoBehaviour {
 
     private void Start() {
         GenerateMap();
-        PlaceMapTile(new Vector3Int(1, -1, 0), MapCountryside[0]);
-        PlaceMapTile(new Vector3Int(1, 0, -1), MapCountryside[1]);
+        PlaceMapTile(new Vector3Int(1, -1, 0), countrysideTiles.TileList[0]);
+        PlaceMapTile(new Vector3Int(1, 0, -1), countrysideTiles.TileList[1]);
 
         microCoordinates[Vector3Int.zero].PlaceEntity(player);
     }
@@ -194,14 +197,14 @@ public class HexMap : MonoBehaviour {
     }
 
     private void GenerateMap() {
-        PlaceMapTile(Vector3Int.zero, MapStart);
+        PlaceMapTile(Vector3Int.zero, mapStart);
     }
 
-    private void PlaceMapTile(Vector3Int origin, MapTile mapTile) {
+    private void PlaceMapTile(Vector3Int origin, MapTileSO mapTile) {
         macroCoordinates.Add(new Vector3Int(origin.x, origin.y, origin.z), mapTile);
 
         for (int i = 0; i < 7; i++) {
-            Vector3Int microCoordinate = MapTile.CoordinateOffsets[i] + MacroToMicroCoordinates(origin);
+            Vector3Int microCoordinate = MapTileSO.CoordinateOffsets[i] + MacroToMicroCoordinates(origin);
             Vector3 worldCoordinate = MicroToWorldCoordinates(microCoordinate);
 
             Hex hex = Instantiate(HexPrefab, worldCoordinate, Quaternion.identity, this.transform).GetComponent<Hex>();

@@ -16,7 +16,7 @@ MonoBehaviour:
   Name: Orc War Beasts
   Armor: 5
   Fame: 3
-  EntityType: 1
+  EntityType: 2
   Attacks:
   - Damage: 3
     Element: 0
