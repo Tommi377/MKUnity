@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 772bdcd3ae60690499f69800dd0d84aa, type: 3}
+  m_Name: CountrysideTileListSO
+  m_EditorClassIdentifier: 
+  TileType: 0
+  TileList:
+  - {fileID: 11400000, guid: 235b718dcc24ae24ea75791b64290f41, type: 2}
+  - {fileID: 11400000, guid: c5192d245e5c8fe4aadf0c0d5b35e9c5, type: 2}
