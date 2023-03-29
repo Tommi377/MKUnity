@@ -13,14 +13,16 @@ public class UnitCardVisual : MonoBehaviour {
     [SerializeField] private Transform abilityContainer;
     [SerializeField] private GameObject abilityTemplate;
 
+    [SerializeField] private Transform woundContainer;
+    [SerializeField] private GameObject woundTemplate;
+
     private UnitCard unitCard;
 
-    private void OnEnable() {
-        UnitCard.OnUnitExhaustChanged += UnitCard_OnUnitExhaustChanged;
-    }
-
     private void OnDisable() {
-        UnitCard.OnUnitExhaustChanged -= UnitCard_OnUnitExhaustChanged;
+        if (unitCard != null) {
+            unitCard.OnUnitExhaustChanged -= UnitCard_OnUnitExhaustChanged;
+            unitCard.OnUnitWoundChanged -= UnitCard_OnUnitWoundChanged;
+        }
     }
 
     public void Init(UnitCard unitCard) {
@@ -37,6 +39,9 @@ public class UnitCardVisual : MonoBehaviour {
             text.gameObject.SetActive(true);
         }
         SetExhaustedStatus();
+
+        unitCard.OnUnitExhaustChanged += UnitCard_OnUnitExhaustChanged;
+        unitCard.OnUnitWoundChanged += UnitCard_OnUnitWoundChanged;
     }
 
     public void SetExhaustedStatus() => SetExhaustedStatus(unitCard.Exhausted);
@@ -46,9 +51,24 @@ public class UnitCardVisual : MonoBehaviour {
         }
     }
 
-    private void UnitCard_OnUnitExhaustChanged(object sender, UnitCard.OnUnitExhaustChangedArgs e) {
-        if (unitCard != null && e.Card == unitCard) {
-            SetExhaustedStatus(e.Exhausted);
+    public void SetWounds() {
+        foreach (Transform child in woundContainer) {
+            Destroy(child.gameObject);
+        }
+        for (int i = 0; i < unitCard.Wounds; i++) {
+            Instantiate(woundTemplate, woundContainer);
+        }
+    }
+
+    private void UnitCard_OnUnitExhaustChanged(object sender, System.EventArgs e) {
+        if (unitCard != null) {
+            SetExhaustedStatus(unitCard.Exhausted);
+        }
+    }
+
+    private void UnitCard_OnUnitWoundChanged(object sender, System.EventArgs e) {
+        if (unitCard != null) {
+            SetWounds();
         }
     }
 }

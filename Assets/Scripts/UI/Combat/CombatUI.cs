@@ -129,6 +129,14 @@ public class CombatUI : MonoBehaviour {
                     CombatAction.DamageAssignClick(this, -1);
                     CombatAction.CombatNextStateClick(this);
                 });
+                for (int i = 0; i < GameManager.Instance.CurrentPlayer.GetUnits().Count; i++) {
+                    UnitCard unit = GameManager.Instance.CurrentPlayer.GetUnits()[i];
+                    int choiceId = i;
+                    middleButtonContainer.AddButton(unit.Name, () => {
+                        CombatAction.DamageAssignClick(this, choiceId);
+                        CombatAction.CombatNextStateClick(this);
+                    });
+                }
                 break;
             case Combat.States.Result:
                 headerText.SetText("End of Combat");
@@ -299,7 +307,7 @@ public static class CombatAction {
         OnAttackSelectedClick?.Invoke(sender, new OnAttackSelectedClickArgs { Target = enemy, Attack = attack });
     }
 
-    public static void DamageAssignClick(object sender, int choiceId) {
+    public static void DamageAssignClick(object sender, int choiceId, UnitCard Unit = null) {
         OnDamageAssignClick?.Invoke(sender, new OnDamageAssignClickArgs { ChoiceId = choiceId });
     }
 }
