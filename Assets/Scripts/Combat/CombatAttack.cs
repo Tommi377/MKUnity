@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class CombatAttack {
@@ -7,17 +8,34 @@ public class CombatAttack {
     public List<Enemy> Enemies { get; private set; }
 
     public List<CombatData> CombatCards { get; private set; }
-    public bool RangePhase { get; private set; }
+    public bool RangePhase { get; private set; } = false;
+    public bool Fortified { get; private set; } = false;
+    public bool DoubleFortified { get; private set; } = false;
 
     public int TotalArmor { get; private set; } = 0;
 
-    public CombatAttack(Player player, List<Enemy> enemies, List<CombatData> combatCards, bool rangePhase) {
-        Player = player;
+    public CombatAttack(Combat combat, List<Enemy> enemies, bool rangePhase, bool fortifiedSite = false) {
+        Player = combat.Player;
         Enemies = enemies;
-        CombatCards = combatCards;
+        CombatCards = combat.CombatCards;
         RangePhase = rangePhase;
 
-        Enemies.ForEach(enemy => TotalArmor += enemy.Armor);
+        foreach (Enemy enemy in enemies) {
+            TotalArmor += enemy.Armor;
+            if (enemy.Abilities.Contains(EnemyAbilities.Elusive) && !combat.EnemyIsFullyBlocked(enemy)) {
+                TotalArmor += enemy.Armor;
+            }
+
+            if (!Fortified && enemy.Abilities.Contains(EnemyAbilities.Fortified)) {
+                Fortified = true;
+                if (fortifiedSite) DoubleFortified = true;
+            }
+        }
+
+        if (!Fortified) {
+            // Fortified if at least 1 enemy is not unfortified
+            Fortified = fortifiedSite && !enemies.All(e => e.Abilities.Contains(EnemyAbilities.Unfortified));
+        }
     }
 
     private int GetDamage(CombatData combatCard) {
@@ -36,9 +54,8 @@ public class CombatAttack {
             }
 
             // TODO: add resistance checking
-            // TODO: add siege checking
             if (RangePhase) {
-                if (combatCard.CombatType == CombatTypes.Range || combatCard.CombatType == CombatTypes.Siege) {
+                if (combatCard.CombatType == CombatTypes.Range && !Fortified || combatCard.CombatType == CombatTypes.Siege && !DoubleFortified) {
                     damage += GetDamage(combatCard);
                 }
             } else {

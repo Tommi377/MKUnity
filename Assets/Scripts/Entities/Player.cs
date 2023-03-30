@@ -37,6 +37,7 @@ public class Player : Entity {
 
     /* EVENT DEFINITIONS - START */
     public static event EventHandler OnShuffleDiscardToDeck;
+    public static event EventHandler<CardEventArgs> OnPlayerDisbandUnit;
     public static event EventHandler<CardEventArgs> OnPlayerDrawCard;
     public static event EventHandler<CardEventArgs> OnPlayerDiscardCard;
     public static event EventHandler<CardEventArgs> OnPlayerTrashCard;
@@ -141,11 +142,14 @@ public class Player : Entity {
         return false;
     }
 
-    public void TakeWounds(int amount) {
-        Debug.Log("Taking " + amount + " wounds!");
-        for (int i = 0; i < amount; i++) {
-            Wound wound = woundSO.CreateInstance() as Wound;
-            AddCardToHand(wound);
+    public void TakeWound(bool poison = false) {
+        Debug.Log("Taking wound!");
+        Wound wound = woundSO.CreateInstance() as Wound;
+        AddCardToHand(wound);
+
+        if (poison) {
+            Wound poisonWound = woundSO.CreateInstance() as Wound;
+            AddCardToDiscard(poisonWound);
         }
     }
 
@@ -202,6 +206,11 @@ public class Player : Entity {
             Card card = deck.Draw();
             AddCardToHand(card);
         }
+    }
+
+    public void DisbandUnit(UnitCard unit) {
+        units.Remove(unit);
+        OnPlayerDisbandUnit?.Invoke(this, new CardEventArgs { Player = this, Card = unit });
     }
     
     public List<BaseAction> GetStartOfTurnActions() {
@@ -286,6 +295,11 @@ public class Player : Entity {
     private void AddCardToHand(Card card) {
         hand.Add(card);
         OnPlayerDrawCard?.Invoke(this, new CardEventArgs { Player = this, Card = card });
+    }
+
+    private void AddCardToDiscard(Card card) {
+        discard.Add(card);
+        OnPlayerDiscardCard?.Invoke(this, new CardEventArgs { Player = this, Card = card });
     }
 
     public void DiscardCard(Card card) {

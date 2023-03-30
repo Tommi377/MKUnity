@@ -36,6 +36,7 @@ public class HandUI : MonoBehaviour {
         Player.OnPlayerDrawCard += Player_OnPlayerDrawCard;
         Player.OnPlayerDiscardCard += Player_OnPlayerDiscardCard;
         Player.OnPlayerTrashCard += Player_OnPlayerTrashCard;
+        Player.OnPlayerDisbandUnit += Player_OnPlayerDisbandUnit;
 
         ManaManager.Instance.OnManaSelected += ManaManager_OnManaSelected;
         ManaManager.Instance.OnManaDeselected += ManaManager_OnManaDeselected;
@@ -211,6 +212,10 @@ public class HandUI : MonoBehaviour {
     }
 
     private void Player_OnPlayerTrashCard(object sender, Player.CardEventArgs e) {
+        RemoveCard(e.Card);
+    }
+
+    private void Player_OnPlayerDisbandUnit(object sender, Player.CardEventArgs e) {
         RemoveCard(e.Card);
     }
 

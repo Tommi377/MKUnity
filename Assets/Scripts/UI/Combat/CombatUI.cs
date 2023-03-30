@@ -129,8 +129,8 @@ public class CombatUI : MonoBehaviour {
                     CombatAction.DamageAssignClick(this, -1);
                     CombatAction.CombatNextStateClick(this);
                 });
-                for (int i = 0; i < GameManager.Instance.CurrentPlayer.GetUnits().Count; i++) {
-                    UnitCard unit = GameManager.Instance.CurrentPlayer.GetUnits()[i];
+                for (int i = 0; i < combat.GetAssignableUnits().Count; i++) {
+                    UnitCard unit = combat.GetAssignableUnits()[i];
                     int choiceId = i;
                     middleButtonContainer.AddButton(unit.Name, () => {
                         CombatAction.DamageAssignClick(this, choiceId);

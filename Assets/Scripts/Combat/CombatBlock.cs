@@ -12,14 +12,16 @@ public class CombatBlock {
 
     private bool combatPrevented = false;
 
-    public CombatBlock(Player player, Enemy enemy, EnemyAttack attack, List<CombatData> combatCards) {
-        Player = player;
+    public CombatBlock(Combat combat, Enemy enemy, EnemyAttack attack) {
+        Player = combat.Player;
         Enemy = enemy;
         Attack = attack;
-        CombatCards = combatCards;
+        CombatCards = combat.CombatCards;
 
         // Modify this attack depending on modifiers
         TotalDamage = Attack.Damage;
+
+        if (Enemy.Abilities.Contains(EnemyAbilities.Swift)) TotalDamage *= 2;
     }
     public int PlayerReceivedDamage() {
         return FullyBlocked ? 0 : TotalDamage;
@@ -41,6 +43,10 @@ public class CombatBlock {
             if (combatCard.CombatBlockModifier != null) {
                 block += combatCard.CombatBlockModifier(this);
             }
+        }
+
+        if (Enemy.Abilities.Contains(EnemyAbilities.Cumbersome)) {
+            block += Player.Movement;
         }
 
         return block;

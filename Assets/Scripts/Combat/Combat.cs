@@ -4,14 +4,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class Combat {
     private List<Enemy> enemies = new List<Enemy>();
     private List<Enemy> alive = new List<Enemy>();
     private List<Enemy> defeated = new List<Enemy>();
+    private List<Enemy> fullyBlocked = new List<Enemy>();
     private Dictionary<Enemy, List<EnemyAttack>> unassignedAttacks = new Dictionary<Enemy, List<EnemyAttack>>();
 
     private List<CombatData> combatCards = new List<CombatData>();
+    private List<UnitCard> assignedUnits = new List<UnitCard>();
 
     public enum States { Start, RangedStart, RangedPlay, BlockStart, BlockPlay, AssignStart, AssignDamage, AttackStart, AttackPlay, Result, End }
 
@@ -20,7 +23,7 @@ public class Combat {
     public EnemyAttack AttackToHandle { get; private set; }
     public int DamageToAssign { get; private set; } = 0;
 
-    public ReadOnlyCollection<CombatData> CombatCards => combatCards.AsReadOnly();
+    public List<CombatData> CombatCards => combatCards;
     public ReadOnlyCollection<Enemy> Enemies { get => enemies.AsReadOnly(); }
     public ReadOnlyCollection<Enemy> Alive { get => alive.AsReadOnly(); }
     public ReadOnlyCollection<Enemy> Defeated { get => defeated.AsReadOnly(); }
@@ -101,22 +104,22 @@ public class Combat {
     }
 
     public int CalculateDamage(bool rangePhase) {
-        CombatAttack combatAttack = new CombatAttack(Player, Targets, combatCards, rangePhase);
+        CombatAttack combatAttack = new CombatAttack(this, Targets, rangePhase);
         return combatAttack.Calculate();
     }
 
     public int CalculateBlock() {
-        CombatBlock combatBlock = new CombatBlock(Player, Targets[0], AttackToHandle, combatCards);
+        CombatBlock combatBlock = new CombatBlock(this, Targets[0], AttackToHandle);
         return combatBlock.Calculate();
     }
 
-    public int CalculateEnemyArmor() {
-        return Targets.Sum(enemy => enemy.Armor);
-    }
+    public int CalculateEnemyArmor() => Targets.Sum(enemy => enemy.Armor);
+
+    public bool EnemyIsFullyBlocked(Enemy enemy) => fullyBlocked.Contains(enemy);
 
     public void AttackEnemies(bool rangePhase) {
         if (Targets.Count > 0) {
-            CombatAttack combatAttack = new CombatAttack(Player, Targets, combatCards, rangePhase);
+            CombatAttack combatAttack = new CombatAttack(this, Targets, rangePhase);
             if (combatAttack.IsEnemyDead()) {
                 defeated.AddRange(Targets);
                 foreach (Enemy target in Targets) {
@@ -135,12 +138,16 @@ public class Combat {
     public void BlockEnemyAttack() {
         Enemy enemy = Targets[0];
         if (unassignedAttacks[enemy].Contains(AttackToHandle)) {
-            CombatBlock combatBlock = new CombatBlock(Player, enemy, AttackToHandle, combatCards);
+            CombatBlock combatBlock = new CombatBlock(this, enemy, AttackToHandle);
             int damageReceived = combatBlock.PlayerReceivedDamage();
 
             if (combatBlock.FullyBlocked) {
                 Debug.Log("Enemy attack was fully blocked");
                 unassignedAttacks[enemy].Remove(AttackToHandle);
+
+                if (unassignedAttacks[enemy].Count == 0) {
+                    fullyBlocked.Add(enemy);
+                }
             } else {
                 Debug.Log("Enemy attack was not fully blocked, take " + damageReceived + " damage");
             }
@@ -149,26 +156,56 @@ public class Combat {
         combatCards.Clear();
     }
 
+    public List<UnitCard> GetAssignableUnits() {
+        List<UnitCard> units = new List<UnitCard>();
+
+        if (Targets[0].Abilities.Contains(EnemyAbilities.Assassination)) return units;
+
+        foreach (UnitCard unit in Player.GetUnits()) {
+            if (!unit.Wounded && !assignedUnits.Contains(unit)) {
+                units.Add(unit);
+            }
+        }
+        return units;
+    }
+
+    public bool CanApply(CardChoice cardChoice) {
+        // Check Cumbersome
+        if (Targets.Count == 1 && cardChoice.ActionType == ActionTypes.Move && Targets[0].Abilities.Contains(EnemyAbilities.Cumbersome)) {
+            return true;
+        }
+
+        return false;
+    }
+
     private void AssignDamageToPlayer() {
-        // TODO: Brutal ability and stuff
-        Player.TakeWounds(1);
+        Enemy enemy = Targets[0];
+
+        Player.TakeWound(enemy.Abilities.Contains(EnemyAbilities.Poison));
         DamageToAssign -= Player.Armor;
 
         if (DamageToAssign <= 0) {
-            unassignedAttacks[Targets[0]].Remove(AttackToHandle);
+            unassignedAttacks[enemy].Remove(AttackToHandle);
         }
 
         OnCombatDamageAssign?.Invoke(this, EventArgs.Empty);
     }
 
     private void AssignDamageToUnit(UnitCard unit) {
-        unit.WoundUnit();
+        Enemy enemy = Targets[0];
+
+        unit.WoundUnit(enemy.Abilities.Contains(EnemyAbilities.Poison));
         DamageToAssign -= unit.Armor;
 
-        if (DamageToAssign <= 0) {
-            unassignedAttacks[Targets[0]].Remove(AttackToHandle);
+        if (enemy.Abilities.Contains(EnemyAbilities.Paralyze)) {
+            Player.DisbandUnit(unit);
         }
 
+        if (DamageToAssign <= 0) {
+            unassignedAttacks[enemy].Remove(AttackToHandle);
+        }
+
+        assignedUnits.Add(unit);
         OnCombatDamageAssign?.Invoke(this, EventArgs.Empty);
     }
 
@@ -193,6 +230,7 @@ public class Combat {
     }
 
     public void CombatEnd() {
+        assignedUnits.Clear();
         OnCombatEnd?.Invoke(this, new OnCombatResultArgs { combat = this, result = result });
     }
 
@@ -226,13 +264,15 @@ public class Combat {
         Targets.Add(e.Target);
         AttackToHandle = e.Attack;
         DamageToAssign = e.Attack.Damage;
+
+        if (e.Target.Abilities.Contains(EnemyAbilities.Brutal)) DamageToAssign *= 2;
     }
 
     private void CombatAction_OnDamageAssignClick(object sender, CombatAction.OnDamageAssignClickArgs e) {
         if (e.ChoiceId == -1) {
             AssignDamageToPlayer();
         } else {
-            UnitCard unit = Player.GetUnits()[e.ChoiceId];
+            UnitCard unit = GetAssignableUnits()[e.ChoiceId];
             AssignDamageToUnit(unit);
         }
     }

@@ -16,7 +16,9 @@ public abstract class UnitCard : Card {
 
     // Variables
     public bool Exhausted { get; private set; } = false;
+    public bool Wounded => Wounds > 0;
     public int Wounds { get; private set; } = 0;
+
 
     public UnitCardSO UnitCardSO => CardSO as UnitCardSO;
 
