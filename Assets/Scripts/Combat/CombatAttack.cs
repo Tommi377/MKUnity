@@ -14,6 +14,13 @@ public class CombatAttack {
 
     public int TotalArmor { get; private set; } = 0;
 
+    public Dictionary<CombatElements, bool> Resistances { get; private set; } = new Dictionary<CombatElements, bool> {
+        { CombatElements.Physical, false },
+        { CombatElements.Ice, false },
+        { CombatElements.Fire, false },
+        { CombatElements.ColdFire, false },
+    };
+
     public CombatAttack(Combat combat, List<Enemy> enemies, bool rangePhase, bool fortifiedSite = false) {
         Player = combat.Player;
         Enemies = enemies;
@@ -30,6 +37,13 @@ public class CombatAttack {
                 Fortified = true;
                 if (fortifiedSite) DoubleFortified = true;
             }
+
+            enemy.Resistances.ForEach(resistance => Resistances[resistance] = true);
+        }
+
+        // Set coldfire resistance
+        if (Resistances[CombatElements.Ice] && Resistances[CombatElements.Ice]) {
+            Resistances[CombatElements.ColdFire] = true;
         }
 
         if (!Fortified) {
@@ -39,11 +53,14 @@ public class CombatAttack {
     }
 
     private int GetDamage(CombatData combatCard) {
+        float multiplier = Resistances[combatCard.CombatElement] ? 0.5f : 1;
         int damage = combatCard.Damage;
+
         if (combatCard.CombatAttackModifier != null) {
             damage += combatCard.CombatAttackModifier(this);
         }
-        return damage;
+
+        return (int)(damage * multiplier);
     }
 
     public int Calculate() {
@@ -53,7 +70,6 @@ public class CombatAttack {
                 continue;
             }
 
-            // TODO: add resistance checking
             if (RangePhase) {
                 if (combatCard.CombatType == CombatTypes.Range && !Fortified || combatCard.CombatType == CombatTypes.Siege && !DoubleFortified) {
                     damage += GetDamage(combatCard);

@@ -32,23 +32,35 @@ public class CombatBlock {
     public void PreventEnemyAttack() => combatPrevented = true;
 
     public int Calculate() {
-        int block = 0;
+        int cumBlock = 0;
         foreach (CombatData combatCard in CombatCards) {
+            float multiplier = 1;
+            int block = 0;
+
             if (combatCard.CombatType != CombatTypes.Block) {
                 continue;
             }
 
-            // TODO: add resistance and other checking
             block += combatCard.Damage;
             if (combatCard.CombatBlockModifier != null) {
                 block += combatCard.CombatBlockModifier(this);
             }
+
+            if (
+                Attack.Element == CombatElements.Ice && (combatCard.CombatElement == CombatElements.Physical || combatCard.CombatElement == CombatElements.Ice) ||
+                Attack.Element == CombatElements.Fire && (combatCard.CombatElement == CombatElements.Physical || combatCard.CombatElement == CombatElements.Fire) ||
+                Attack.Element == CombatElements.ColdFire && !(combatCard.CombatElement == CombatElements.ColdFire)
+            ) {
+                multiplier *= 0.5f;
+            }
+
+            cumBlock += (int)(block * multiplier);
         }
 
         if (Enemy.Abilities.Contains(EnemyAbilities.Cumbersome)) {
-            block += Player.Movement;
+            cumBlock += Player.Movement;
         }
 
-        return block;
+        return cumBlock;
     }
 }
