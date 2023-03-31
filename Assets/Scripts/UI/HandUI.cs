@@ -195,28 +195,36 @@ public class HandUI : MonoBehaviour {
 
     private void Player_OnPlayerDrawCard(object sender, Player.CardEventArgs e) {
         if (state == State.Hand) {
-            AddCard(e.Card);
+            foreach(Card card in e.Cards) {
+                AddCard(card);
+            }
         }
     }
 
     private void Player_OnPlayerDiscardCard(object sender, Player.CardEventArgs e) {
         // TODO: Discard the card that was actually discarded (currently only discards the first matching)
-        if (selectedCardVisual != null && selectedCardVisual.Card == e.Card) {
-            Destroy(selectedCardVisual.gameObject);
-            selectedCardVisual = null;
-            return;
-        } else {
-            Debug.Log("HandUI discarded card not found");
-            RemoveCard(e.Card);
+        foreach (Card card in e.Cards) {
+            if (selectedCardVisual != null && selectedCardVisual.Card == card) {
+                Destroy(selectedCardVisual.gameObject);
+                selectedCardVisual = null;
+                return;
+            } else {
+                Debug.Log("HandUI discarded card not found");
+                RemoveCard(card);
+            }
         }
     }
 
     private void Player_OnPlayerTrashCard(object sender, Player.CardEventArgs e) {
-        RemoveCard(e.Card);
+        foreach (Card card in e.Cards) {
+            RemoveCard(card);
+        }
     }
 
     private void Player_OnPlayerDisbandUnit(object sender, Player.CardEventArgs e) {
-        RemoveCard(e.Card);
+        foreach (Card card in e.Cards) {
+            RemoveCard(card);
+        }
     }
 
     private void EventSignalManager_OnChangeHandUIMode(object sender, EventSignalManager.OnChangeHandUIModeArgs e) {

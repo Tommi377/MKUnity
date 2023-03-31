@@ -57,6 +57,8 @@ public class CombatBlock {
             cumBlock += (int)(block * multiplier);
         }
 
+        Debug.Log(Player.Movement);
+
         if (Enemy.Abilities.Contains(EnemyAbilities.Cumbersome)) {
             cumBlock += Player.Movement;
         }

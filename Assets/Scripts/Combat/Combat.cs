@@ -113,7 +113,9 @@ public class Combat {
         return combatBlock.Calculate();
     }
 
-    public int CalculateEnemyArmor() => Targets.Sum(enemy => enemy.Armor);
+    public int CalculateEnemyArmor() => (new CombatAttack(this, Targets, true)).TotalArmor;
+
+    public int CalculateEnemyAttack() => (new CombatBlock(this, Targets[0], AttackToHandle)).TotalDamage;
 
     public bool EnemyIsFullyBlocked(Enemy enemy) => fullyBlocked.Contains(enemy);
 
@@ -132,7 +134,7 @@ public class Combat {
             Debug.Log("Must have targets to attack");
         }
 
-        combatCards.Clear();
+        ResetAfterPlay();
     }
 
     public void BlockEnemyAttack() {
@@ -153,7 +155,7 @@ public class Combat {
             }
         }
 
-        combatCards.Clear();
+        ResetAfterPlay();
     }
 
     public List<UnitCard> GetAssignableUnits() {
@@ -188,25 +190,38 @@ public class Combat {
             unassignedAttacks[enemy].Remove(AttackToHandle);
         }
 
+        if (enemy.Abilities.Contains(EnemyAbilities.Paralyze)) {
+            Player.DiscardAllNonWounds();
+        }
+
         OnCombatDamageAssign?.Invoke(this, EventArgs.Empty);
     }
 
     private void AssignDamageToUnit(UnitCard unit) {
+        if (assignedUnits.Contains(unit)) {
+            Debug.LogError("Can't assign damage to the same unit twice");
+        }
+
         Enemy enemy = Targets[0];
 
         unit.WoundUnit(enemy.Abilities.Contains(EnemyAbilities.Poison));
         DamageToAssign -= unit.Armor;
 
-        if (enemy.Abilities.Contains(EnemyAbilities.Paralyze)) {
-            Player.DisbandUnit(unit);
-        }
-
         if (DamageToAssign <= 0) {
             unassignedAttacks[enemy].Remove(AttackToHandle);
         }
 
+        if (enemy.Abilities.Contains(EnemyAbilities.Paralyze)) {
+            Player.DisbandUnit(unit);
+        }
+
         assignedUnits.Add(unit);
         OnCombatDamageAssign?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ResetAfterPlay() {
+        combatCards.Clear();
+        Player.ResetValues();
     }
 
     public void CombatStateEnter() {

@@ -39,6 +39,7 @@ public class UnitCardVisual : MonoBehaviour {
             text.gameObject.SetActive(true);
         }
         SetExhaustedStatus();
+        SetWounds();
 
         unitCard.OnUnitExhaustChanged += UnitCard_OnUnitExhaustChanged;
         unitCard.OnUnitWoundChanged += UnitCard_OnUnitWoundChanged;
