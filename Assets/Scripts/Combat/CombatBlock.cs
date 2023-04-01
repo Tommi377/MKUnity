@@ -12,14 +12,16 @@ public class CombatBlock {
 
     private bool combatPrevented = false;
 
-    public CombatBlock(Player player, Enemy enemy, EnemyAttack attack, List<CombatData> combatCards) {
-        Player = player;
+    public CombatBlock(Combat combat, Enemy enemy, EnemyAttack attack) {
+        Player = combat.Player;
         Enemy = enemy;
         Attack = attack;
-        CombatCards = combatCards;
+        CombatCards = combat.CombatCards;
 
         // Modify this attack depending on modifiers
         TotalDamage = Attack.Damage;
+
+        if (Enemy.Abilities.Contains(EnemyAbilities.Swift)) TotalDamage *= 2;
     }
     public int PlayerReceivedDamage() {
         return FullyBlocked ? 0 : TotalDamage;
@@ -29,20 +31,38 @@ public class CombatBlock {
 
     public void PreventEnemyAttack() => combatPrevented = true;
 
-    public int Calculate() {
-        int block = 0;
+    public float Calculate() {
+        float cumBlock = 0;
         foreach (CombatData combatCard in CombatCards) {
+            float multiplier = 1;
+            float block = 0;
+
             if (combatCard.CombatType != CombatTypes.Block) {
                 continue;
             }
 
-            // TODO: add resistance and other checking
             block += combatCard.Damage;
             if (combatCard.CombatBlockModifier != null) {
                 block += combatCard.CombatBlockModifier(this);
             }
+
+            if (
+                Attack.Element == CombatElements.Ice && (combatCard.CombatElement == CombatElements.Physical || combatCard.CombatElement == CombatElements.Ice) ||
+                Attack.Element == CombatElements.Fire && (combatCard.CombatElement == CombatElements.Physical || combatCard.CombatElement == CombatElements.Fire) ||
+                Attack.Element == CombatElements.ColdFire && !(combatCard.CombatElement == CombatElements.ColdFire)
+            ) {
+                multiplier *= 0.5f;
+            }
+
+            cumBlock += (int)(block * multiplier);
         }
 
-        return block;
+        Debug.Log(Player.Movement);
+
+        if (Enemy.Abilities.Contains(EnemyAbilities.Cumbersome)) {
+            cumBlock += Player.Movement;
+        }
+
+        return cumBlock;
     }
 }

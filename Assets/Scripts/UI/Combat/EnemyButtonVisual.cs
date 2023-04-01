@@ -13,6 +13,7 @@ public class EnemyButtonVisual : MonoBehaviour {
 
     public bool Dead { get; private set; } = false;
     public bool Selected { get; private set; } = false;
+    public bool Forced { get; private set; } = false;
 
     public Enemy Enemy { get; private set; }
 
@@ -38,6 +39,15 @@ public class EnemyButtonVisual : MonoBehaviour {
         }
 
         switch (state) {
+            case Combat.States.Start:
+                Select();
+                if (!Forced) {
+                    buttonContainer.AddButton("Deselect", (btn) => {
+                        ToggleSelect();
+                        buttonContainer.SetText(btn, Selected ? "Select" : "Select");
+                    });
+                }
+                break;
             case Combat.States.AttackStart:
             case Combat.States.RangedStart:
                 buttonContainer.AddButton("Select", (btn) => {
@@ -75,6 +85,10 @@ public class EnemyButtonVisual : MonoBehaviour {
     public void SetDead() {
         Dead = true;
         backgroundDead.gameObject.SetActive(true);
+    }
+
+    public void SetForced() {
+        Forced = true;
     }
 
     public void Select() {

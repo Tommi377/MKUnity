@@ -38,15 +38,21 @@ public class CombatUI : MonoBehaviour {
 
         Combat.OnCombatStateEnter += Combat_OnCombatStateEnter;
         Combat.OnGenerateCombatResult += Combat_OnGenerateCombatResult;
-        Combat.OnCombatCardPlayed += Combat_OnCombatCardPlayed;
         Combat.OnCombatDamageAssign += Combat_OnCombatDamageAssign;
+
+        if (CardManager.Instance) {
+            CardManager.Instance.OnPlayCard += CardManager_OnPlayCard;
+        }
     }
 
     private void OnDisable() {
         Combat.OnCombatStateEnter -= Combat_OnCombatStateEnter;
         Combat.OnGenerateCombatResult -= Combat_OnGenerateCombatResult;
-        Combat.OnCombatCardPlayed -= Combat_OnCombatCardPlayed;
         Combat.OnCombatDamageAssign -= Combat_OnCombatDamageAssign;
+
+        if (CardManager.Instance) {
+            CardManager.Instance.OnPlayCard -= CardManager_OnPlayCard;
+        }
 
         combat = null;
 
@@ -64,11 +70,7 @@ public class CombatUI : MonoBehaviour {
     private void SetState(Combat.States state) {
         this.state = state;
 
-        if (enemyVisuals.Count == 0) {
-            DrawEnemies();
-        }
-        
-        UpdateEnemies();
+        DrawEnemies();
         UpdateUI();
         UpdateInfoText();
     }
@@ -84,10 +86,16 @@ public class CombatUI : MonoBehaviour {
 
         switch (state) {
             case Combat.States.Start:
-                headerText.SetText("Start of Combat");
-                subheaderText.SetText("These are your enemies:");
+                string proceedButtonString = combat.Forced.Count + GetTargets().Count > 0 ? "Start\nCombat" : "Skip\nCombat";
+                string subheaderString = combat.Forced.Count == combat.Enemies.Count ? "These are your enemies:" : "Choose your enemies:";
 
-                bottomRightButtonContainer.AddButton("Start\nCombat", () => CombatAction.CombatNextStateClick(this));
+                headerText.SetText("Start of Combat");
+                subheaderText.SetText(subheaderString);
+
+                bottomRightButtonContainer.AddButton(proceedButtonString, () => {
+                    SelectTargets();
+                    CombatAction.CombatNextStateClick(this);
+                });
                 break;
             case Combat.States.AttackStart:
             case Combat.States.RangedStart:
@@ -129,12 +137,13 @@ public class CombatUI : MonoBehaviour {
                     CombatAction.DamageAssignClick(this, -1);
                     CombatAction.CombatNextStateClick(this);
                 });
-                for (int i = 0; i < GameManager.Instance.CurrentPlayer.GetUnits().Count; i++) {
-                    UnitCard unit = GameManager.Instance.CurrentPlayer.GetUnits()[i];
+                for (int i = 0; i < combat.GetAssignableUnits().Count; i++) {
+                    UnitCard unit = combat.GetAssignableUnits()[i];
                     int choiceId = i;
                     middleButtonContainer.AddButton(unit.Name, () => {
                         CombatAction.DamageAssignClick(this, choiceId);
                         CombatAction.CombatNextStateClick(this);
+                        UpdateUI();
                     });
                 }
                 break;
@@ -152,7 +161,7 @@ public class CombatUI : MonoBehaviour {
                     }
                 }
 
-                if (aliveTab.gameObject.activeSelf == false && combat.Defeated.Any()) {
+                if (deadTab.gameObject.activeSelf == false && combat.Defeated.Any()) {
                     deadTab.gameObject.SetActive(true);
                     foreach (Enemy enemy in combat.Defeated) {
                         EnemyVisual enemyVisual = Instantiate(enemySmallVisualTemplate, deadContainer).GetComponent<EnemyVisual>();
@@ -171,7 +180,7 @@ public class CombatUI : MonoBehaviour {
 
     private void DrawResult(CombatResult result) {
         resultTab.gameObject.SetActive(true);
-        string resultTextString = result.Alive.Any() ? "Ran Away" : "Combat Won";
+        string resultTextString = result.Alive.Any() || result.Defeated.Count == 0 ? "Ran Away" : "Combat Won";
         string detailTextString = "Fame Gained: " + result.Fame;
         detailTextString += "\nCurrent Fame: " + (result.Fame + GameManager.Instance.CurrentPlayer.Fame);
         if (GameManager.Instance.CurrentPlayer.CanLevelUp(result.Fame)) {
@@ -186,30 +195,85 @@ public class CombatUI : MonoBehaviour {
         resultDetailText.SetText(detailTextString);
     }
 
-    private void DrawEnemies() {
-        Debug.Log("enems" + combat.Enemies.Count);
-        foreach (Enemy enemy in combat.Enemies) {
-            EnemyButtonVisual visual = Instantiate(enemyButtonVisualTemplate, enemyContainer).GetComponent<EnemyButtonVisual>();
-            visual.Init(state, enemy);
-            visual.gameObject.SetActive(true);
+    private void ResetEnemies() {
+        enemyVisuals.Clear();
+        aliveTab.gameObject.SetActive(false);
+        deadTab.gameObject.SetActive(false);
 
-            enemyVisuals.Add(visual);
-
-            visual.OnButtonClick += EnemyButtonVisual_OnButtonClick;
+        foreach (Transform child in enemyContainer) {
+            Destroy(child.gameObject);
+        }
+        foreach (Transform child in aliveContainer) {
+            Destroy(child.gameObject);
+        }
+        foreach (Transform child in deadContainer) {
+            Destroy(child.gameObject);
         }
     }
 
-    private void UpdateEnemies() {
-        if (state == Combat.States.Result) return;
+    private void DrawEnemies() {
+        ResetEnemies();
 
-        foreach(EnemyButtonVisual visual in enemyVisuals) {
-            if (!visual.Dead && combat.Defeated.Contains(visual.Enemy)) {
-                visual.SetDead();
+        if (combat.Defeated.Count > 0) {
+            deadTab.gameObject.SetActive(true);
+            foreach (Enemy enemy in combat.Defeated) {
+                EnemyVisual enemyVisual = EnemySmallVisualInstantiate(enemy, deadContainer);
+
+                var deadlight = enemyVisual.GetComponent<ToggleableHighlightVisual>();
+                deadlight.Select();
             }
-
-            visual.Deselect();
-            visual.UpdateUI(state);
         }
+
+        switch (state) {
+            case Combat.States.AttackPlay:
+            case Combat.States.RangedPlay:
+            case Combat.States.BlockPlay:
+            case Combat.States.AssignDamage:
+                List<Enemy> nonTargets = combat.Alive.Where(e => !combat.Targets.Contains(e)).ToList();
+                if (nonTargets.Count > 0) {
+                    aliveTab.gameObject.SetActive(true);
+                    foreach (Enemy enemy in nonTargets) {
+                        EnemySmallVisualInstantiate(enemy, aliveContainer);
+                    }
+                }
+
+                foreach (Enemy enemy in combat.Targets) {
+                    EnemyButtonVisualInstantiate(enemy, enemyContainer);
+                }
+                break;
+            case Combat.States.Start:
+                foreach (Enemy enemy in combat.Alive) {
+                    var visual = EnemyButtonVisualInstantiate(enemy, enemyContainer);
+                    if (combat.Forced.Contains(enemy)) {
+                        visual.SetForced();
+                    }
+                }
+                break;
+            default:
+                foreach (Enemy enemy in combat.Alive) {
+                    EnemyButtonVisualInstantiate(enemy, enemyContainer);
+                }
+                break;
+        }
+    }
+
+    private EnemyVisual EnemySmallVisualInstantiate(Enemy enemy, Transform container) {
+        EnemyVisual enemyVisual = Instantiate(enemySmallVisualTemplate, container).GetComponent<EnemyVisual>();
+        enemyVisual.Init(enemy.EnemySO);
+        enemyVisual.gameObject.SetActive(true);
+
+        return enemyVisual;
+    }
+
+    private EnemyButtonVisual EnemyButtonVisualInstantiate(Enemy enemy, Transform container) {
+        EnemyButtonVisual enemyVisual = Instantiate(enemyButtonVisualTemplate, container).GetComponent<EnemyButtonVisual>();
+        enemyVisual.Init(state, enemy);
+        enemyVisual.gameObject.SetActive(true);
+        enemyVisual.OnButtonClick += EnemyButtonVisual_OnButtonClick;
+
+        enemyVisuals.Add(enemyVisual);
+
+        return enemyVisual;
     }
 
     private void UpdateInfoText() {
@@ -221,7 +285,7 @@ public class CombatUI : MonoBehaviour {
                 infoText.SetText(attackText);
                 break;
             case Combat.States.BlockPlay:
-                string blockText = "Blocking: " + combat.AttackToHandle;
+                string blockText = "Blocking: " + combat.CalculateEnemyAttack();
                 blockText += "\nCurrent block: " + combat.CalculateBlock();
                 infoText.SetText(blockText);
                 break;
@@ -250,14 +314,13 @@ public class CombatUI : MonoBehaviour {
 
     private void EnemyButtonVisual_OnButtonClick(Enemy enemy, int choiceId) {
         switch (state) {
-            case Combat.States.AttackStart:
-            case Combat.States.RangedStart:
-                UpdateUI();
-                break;
             case Combat.States.BlockStart:
             case Combat.States.AssignStart:
                 CombatAction.AttackSelectedClick(this, enemy, enemy.Attacks[choiceId]);
                 CombatAction.CombatNextStateClick(this);
+                break;
+            default:
+                UpdateUI();
                 break;
         }
     }
@@ -270,11 +333,11 @@ public class CombatUI : MonoBehaviour {
         DrawResult(e.result);
     }
 
-    private void Combat_OnCombatCardPlayed(object sender, EventArgs e) {
+    private void Combat_OnCombatDamageAssign(object sender, EventArgs e) {
         UpdateInfoText();
     }
 
-    private void Combat_OnCombatDamageAssign(object sender, EventArgs e) {
+    private void CardManager_OnPlayCard(object sender, CardManager.OnPlayCardArgs e) {
         UpdateInfoText();
     }
 }

@@ -53,8 +53,10 @@ public abstract class Card {
     public abstract Types Type { get; }
 
     public virtual bool CanApply(ActionTypes action, CardChoice cardChoice) {
+
         if (cardChoice.ActionType == ActionTypes.Special) return true; // Special cards can be played in any time
         if (cardChoice.ActionType == ActionTypes.Heal && !GameManager.Instance.CurrentPlayer.IsInCombat()) return true; // Heal cards can only be played out of combat
+        if (GameManager.Instance.Combat != null && GameManager.Instance.Combat.CanApply(cardChoice)) return true; // If combat overrides rules then can played
         if (action == cardChoice.ActionType) return true; // Actions that match the round action can be played
 
         return false;

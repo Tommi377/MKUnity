@@ -37,12 +37,13 @@ public class Player : Entity {
 
     /* EVENT DEFINITIONS - START */
     public static event EventHandler OnShuffleDiscardToDeck;
+    public static event EventHandler<CardEventArgs> OnPlayerDisbandUnit;
     public static event EventHandler<CardEventArgs> OnPlayerDrawCard;
     public static event EventHandler<CardEventArgs> OnPlayerDiscardCard;
     public static event EventHandler<CardEventArgs> OnPlayerTrashCard;
     public class CardEventArgs : EventArgs {
         public Player Player;
-        public Card Card;
+        public List<Card> Cards;
     }
 
 
@@ -141,11 +142,14 @@ public class Player : Entity {
         return false;
     }
 
-    public void TakeWounds(int amount) {
-        Debug.Log("Taking " + amount + " wounds!");
-        for (int i = 0; i < amount; i++) {
-            Wound wound = woundSO.CreateInstance() as Wound;
-            AddCardToHand(wound);
+    public void TakeWound(bool poison = false) {
+        Debug.Log("Taking wound!");
+        Wound wound = woundSO.CreateInstance() as Wound;
+        AddCardToHand(wound);
+
+        if (poison) {
+            Wound poisonWound = woundSO.CreateInstance() as Wound;
+            AddCardToDiscard(poisonWound);
         }
     }
 
@@ -188,7 +192,7 @@ public class Player : Entity {
             Card found = hand.Find((card) => card is Wound);
             if (found != null) {
                 hand.Remove(found);
-                OnPlayerTrashCard?.Invoke(this, new CardEventArgs { Player = this, Card = found });
+                OnPlayerTrashCard?.Invoke(this, new CardEventArgs { Player = this, Cards = new List<Card>() { found } });
             }
         }
     }
@@ -202,6 +206,24 @@ public class Player : Entity {
             Card card = deck.Draw();
             AddCardToHand(card);
         }
+    }
+
+    public void DiscardCard(Card card) {
+        discard.Add(card);
+        hand.Remove(card);
+        OnPlayerDiscardCard?.Invoke(this, new CardEventArgs { Player = this, Cards = new List<Card>() { card } });
+    }
+
+    public void DiscardAllNonWounds() {
+        var nonWounds = hand.Where(card => card is not Wound).ToList();
+        discard.AddRange(nonWounds);
+        nonWounds.ForEach(card => hand.Remove(card));
+        OnPlayerDiscardCard?.Invoke(this, new CardEventArgs { Player = this, Cards = nonWounds });
+    }
+
+    public void DisbandUnit(UnitCard unit) {
+        units.Remove(unit);
+        OnPlayerDisbandUnit?.Invoke(this, new CardEventArgs { Player = this, Cards = new List<Card>() { unit } });
     }
     
     public List<BaseAction> GetStartOfTurnActions() {
@@ -285,14 +307,12 @@ public class Player : Entity {
 
     private void AddCardToHand(Card card) {
         hand.Add(card);
-        OnPlayerDrawCard?.Invoke(this, new CardEventArgs { Player = this, Card = card });
+        OnPlayerDrawCard?.Invoke(this, new CardEventArgs { Player = this, Cards = new List<Card>() { card } });
     }
 
-    public void DiscardCard(Card card) {
-        Debug.Log("Discarded: " + card);
+    private void AddCardToDiscard(Card card) {
         discard.Add(card);
-        hand.Remove(card);
-        OnPlayerDiscardCard?.Invoke(this, new CardEventArgs { Player = this, Card = card });
+        OnPlayerDiscardCard?.Invoke(this, new CardEventArgs { Player = this, Cards = new List<Card>() { card } });
     }
 
     private void ShuffleDiscardToDeck() {
@@ -338,7 +358,7 @@ public class Player : Entity {
         DrawToHandLimit();
     }
 
-    private void ResetValues() {
+    public void ResetValues() {
         Movement = 0;
         Influence = 0;
 

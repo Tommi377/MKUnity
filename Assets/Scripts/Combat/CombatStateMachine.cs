@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Unity.VisualScripting;
+using System.Linq;
 using UnityEngine;
 
 public class CombatStateMachine {
     private Combat combat;
+
+    // Flags
     private bool goNextState = false;
+    private bool transferIfNoEnemies = false;
+
     private StateMachine stateMachine;
 
     public Combat.States GetCurrentState() => (Combat.States)stateMachine.GetCurrentState().ID;
@@ -24,9 +28,19 @@ public class CombatStateMachine {
         stateMachine.Tick();
     }
 
+    private void TransferToReportIfNoEnemies() {
+        transferIfNoEnemies = Alive.Count == 0;
+        stateMachine.Tick();
+    }
+
     private void OnStateEnter() {
         goNextState = false;
+        transferIfNoEnemies = false;
         combat.CombatStateEnter();
+    }
+
+    private void ExitStart() {
+        combat.RemoveTargetEnemies();
     }
 
     private void ExitRangedPlay() {
@@ -49,7 +63,7 @@ public class CombatStateMachine {
         combat.CombatEnd();
     }
 
-    private State CreateState(Combat.States stateType) => new State((int)stateType, OnStateEnterAction.Create(OnStateEnter));
+    private State CreateState(Combat.States stateType, bool noEnemiesCheck = false) => new State((int)stateType, OnStateEnterAction.Create(OnStateEnter));
 
     private void StateMachineInit() {
         State Start = CreateState(Combat.States.Start);
@@ -64,29 +78,37 @@ public class CombatStateMachine {
         State Result = CreateState(Combat.States.Result);
         State End = CreateState(Combat.States.End);
 
+        Start.AddAction(OnStateExitAction.Create(ExitStart));
         RangedPlay.AddAction(OnStateExitAction.Create(ExitRangedPlay));
         BlockPlay.AddAction(OnStateExitAction.Create(ExitBlockPlay));
         AttackPlay.AddAction(OnStateExitAction.Create(ExitAttackPlay));
         Result.AddAction(OnStateEnterAction.Create(EnterResult));
         End.AddAction(OnStateEnterAction.Create(EnterEnd));
 
+        // TransferToReportIfNoEnemies
+        RangedStart.AddAction(OnStateEnterAction.Create(TransferToReportIfNoEnemies));
+        AttackStart.AddAction(OnStateEnterAction.Create(TransferToReportIfNoEnemies));
+
         List<StateTransition> transitions = new List<StateTransition>() {
-            new StateTransition(Start, RangedStart, () => goNextState), // Start
-            new StateTransition(RangedStart, RangedPlay, () => goNextState && Targets.Count > 0), // Choose target(s) to range attack
-            new StateTransition(RangedPlay, RangedStart, () => goNextState), // Play cards to range attack with
-            new StateTransition(RangedStart, BlockStart, () => goNextState && Targets.Count == 0 && Alive.Count > 0), // End ranged phase (enemies alive)
-            new StateTransition(RangedStart, Result, () => goNextState && Targets.Count == 0 && Alive.Count == 0), // End ranged phase (no enemies alive)
-            new StateTransition(BlockStart, BlockPlay, () => goNextState && Targets.Count == 1 && combat.AttackToHandle != null), // Choose enemy attack to block
-            new StateTransition(BlockPlay, BlockStart, () => goNextState), // Play cards to block with
-            new StateTransition(BlockStart, AssignStart, () => goNextState && combat.HasUnassignedAttacks() && combat.AttackToHandle == null), // End block phase with unblocked enemies
-            new StateTransition(BlockStart, AttackStart, () => goNextState && !combat.HasUnassignedAttacks() && combat.AttackToHandle == null), // End block phase with all enemies blocked
-            new StateTransition(AssignStart, AssignDamage, () => goNextState && Targets.Count == 1 && combat.AttackToHandle != null), // Choose an enemy attack to assign damange
-            new StateTransition(AssignDamage, AssignStart, () => goNextState && combat.DamageToAssign <= 0 && combat.HasUnassignedAttacks()), // Choose a player/unit to assign damage to (no leftover attack & unassigned enemies left)
-            new StateTransition(AssignDamage, AttackStart, () => goNextState && combat.DamageToAssign <= 0 && !combat.HasUnassignedAttacks()), // Choose a player/unit to assign damage to (no leftover attack & no unassigned enemies left)
-            new StateTransition(AttackStart, AttackPlay, () => goNextState && Targets.Count > 0), // Choose target(s) to attack
-            new StateTransition(AttackPlay, AttackStart, () => goNextState), // Play cards to attack with
-            new StateTransition(AttackStart, Result, () => goNextState && Targets.Count == 0), // End attack phase
-            new StateTransition(Result, End, () => goNextState), // End attack phase
+            Start       .To(RangedStart,    () => goNextState), // Start
+            RangedStart .To(RangedPlay,     () => goNextState && Targets.Count > 0), // Choose target(s) to range attack
+            RangedStart .To(BlockStart,     () => goNextState && Targets.Count == 0), // End ranged phase (enemies alive)
+            RangedStart .To(Result,         () => transferIfNoEnemies), // End ranged phase (no enemies alive)
+            RangedPlay  .To(RangedStart,    () => goNextState && combat.Alive.Count > 0), // Play cards to range attack with
+            RangedPlay  .To(Result,         () => goNextState && combat.Alive.Count == 0), // Play cards to range attack with
+            BlockStart  .To(BlockPlay,      () => goNextState && Targets.Count == 1 && combat.AttackToHandle != null), // Choose enemy attack to block
+            BlockStart  .To(AssignStart,    () => goNextState && combat.HasUnassignedAttacks() && combat.AttackToHandle == null), // End block phase with unblocked enemies
+            BlockStart  .To(AttackStart,    () => goNextState && ! combat.HasUnassignedAttacks() && combat.AttackToHandle == null), // End block phase with all enemies blocked
+            BlockPlay   .To(BlockStart,     () => goNextState), // Play cards to block with
+            AssignStart .To(AssignDamage,   () => goNextState && Targets.Count == 1 && combat.AttackToHandle != null), // Choose an enemy attack to assign damage
+            AssignDamage.To(AssignStart,    () => goNextState && combat.DamageToAssign <= 0 && combat.HasUnassignedAttacks()), // Choose a player/unit to assign damage to (no leftover attack & unassigned enemies left)
+            AssignDamage.To(AttackStart,    () => goNextState && combat.DamageToAssign <= 0 && ! combat.HasUnassignedAttacks()), // Choose a player/unit to assign damage to (no leftover attack & no unassigned enemies left)
+            AttackStart .To(AttackPlay,     () => goNextState && Targets.Count > 0), // Choose target(s) to 
+            AttackStart .To(Result,         () => goNextState && Targets.Count == 0), // End attack phase (manually)
+            AttackStart .To(Result,         () => transferIfNoEnemies), // End attack phase (no enemies alive)
+            AttackPlay  .To(AttackStart,    () => goNextState && combat.Alive.Count > 0), // Play cards to attack with
+            AttackPlay  .To(Result,         () => goNextState && combat.Alive.Count == 0), // Play cards to attack with
+            Result      .To(End,            () => goNextState)
         };
 
         stateMachine = new StateMachine(Start, transitions);

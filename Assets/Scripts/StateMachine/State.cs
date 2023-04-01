@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -21,6 +22,8 @@ public class State {
         ID = id;
         this.actions.AddRange(actions);
     }
+
+    public StateTransition To(State to, Func<bool> condition) => new StateTransition(this, to, condition);
 
     public void AddTransition(StateTransition transition) {
         transitions.Add(transition);
