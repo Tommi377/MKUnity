@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a47b774e044d3ca45b1c4aadadac5ea8, type: 3}
   m_Name: WolfRidersSO
   m_EditorClassIdentifier: 
-  Sprite: {fileID: 716498443, guid: a7ae09f8cdf9241429a55de01cf57bff, type: 3}
+  Sprite: {fileID: 189029712, guid: a7ae09f8cdf9241429a55de01cf57bff, type: 3}
   Name: Wolf Riders
   Armor: 4
   Fame: 3
