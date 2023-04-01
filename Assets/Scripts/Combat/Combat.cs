@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class Combat {
     private List<Enemy> enemies = new List<Enemy>();
     private List<Enemy> alive = new List<Enemy>();
+    private List<Enemy> forced = new List<Enemy>();
     private List<Enemy> defeated = new List<Enemy>();
     private List<Enemy> fullyBlocked = new List<Enemy>();
     private Dictionary<Enemy, List<EnemyAttack>> unassignedAttacks = new Dictionary<Enemy, List<EnemyAttack>>();
@@ -24,9 +24,10 @@ public class Combat {
     public int DamageToAssign { get; private set; } = 0;
 
     public List<CombatData> CombatCards => combatCards;
-    public ReadOnlyCollection<Enemy> Enemies { get => enemies.AsReadOnly(); }
-    public ReadOnlyCollection<Enemy> Alive { get => alive.AsReadOnly(); }
-    public ReadOnlyCollection<Enemy> Defeated { get => defeated.AsReadOnly(); }
+    public ReadOnlyCollection<Enemy> Enemies => enemies.AsReadOnly();
+    public ReadOnlyCollection<Enemy> Alive => alive.AsReadOnly();
+    public ReadOnlyCollection<Enemy> Forced => forced.AsReadOnly();
+    public ReadOnlyCollection<Enemy> Defeated => defeated.AsReadOnly();
     public Dictionary<Enemy, List<EnemyAttack>> UnassignedAttacks => unassignedAttacks;
 
     public States GetCurrentState() => stateMachine.GetCurrentState();
@@ -58,10 +59,11 @@ public class Combat {
     }
     /* EVENT DEFINITIONS - END */
 
-    public Combat(Player player, IEnumerable<Enemy> enemies) {
+    public Combat(Player player, IEnumerable<Enemy> enemies, IEnumerable<Enemy> forced) {
         Player = player;
         this.enemies.AddRange(enemies);
         this.alive.AddRange(enemies);
+        this.forced.AddRange(forced);
 
         foreach (Enemy enemy in enemies) {
             if (!unassignedAttacks.ContainsKey(enemy)) {
@@ -90,6 +92,22 @@ public class Combat {
     public bool EveryEnemyDefeated() => Alive.Count == 0;
     public bool HasUnassignedAttacks() => UnassignedAttacks.Any(item => item.Value.Any());
 
+    public void RemoveTargetEnemies() {
+        if (Targets.Count == Enemies.Count) return;
+
+        List<Enemy> removed = enemies.Where(enemy => !Targets.Contains(enemy)).ToList();
+        foreach (Enemy enemy in removed) {
+            if (!Forced.Contains(enemy)) {
+                enemies.Remove(enemy);
+                alive.Remove(enemy);
+                unassignedAttacks.Remove(enemy);
+                Debug.Log("removed");
+            } else {
+                Debug.LogError("Can't remove forced enemy from combat");
+            }
+        }
+    }
+
     public void PlayAttackCard(int damage, CombatTypes combatType, CombatElements combatElement, Func<CombatAttack, int> attackFunc = null) {
         PlayCombatCard(new CombatData(damage, combatType, combatElement, attackFunc));
     }
@@ -103,12 +121,12 @@ public class Combat {
         Debug.Log(combatData);
     }
 
-    public int CalculateDamage(bool rangePhase) {
+    public float CalculateDamage(bool rangePhase) {
         CombatAttack combatAttack = new CombatAttack(this, Targets, rangePhase);
         return combatAttack.Calculate();
     }
 
-    public int CalculateBlock() {
+    public float CalculateBlock() {
         CombatBlock combatBlock = new CombatBlock(this, Targets[0], AttackToHandle);
         return combatBlock.Calculate();
     }

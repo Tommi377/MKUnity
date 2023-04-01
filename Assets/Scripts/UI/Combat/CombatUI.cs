@@ -86,10 +86,16 @@ public class CombatUI : MonoBehaviour {
 
         switch (state) {
             case Combat.States.Start:
-                headerText.SetText("Start of Combat");
-                subheaderText.SetText("These are your enemies:");
+                string proceedButtonString = combat.Forced.Count + GetTargets().Count > 0 ? "Start\nCombat" : "Skip\nCombat";
+                string subheaderString = combat.Forced.Count == combat.Enemies.Count ? "These are your enemies:" : "Choose your enemies:";
 
-                bottomRightButtonContainer.AddButton("Start\nCombat", () => CombatAction.CombatNextStateClick(this));
+                headerText.SetText("Start of Combat");
+                subheaderText.SetText(subheaderString);
+
+                bottomRightButtonContainer.AddButton(proceedButtonString, () => {
+                    SelectTargets();
+                    CombatAction.CombatNextStateClick(this);
+                });
                 break;
             case Combat.States.AttackStart:
             case Combat.States.RangedStart:
@@ -234,6 +240,14 @@ public class CombatUI : MonoBehaviour {
                     EnemyButtonVisualInstantiate(enemy, enemyContainer);
                 }
                 break;
+            case Combat.States.Start:
+                foreach (Enemy enemy in combat.Alive) {
+                    var visual = EnemyButtonVisualInstantiate(enemy, enemyContainer);
+                    if (combat.Forced.Contains(enemy)) {
+                        visual.SetForced();
+                    }
+                }
+                break;
             default:
                 foreach (Enemy enemy in combat.Alive) {
                     EnemyButtonVisualInstantiate(enemy, enemyContainer);
@@ -299,14 +313,13 @@ public class CombatUI : MonoBehaviour {
 
     private void EnemyButtonVisual_OnButtonClick(Enemy enemy, int choiceId) {
         switch (state) {
-            case Combat.States.AttackStart:
-            case Combat.States.RangedStart:
-                UpdateUI();
-                break;
             case Combat.States.BlockStart:
             case Combat.States.AssignStart:
                 CombatAction.AttackSelectedClick(this, enemy, enemy.Attacks[choiceId]);
                 CombatAction.CombatNextStateClick(this);
+                break;
+            default:
+                UpdateUI();
                 break;
         }
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -103,12 +104,15 @@ public class GameManager : MonoBehaviour {
                 // TODO: optionally choose neighboring rampaging enemies
                 Hex hex = GetHexWithCurrentPlayer();
                 List<Enemy> enemies = hex.GetEnemies();
+                List<Enemy> forced = new List<Enemy>(enemies);
+
                 foreach (Hex neighbor in HexMap.Instance.GetNeighbors(hex.Position)) {
                     enemies.AddRange(neighbor.GetEnemies());
                 }
+
                 Debug.Log("Enemies: " + enemies.Count);
                 if (enemies.Count > 0) {
-                    Combat = new Combat(CurrentPlayer, enemies);
+                    Combat = new Combat(CurrentPlayer, enemies, forced);
                     Combat.Init();
                 } else {
                     Debug.Log("Can't start combat with no enemies");

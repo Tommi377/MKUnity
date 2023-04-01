@@ -31,11 +31,11 @@ public class CombatBlock {
 
     public void PreventEnemyAttack() => combatPrevented = true;
 
-    public int Calculate() {
-        int cumBlock = 0;
+    public float Calculate() {
+        float cumBlock = 0;
         foreach (CombatData combatCard in CombatCards) {
             float multiplier = 1;
-            int block = 0;
+            float block = 0;
 
             if (combatCard.CombatType != CombatTypes.Block) {
                 continue;

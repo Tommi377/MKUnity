@@ -52,19 +52,19 @@ public class CombatAttack {
         }
     }
 
-    private int GetDamage(CombatData combatCard) {
+    private float GetDamage(CombatData combatCard) {
         float multiplier = Resistances[combatCard.CombatElement] ? 0.5f : 1;
-        int damage = combatCard.Damage;
+        float damage = combatCard.Damage;
 
         if (combatCard.CombatAttackModifier != null) {
             damage += combatCard.CombatAttackModifier(this);
         }
 
-        return (int)(damage * multiplier);
+        return damage * multiplier;
     }
 
-    public int Calculate() {
-        int damage = 0;
+    public float Calculate() {
+        float damage = 0;
         foreach (CombatData combatCard in CombatCards) {
             if (combatCard.CombatType == CombatTypes.Block) {
                 continue;
