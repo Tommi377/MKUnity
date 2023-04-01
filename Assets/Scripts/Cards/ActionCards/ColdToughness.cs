@@ -14,6 +14,8 @@ public  class ColdToughness : ActionCard {
                 break;
             case 2:
                 GetCombat(GetPlayer()).PlayBlockCard(4, CombatElements.Physical, (combatBlock) => {
+                    if (combatBlock.ArcaneImmunity) return 0;
+
                     Enemy enemy = combatBlock.Enemy;
                     int bonusBlock = enemy.Abilities.Count + enemy.Resistances.Count;
                     foreach (EnemyAttack attack in enemy.Attacks) {
