@@ -32,7 +32,7 @@ public class Crystallize : ActionCard, ITargetingCard<Mana>, IChoiceEffect {
     private readonly List<string> effectChoices = new List<string> { "Red", "Green", "Blue", "White", "Gold", "Black" };
     public List<string> EffectChoices(CardChoice choice) => effectChoices;
 
-    public void ApplyEffect(int id) {
+    public void ApplyEffect(CardChoice choice, int id) {
         Inventory inventory = GetPlayer().GetInventory();
         Mana.Types manaType = (Mana.Types)id; // Only works because the choices are in order
         inventory.AddCrystal(manaType);

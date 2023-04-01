@@ -12,6 +12,7 @@ public class MagicalGlade : Structure {
     };
 
     public override List<BaseAction> EndOfTurnActions(Player player) => new List<BaseAction>() {
-        new BaseAction("Heal 1", "Heal one wound", () => player.HealWounds(1)) // TODO: also allow from discard
+        new BaseAction("Heal 1 (hand)", "Heal one wound from hand", () => player.HealWound()),
+        new BaseAction("Heal 1 (discrad)", "Heal one wound from discard", () => player.TryRemoveWoundFromDiscard())
     };
 }

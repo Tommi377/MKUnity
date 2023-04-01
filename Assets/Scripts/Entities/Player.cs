@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class BaseAction {
@@ -37,6 +36,7 @@ public class Player : Entity {
 
     /* EVENT DEFINITIONS - START */
     public static event EventHandler OnShuffleDiscardToDeck;
+
     public static event EventHandler<CardEventArgs> OnPlayerDisbandUnit;
     public static event EventHandler<CardEventArgs> OnPlayerDrawCard;
     public static event EventHandler<CardEventArgs> OnPlayerDiscardCard;
@@ -46,24 +46,30 @@ public class Player : Entity {
         public List<Card> Cards;
     }
 
-
-    public static event EventHandler<IntEventArgs> OnPlayerInfluenceUpdate;
-    public class IntEventArgs : EventArgs {
+    public static event EventHandler<PlayerIntEventArgs> OnPlayerInfluenceUpdate;
+    public static event EventHandler<PlayerIntEventArgs> OnPlayerHealUpdate;
+    public class PlayerIntEventArgs : EventArgs {
         public Player Player;
         public int Value;
     }
 
     public static void ResetStaticData() {
+        OnShuffleDiscardToDeck = null;
+
+        OnPlayerDisbandUnit = null;
         OnPlayerDrawCard = null;
         OnPlayerDiscardCard = null;
-        OnShuffleDiscardToDeck = null;
         OnPlayerTrashCard = null;
+
+        OnPlayerInfluenceUpdate = null;
+        OnPlayerHealUpdate = null;
     }
     /* EVENT DEFINITIONS - END */
 
     // Actions
     public int Movement { get; private set; } = 0;
     public int Influence { get; private set; } = 0;
+    public int Heal { get; private set; } = 0;
 
     // Components
     private Inventory inventory;
@@ -98,16 +104,18 @@ public class Player : Entity {
     public Deck GetDeck() => deck;
     public List<Card> GetHand() => hand;
     public List<UnitCard> GetUnits() => units;
+    public List<UnitCard> GetWoundedUnits() => units.Where(e => e.Wounded).ToList();
 
     // Modifier functions
     List<Func<Hex, int, int>> MoveModifiers = new List<Func<Hex, int, int>>();
 
     public int GetDeckCount() => deck.Count;
     public int GetDiscardCount() => discard.Count;
-    public bool IsInCombat() => GameManager.Instance.Combat != null && GameManager.Instance.Combat.Player == this;
-
-    public bool CanLevelUp(int fame) => levelThresholds[Level - 1] < Fame + fame;
     public int GetReputationBonus(int repdiff = 0) => reputationBonuses[Math.Min(Math.Max(Reputation + repdiff + 7, 0), reputationBonuses.Length - 1)];
+
+    public bool IsInCombat() => GameManager.Instance.Combat != null && GameManager.Instance.Combat.Player == this;
+    public bool IsWoundInHand() => hand.Any(card => card is Wound);
+    public bool CanLevelUp(int fame) => levelThresholds[Level - 1] < Fame + fame;
 
     public ReadOnlyCollection<Card> DiscardPile => discard.AsReadOnly();
 
@@ -131,6 +139,8 @@ public class Player : Entity {
         ButtonInputManager.Instance.OnDrawCardClick += ButtonInputManager_OnDrawCardClick;
         ButtonInputManager.Instance.OnInfluenceChoiceClick += ButtonInputManager_OnInfluenceChoiceClick;
         ButtonInputManager.Instance.OnRecruitUnitClick += ButtonInputManager_OnRecruitUnitClick;
+
+        HealAction.OnHealClick += HealAction_OnHealClick;
     }
 
     public bool TryGetCombat(out Combat combat) {
@@ -163,12 +173,22 @@ public class Player : Entity {
 
     public void AddInfluence(int influence) {
         Influence += influence;
-        OnPlayerInfluenceUpdate?.Invoke(this, new IntEventArgs { Player = this, Value = Influence });
+        OnPlayerInfluenceUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Influence });
     }
 
     public void ReduceInfluence(int influence) {
         Influence -= influence;
-        OnPlayerInfluenceUpdate?.Invoke(this, new IntEventArgs { Player = this, Value = Influence });
+        OnPlayerInfluenceUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Influence });
+    }
+
+    public void AddHeal(int heal) {
+        Heal += heal;
+        OnPlayerHealUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Heal });
+    }
+
+    public void ReduceHeal(int heal) {
+        Heal -= heal;
+        OnPlayerHealUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Heal });
     }
 
     public void AddReputation(int reputation) {
@@ -187,14 +207,37 @@ public class Player : Entity {
         Fame -= fame;
     }
 
-    public void HealWounds(int count = 1) {
-        for (int i = 0; i < count; i++) {
-            Card found = hand.Find((card) => card is Wound);
-            if (found != null) {
-                hand.Remove(found);
-                OnPlayerTrashCard?.Invoke(this, new CardEventArgs { Player = this, Cards = new List<Card>() { found } });
-            }
+    public void HealWound() {
+        Card found = hand.Find((card) => card is Wound);
+        if (found != null) {
+            hand.Remove(found);
+            OnPlayerTrashCard?.Invoke(this, new CardEventArgs { Player = this, Cards = new List<Card>() { found } });
+
+            ReduceHeal(1);
         }
+    }
+
+    public void HealUnit(UnitCard unit) {
+        if (units.Contains(unit)) {
+            if (unit.Level <= Heal) {
+                unit.Heal();
+
+                ReduceHeal(unit.Level);
+            } else {
+                Debug.LogError("Not enough heal to heal unit");
+            }
+        } else {
+            Debug.LogError("Player does not own unit");
+        }
+    }
+
+    public bool TryRemoveWoundFromDiscard() {
+        Card wound = discard.Find(card => card is Wound);
+        if (wound != null) {
+            discard.Remove(wound);
+        }
+
+        return wound != null;
     }
 
     public void DrawCards(int count = 1) {
@@ -361,6 +404,7 @@ public class Player : Entity {
     public void ResetValues() {
         Movement = 0;
         Influence = 0;
+        Heal = 0;
 
         MoveModifiers.Clear();
     }
@@ -401,5 +445,12 @@ public class Player : Entity {
 
     private void ButtonInputManager_OnRecruitUnitClick(object sender, ButtonInputManager.OnRecruitUnitClickArgs e) {
         RecruitUnit(e.unitCard);
+    }
+
+    private void HealAction_OnHealClick(object sender, HealAction.OnHealClickArgs e) {
+        if (e.Unit == null)
+            HealWound();
+        else
+            HealUnit(e.Unit);
     }
 }

@@ -21,7 +21,7 @@ public class ManaDraw : ActionCard, ITargetingCard<ManaSource>, IChoiceEffect {
 
     public bool HasChoice(CardChoice choice) => choice.Id == 1;
 
-    public void ApplyEffect(int id) {
+    public void ApplyEffect(CardChoice choice, int id) {
         Mana.Types manaType = (Mana.Types)id; // Only works because the choices are in order
         suppliedManaSource.SetManaType(manaType);
         GameManager.Instance.CurrentPlayer.GetInventory().AddToken(manaType);

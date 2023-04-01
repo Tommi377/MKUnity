@@ -5,5 +5,5 @@ public interface IChoiceEffect {
     bool HasChoice(CardChoice choice);
     string GetEffectChoicePrompt(CardChoice choice);
     List<string> EffectChoices(CardChoice choice);
-    void ApplyEffect(int id);
+    void ApplyEffect(CardChoice choice, int id);
 }

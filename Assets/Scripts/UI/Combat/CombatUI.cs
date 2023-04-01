@@ -358,6 +358,13 @@ public static class CombatAction {
         public int ChoiceId;
     }
 
+    public static void ResetStaticData() {
+        OnCombatNextStateClick = null;
+        OnTargetsSelectedClick = null;
+        OnAttackSelectedClick = null;
+        OnDamageAssignClick = null;
+    }
+
     public static void CombatNextStateClick(object sender) {
         OnCombatNextStateClick?.Invoke(sender, EventArgs.Empty);
     }
