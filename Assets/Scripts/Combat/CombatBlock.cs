@@ -36,27 +36,11 @@ public class CombatBlock {
     public float Calculate() {
         float cumBlock = 0;
         foreach (CombatData combatCard in CombatCards) {
-            float multiplier = 1;
-            float block = 0;
-
             if (combatCard.CombatType != CombatTypes.Block) {
                 continue;
             }
 
-            block += combatCard.Damage;
-            if (combatCard.CombatBlockModifier != null) {
-                block += combatCard.CombatBlockModifier(this);
-            }
-
-            if (
-                Attack.Element == CombatElements.Ice && (combatCard.CombatElement == CombatElements.Physical || combatCard.CombatElement == CombatElements.Ice) ||
-                Attack.Element == CombatElements.Fire && (combatCard.CombatElement == CombatElements.Physical || combatCard.CombatElement == CombatElements.Fire) ||
-                Attack.Element == CombatElements.ColdFire && !(combatCard.CombatElement == CombatElements.ColdFire)
-            ) {
-                multiplier *= 0.5f;
-            }
-
-            cumBlock += (int)(block * multiplier);
+            cumBlock += GetBlock(combatCard);
         }
 
         Debug.Log(Player.Movement);
@@ -66,5 +50,26 @@ public class CombatBlock {
         }
 
         return cumBlock;
+    }
+
+    private float GetBlock(CombatData combatCard) {
+        float multiplier = 1;
+        float block = 0;
+
+        block += combatCard.Damage;
+        if (combatCard.CombatBlockModifier != null) {
+            block += combatCard.CombatBlockModifier(this);
+        }
+
+        // Resistance check
+        if (
+            Attack.Element == CombatElements.Ice && (combatCard.CombatElement == CombatElements.Physical || combatCard.CombatElement == CombatElements.Ice) ||
+            Attack.Element == CombatElements.Fire && (combatCard.CombatElement == CombatElements.Physical || combatCard.CombatElement == CombatElements.Fire) ||
+            Attack.Element == CombatElements.ColdFire && !(combatCard.CombatElement == CombatElements.ColdFire)
+        ) {
+            multiplier *= 0.5f;
+        }
+
+        return block * multiplier;
     }
 }

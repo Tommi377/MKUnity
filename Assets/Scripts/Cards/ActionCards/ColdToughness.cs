@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Linq;
 
 public  class ColdToughness : ActionCard {
     public ColdToughness(ActionCardSO actionCardSO) : base(actionCardSO) { }

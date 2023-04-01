@@ -11,6 +11,7 @@ public class CombatAttack {
     public bool RangePhase { get; private set; } = false;
     public bool Fortified { get; private set; } = false;
     public bool DoubleFortified { get; private set; } = false;
+    public bool ArcaneImmunity { get; private set; } = false;
 
     public int TotalArmor { get; private set; } = 0;
 
@@ -38,6 +39,10 @@ public class CombatAttack {
                 if (fortifiedSite) DoubleFortified = true;
             }
 
+            if (!ArcaneImmunity && enemy.Abilities.Contains(EnemyAbilities.Fortified)) {
+                ArcaneImmunity = true;
+            }
+
             enemy.Resistances.ForEach(resistance => Resistances[resistance] = true);
         }
 
@@ -50,17 +55,6 @@ public class CombatAttack {
             // Fortified if at least 1 enemy is not unfortified
             Fortified = fortifiedSite && !enemies.All(e => e.Abilities.Contains(EnemyAbilities.Unfortified));
         }
-    }
-
-    private float GetDamage(CombatData combatCard) {
-        float multiplier = Resistances[combatCard.CombatElement] ? 0.5f : 1;
-        float damage = combatCard.Damage;
-
-        if (combatCard.CombatAttackModifier != null) {
-            damage += combatCard.CombatAttackModifier(this);
-        }
-
-        return damage * multiplier;
     }
 
     public float Calculate() {
@@ -83,5 +77,16 @@ public class CombatAttack {
 
     public bool IsEnemyDead() {
         return TotalArmor <= Calculate();
+    }
+
+    private float GetDamage(CombatData combatCard) {
+        float multiplier = Resistances[combatCard.CombatElement] ? 0.5f : 1;
+        float damage = combatCard.Damage;
+
+        if (combatCard.CombatAttackModifier != null) {
+            damage += combatCard.CombatAttackModifier(this);
+        }
+
+        return damage * multiplier;
     }
 }
