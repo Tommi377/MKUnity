@@ -9,6 +9,7 @@ public class CombatBlock {
     public List<CombatData> CombatCards { get; private set; }
 
     public int TotalDamage { get; private set; } = 0;
+    public bool ArcaneImmunity { get; private set; } = false;
 
     private bool combatPrevented = false;
 
@@ -22,6 +23,7 @@ public class CombatBlock {
         TotalDamage = Attack.Damage;
 
         if (Enemy.Abilities.Contains(EnemyAbilities.Swift)) TotalDamage *= 2;
+        if (Enemy.Abilities.Contains(EnemyAbilities.ArcaneImmunity)) ArcaneImmunity = true;
     }
     public int PlayerReceivedDamage() {
         return FullyBlocked ? 0 : TotalDamage;
