@@ -70,6 +70,8 @@ public class CardManager : MonoBehaviour {
         }
     }
 
+    public TargetTypes? CurrentTargetType => targetingCard?.TargetType;
+
     private void Start() {
         MouseInputManager.Instance.OnCardClick += MouseInputManager_OnCardClick;
         ButtonInputManager.Instance.OnCardActionClick += ButtonInputManager_OnCardActionClick;
