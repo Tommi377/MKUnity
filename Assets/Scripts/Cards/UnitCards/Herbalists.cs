@@ -9,7 +9,7 @@ public class Herbalists : UnitCard, ITargetingCard<UnitCard> {
     public override void Apply(CardChoice choice) {
         switch (choice.Id) {
             case 0:
-                GetPlayer().HealWounds(2);
+                GetPlayer().AddHeal(2);
                 break;
             case 1:
                 cachedTarget.Ready();

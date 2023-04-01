@@ -57,7 +57,7 @@ public class InfluenceUI : MonoBehaviour {
         return new List<UnitCard>();
     }
 
-    private void Player_OnPlayerInfluenceUpdate(object sender, Player.IntEventArgs e) {
+    private void Player_OnPlayerInfluenceUpdate(object sender, Player.PlayerIntEventArgs e) {
         UpdateUI();
     }
 

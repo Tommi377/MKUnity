@@ -12,6 +12,11 @@ public class TargetingCard {
     public CardChoice Choice;
 }
 
+public class ChoiceCardItem {
+    public Card Card;
+    public CardChoice Choice;
+}
+
 public class PlayCardOptions {
     public bool SkipResolveCallbacks = false;
     public bool SkipManaUse = false;
@@ -53,7 +58,7 @@ public class CardManager : MonoBehaviour {
     private Stack<UnresolvedCard> unresolvedCards = new Stack<UnresolvedCard>();
 
     private TargetingCard targetingCard = null;
-    private Card choiceCard = null;
+    private ChoiceCardItem choiceCardItem = null;
 
     private Player Player => GameManager.Instance.CurrentPlayer;
 
@@ -75,7 +80,7 @@ public class CardManager : MonoBehaviour {
     }
 
     public bool CanPlay() {
-        return choiceCard == null && (targetingCard == null || targetingCard.TargetType == TargetTypes.ActionCardChoice);
+        return choiceCardItem == null && (targetingCard == null || targetingCard.TargetType == TargetTypes.ActionCardChoice);
     }
 
     public void HandleCard(Card card) {
@@ -147,7 +152,7 @@ public class CardManager : MonoBehaviour {
         if (card is IChoiceEffect) {
             IChoiceEffect choiceEffectCard = card as IChoiceEffect;
             if (choiceEffectCard.HasChoice(choice)) {
-                this.choiceCard = card;
+                choiceCardItem = new ChoiceCardItem() { Card = card, Choice = choice };
                 OnChoiceEffectCard?.Invoke(this, new OnChoiceEffectCardArgs {
                     Choice = choice,
                     Card = choiceEffectCard,
@@ -196,9 +201,9 @@ public class CardManager : MonoBehaviour {
 
     private void ChooseChoiceEffect(int choiceId) {
         Debug.Log("Choice " + choiceId + " chosen!");
-        (choiceCard as IChoiceEffect).ApplyEffect(choiceId);
+        (choiceCardItem.Card as IChoiceEffect).ApplyEffect(choiceCardItem.Choice, choiceId);
         ExecuteUnresolvedCards();
-        choiceCard = null;
+        choiceCardItem = null;
     }
 
     private void ExecuteUnresolvedCards() {
