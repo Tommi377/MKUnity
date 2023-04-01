@@ -126,7 +126,7 @@ public class ManaManager : MonoBehaviour {
 
     private void SelectManaSource(ManaSource manaSource) {
         DeselectManaSource();
-        if (!CanChannelMana()) return;
+        if (!CanChannelMana() && CardManager.Instance.CurrentTargetType != TargetTypes.ManaSource) return;
 
         SelectedManaSource = manaSource;
         OnManaSourceSelected?.Invoke(this, new OnManaSourceSelectedArgs() { manaSource = manaSource });
