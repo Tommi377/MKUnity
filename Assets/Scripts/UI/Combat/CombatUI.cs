@@ -143,6 +143,7 @@ public class CombatUI : MonoBehaviour {
                     middleButtonContainer.AddButton(unit.Name, () => {
                         CombatAction.DamageAssignClick(this, choiceId);
                         CombatAction.CombatNextStateClick(this);
+                        UpdateUI();
                     });
                 }
                 break;
@@ -179,7 +180,7 @@ public class CombatUI : MonoBehaviour {
 
     private void DrawResult(CombatResult result) {
         resultTab.gameObject.SetActive(true);
-        string resultTextString = result.Alive.Any() ? "Ran Away" : "Combat Won";
+        string resultTextString = result.Alive.Any() || result.Defeated.Count == 0 ? "Ran Away" : "Combat Won";
         string detailTextString = "Fame Gained: " + result.Fame;
         detailTextString += "\nCurrent Fame: " + (result.Fame + GameManager.Instance.CurrentPlayer.Fame);
         if (GameManager.Instance.CurrentPlayer.CanLevelUp(result.Fame)) {

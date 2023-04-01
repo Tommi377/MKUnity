@@ -267,6 +267,19 @@ public class Combat {
         OnCombatEnd?.Invoke(this, new OnCombatResultArgs { combat = this, result = result });
     }
 
+    public void SetTargets(List<Enemy> targets) {
+        Targets.Clear();
+        foreach (Enemy enemy in targets) {
+            if (!Targets.Contains(enemy)) {
+                Targets.Add(enemy);
+            } else {
+                Debug.Log("Enemy already targeted");
+            }
+        }
+
+        Debug.Log("Targeted " + Targets.Count + " enemies");
+    }
+
     /* ------------------- EVENTS ---------------------- */
 
     private void CombatAction_OnCombatNextStateClick(object sender, EventArgs e) {
@@ -278,16 +291,7 @@ public class Combat {
     }
 
     private void CombatAction_OnTargetsSelectedClick(object sender, CombatAction.OnTargetsSelectedClickArgs e) {
-        Targets.Clear();
-        foreach (Enemy enemy in e.Targets) {
-            if (!Targets.Contains(enemy)) {
-                Targets.Add(enemy);
-            } else {
-                Debug.Log("Enemy already targeted");
-            }
-        }
-
-        Debug.Log("Targeted " + Targets.Count + " enemies");
+        SetTargets(e.Targets);
     }
 
     private void CombatAction_OnAttackSelectedClick(object sender, CombatAction.OnAttackSelectedClickArgs e) {
