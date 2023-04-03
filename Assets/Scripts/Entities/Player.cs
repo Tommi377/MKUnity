@@ -109,11 +109,13 @@ public class Player : Entity {
     // Modifier functions
     List<Func<Hex, int, int>> MoveModifiers = new List<Func<Hex, int, int>>();
 
+    public int GetWoundCount() => hand.Where(card => card is Wound).Count();
     public int GetDeckCount() => deck.Count;
     public int GetDiscardCount() => discard.Count;
     public int GetReputationBonus(int repdiff = 0) => reputationBonuses[Math.Min(Math.Max(Reputation + repdiff + 7, 0), reputationBonuses.Length - 1)];
 
     public bool IsInCombat() => GameManager.Instance.Combat != null && GameManager.Instance.Combat.Player == this;
+    public bool IsOnSafeHex() => GetHex().GetEnemies().Any();
     public bool IsWoundInHand() => hand.Any(card => card is Wound);
     public bool CanLevelUp(int fame) => levelThresholds[Level - 1] < Fame + fame;
 
