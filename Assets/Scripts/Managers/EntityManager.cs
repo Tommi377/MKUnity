@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class EntityManager : MonoBehaviour {
@@ -25,10 +23,21 @@ public class EntityManager : MonoBehaviour {
         }
     }
 
-    public List<EnemySO> GetEntitySOs(EntityTypes type) {
+    public List<EnemySO> GetEnemySOs(EntityTypes type) {
         if (enemyListSOMap.TryGetValue(type, out List<EnemySO> enemyListSO)) {
             return enemyListSO;
         }
         return new List<EnemySO>();
+    }
+
+    public EnemySO GetRandomEnemySO(EntityTypes type) {
+        List<EnemySO> entitySOs = GetEnemySOs(type);
+
+        if (entitySOs.Count > 0) {
+            return entitySOs[Random.Range(0, entitySOs.Count)];
+        } else {
+            Debug.Log("Type didn't have any possible enities (" + type + ")");
+            return null;
+        }
     }
 }

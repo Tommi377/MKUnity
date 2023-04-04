@@ -33,7 +33,7 @@ public class CombatUI : MonoBehaviour {
     //}
 
     private void OnEnable() {
-        combat = GameManager.Instance.Combat;
+        combat = GameManager.Instance?.Combat;
         if (combat == null) {
             Debug.LogError("Can't enable combat UI without combat");
             return;
@@ -279,7 +279,7 @@ public class CombatUI : MonoBehaviour {
         EnemyButtonVisual enemyVisual = Instantiate(enemyButtonVisualTemplate, container).GetComponent<EnemyButtonVisual>();
         enemyVisual.Init(state, enemy);
         enemyVisual.gameObject.SetActive(true);
-        enemyVisual.OnButtonClick += EnemyButtonVisual_OnButtonClick;
+        enemyVisual.OnEnemyButtonClick += EnemyButtonVisual_OnButtonClick;
 
         enemyVisuals.Add(enemyVisual);
 
@@ -322,11 +322,11 @@ public class CombatUI : MonoBehaviour {
         return targets;
     }
 
-    private void EnemyButtonVisual_OnButtonClick(Enemy enemy, int choiceId) {
+    private void EnemyButtonVisual_OnButtonClick(Enemy enemy, EnemyAttack attack) {
         switch (state) {
             case Combat.States.BlockStart:
             case Combat.States.AssignStart:
-                CombatAction.AttackSelectedClick(this, enemy, enemy.Attacks[choiceId]);
+                CombatAction.AttackSelectedClick(this, enemy, attack);
                 CombatAction.CombatNextStateClick(this);
                 break;
             default:

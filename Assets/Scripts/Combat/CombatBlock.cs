@@ -5,6 +5,7 @@ using UnityEngine;
 public class CombatBlock {
     public Player Player { get; private set; }
     public Enemy Enemy { get; private set; }
+    public List<EnemyAbilities> Abilities { get; private set; }
     public EnemyAttack Attack { get; private set; }
     public List<CombatData> CombatCards { get; private set; }
 
@@ -16,14 +17,14 @@ public class CombatBlock {
     public CombatBlock(Combat combat, Enemy enemy, EnemyAttack attack) {
         Player = combat.Player;
         Enemy = enemy;
+        Abilities = combat.SummonedEnemies[enemy]?.Abilities ?? enemy.Abilities;
         Attack = attack;
         CombatCards = combat.CombatCards;
 
-        // Modify this attack depending on modifiers
         TotalDamage = Attack.Damage;
 
-        if (Enemy.Abilities.Contains(EnemyAbilities.Swift)) TotalDamage *= 2;
-        if (Enemy.Abilities.Contains(EnemyAbilities.ArcaneImmunity)) ArcaneImmunity = true;
+        if (Abilities.Contains(EnemyAbilities.Swift)) TotalDamage *= 2;
+        if (Abilities.Contains(EnemyAbilities.ArcaneImmunity)) ArcaneImmunity = true;
     }
     public int PlayerReceivedDamage() {
         return FullyBlocked ? 0 : TotalDamage;
@@ -45,7 +46,7 @@ public class CombatBlock {
 
         Debug.Log(Player.Movement);
 
-        if (Enemy.Abilities.Contains(EnemyAbilities.Cumbersome)) {
+        if (Abilities.Contains(EnemyAbilities.Cumbersome)) {
             cumBlock += Player.Movement;
         }
 
