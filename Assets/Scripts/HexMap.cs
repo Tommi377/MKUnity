@@ -168,7 +168,7 @@ public class HexMap : MonoBehaviour {
             SpawnEntity(hex, enemy);
             return enemy;
         } else {
-            Debug.Log("Type didn't have any possible enities");
+            Debug.Log("Type didn't have any possible enities (" + type + ")");
             return null;
         }
     }
