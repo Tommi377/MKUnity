@@ -41,7 +41,7 @@ public class HandUI : MonoBehaviour {
         ManaManager.Instance.OnManaSelected += ManaManager_OnManaSelected;
         ManaManager.Instance.OnManaDeselected += ManaManager_OnManaDeselected;
 
-        RoundManager.Instance.OnPhaseChange += RoundManager_OnPhaseChange;
+        RoundManager.Instance.OnRoundStateExit += RoundManager_OnRoundStateExit;
 
         UnitManager.Instance.OnUnitRecruit += UnitManager_OnUnitRecruit;
 
@@ -81,11 +81,10 @@ public class HandUI : MonoBehaviour {
 
     private void SelectCard(CardVisual cardVisual) {
         DeselectCard();
-        if (!IsCardSelectableInCurrentPhase()) return;
 
-        if (!RoundManager.Instance.CanPlayCard(cardVisual.Card)) return;
+        if (!RoundManager.Instance.StateAllowsCardPlay(cardVisual.Card)) return;
 
-        if (!cardVisual.Card.HasPlayableChoices(RoundManager.Instance.CurrentAction)) {
+        if (!cardVisual.Card.HasPlayableChoices(RoundManager.Instance.GetCurrentAction())) {
             Debug.Log("Card doesn't have any playable actions");
             return;
         }
@@ -106,37 +105,29 @@ public class HandUI : MonoBehaviour {
     private void UpdateChoices() {
         buttonUI.ClearButtons();
         if (selectedCardVisual != null) {
+            List<CardChoice> choices = selectedCardVisual.Card.GetChoices(RoundManager.Instance.GetCurrentAction());
             switch (mode) {
-                case SelectionMode.Default: {
-                        List<CardChoice> choices = selectedCardVisual.Card.GetChoices(RoundManager.Instance.CurrentAction);
-
-                        foreach (CardChoice choice in choices) {
-                            bool interactable = !choice.ManaTypes.Any() || ManaManager.Instance.SelectedManaUsableWithChoice(choice);
-                            Color? manaColor = choice.ManaTypes.Any() ? Mana.GetColor(choice.ManaTypes[0]) : null;
-                            Button button = buttonUI.AddButton(
-                                choice.Name, () => CardActionClick(selectedCardVisual.Card, choice),
-                                new ExpandingButtonUI.Options() { Interactable = interactable, BackgroundColor = manaColor }
-                            );
-                        }
-                        break;
+                case SelectionMode.Default: 
+                    foreach (CardChoice choice in choices) {
+                        bool interactable = !choice.ManaTypes.Any() || ManaManager.Instance.SelectedManaUsableWithChoice(choice);
+                        Color? manaColor = choice.ManaTypes.Any() ? Mana.GetColor(choice.ManaTypes[0]) : null;
+                        Button button = buttonUI.AddButton(
+                            choice.Name, () => CardActionClick(selectedCardVisual.Card, choice),
+                            new ExpandingButtonUI.Options() { Interactable = interactable, BackgroundColor = manaColor }
+                        );
                     }
-                case SelectionMode.OnlySuper: {
-                        List<CardChoice> choices = selectedCardVisual.Card.GetChoices(RoundManager.Instance.CurrentAction);
-                        foreach (CardChoice choice in choices) {
-                            Color? manaColor = choice.ManaTypes.Any() ? Mana.GetColor(choice.ManaTypes[0]) : null;
-                            if (choice.ManaTypes.Any()) buttonUI.AddButton(
-                                choice.Name, () => CardActionClick(selectedCardVisual.Card, choice),
-                                new ExpandingButtonUI.Options() { BackgroundColor = manaColor }
-                            );
-                        }
-                        break;
+                    break;
+                case SelectionMode.OnlySuper:
+                    foreach (CardChoice choice in choices) {
+                        Color? manaColor = choice.ManaTypes.Any() ? Mana.GetColor(choice.ManaTypes[0]) : null;
+                        if (choice.ManaTypes.Any()) buttonUI.AddButton(
+                            choice.Name, () => CardActionClick(selectedCardVisual.Card, choice),
+                            new ExpandingButtonUI.Options() { BackgroundColor = manaColor }
+                        );
                     }
+                    break;
             }
         }
-    }
-
-    private bool IsCardSelectableInCurrentPhase() {
-        return RoundManager.Instance.CurrentPhase == TurnPhases.Movement || RoundManager.Instance.CurrentPhase == TurnPhases.Action;
     }
 
     private void CardActionClick(Card card, CardChoice choice) {
@@ -185,7 +176,7 @@ public class HandUI : MonoBehaviour {
         UpdateChoices();
     }
 
-    private void RoundManager_OnPhaseChange(object sender, RoundManager.OnPhaseChangeArgs e) {
+    private void RoundManager_OnRoundStateExit(object sender, RoundManager.RoundStateArgs e) {
         DeselectCard();
     }
 

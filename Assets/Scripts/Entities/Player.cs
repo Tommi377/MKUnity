@@ -115,9 +115,13 @@ public class Player : Entity {
     public int GetReputationBonus(int repdiff = 0) => reputationBonuses[Math.Min(Math.Max(Reputation + repdiff + 7, 0), reputationBonuses.Length - 1)];
 
     public bool IsInCombat() => GameManager.Instance.Combat != null && GameManager.Instance.Combat.Player == this;
-    public bool IsOnSafeHex() => GetHex().GetEnemies().Any();
+    public bool IsOnSafeHex() => !GetHex().GetEnemies().Any();
     public bool IsWoundInHand() => hand.Any(card => card is Wound);
     public bool CanLevelUp(int fame) => levelThresholds[Level - 1] < Fame + fame;
+
+    public bool CanNormalRest() => GetWoundCount() > 0 && GetWoundCount() < HandLimit;
+    public bool MustSlowRest() => GetWoundCount() == HandLimit;
+    public bool CanEndRound() => deck.Count == 0;
 
     public ReadOnlyCollection<Card> DiscardPile => discard.AsReadOnly();
 
@@ -133,7 +137,7 @@ public class Player : Entity {
 
         RoundManager.Instance.OnNewRound += RoundManager_OnNewRound;
         RoundManager.Instance.OnNewTurn += RoundManager_OnNewTurn;
-        RoundManager.Instance.OnPhaseChange += RoundManager_OnPhaseChange;
+        RoundManager.Instance.OnRoundStateEnter += RoundManager_OnRoundStateEnter;
 
         MouseInputManager.Instance.OnHexClick += MouseInput_OnHexClick;
 
@@ -417,16 +421,23 @@ public class Player : Entity {
         GainFame(e.result.Fame);
     }
 
-    private void RoundManager_OnPhaseChange(object sender, RoundManager.OnPhaseChangeArgs e) {
-        ResetValues();
-    }
-
     private void RoundManager_OnNewRound(object sender, EventArgs e) {
         RoundStartInit();
     }
 
     private void RoundManager_OnNewTurn(object sender, EventArgs e) {
         TurnStartInit();
+    }
+
+    private void RoundManager_OnRoundStateEnter(object sender, RoundManager.RoundStateArgs e) {
+        if (
+            e.State == RoundManager.States.Move ||
+            e.State == RoundManager.States.Combat ||
+            e.State == RoundManager.States.Influence ||
+            e.State == RoundManager.States.ActionCard
+        ) {
+            ResetValues();
+        }
     }
 
     private void MouseInput_OnHexClick(object sender, MouseInputManager.OnHexClickArgs e) {

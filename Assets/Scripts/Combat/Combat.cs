@@ -287,7 +287,7 @@ public class Combat {
 
         stateMachine.AttemptStateTransfer();
 
-        Debug.Log("Old state: " + prev + ". New state: " + GetCurrentState());
+        Debug.Log("Combat statemachine: Old state: " + prev + ". New state: " + GetCurrentState());
     }
 
     private void CombatAction_OnTargetsSelectedClick(object sender, CombatAction.OnTargetsSelectedClickArgs e) {
