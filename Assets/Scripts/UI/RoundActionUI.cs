@@ -109,7 +109,7 @@ public class RoundActionUI : MonoBehaviour {
     private void SetPreActionUI() {
         List<ActionTypes> actionTypes = GameManager.Instance.GetPossibleActions(); 
         if (actionTypes.Contains(ActionTypes.Combat)) buttonContainer.AddButton("Combat", () => RoundAction.RoundNextStateClick(this, 0));
-        if (actionTypes.Contains(ActionTypes.Influence)) buttonContainer.AddButton("Influnce", () => RoundAction.RoundNextStateClick(this, 1));
+        if (actionTypes.Contains(ActionTypes.Influence)) buttonContainer.AddButton("Influence", () => RoundAction.RoundNextStateClick(this, 1));
         if (actionTypes.Contains(ActionTypes.Action)) buttonContainer.AddButton("Card Action", () => RoundAction.RoundNextStateClick(this, 2));
         buttonContainer.AddButton("Skip", () => RoundAction.RoundNextStateClick(this, 3));
     }

@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class EntityManager : MonoBehaviour {
     public static EntityManager Instance;
 
-    [SerializeField] private List<EnemyListSO> enemyListValues;
+    [SerializeField] private List<EnemyListSO> enemyListSOs;
 
     private Dictionary<EntityTypes, List<EnemySO>> enemyListSOMap = new Dictionary<EntityTypes, List<EnemySO>>();
 
@@ -18,8 +19,9 @@ public class EntityManager : MonoBehaviour {
             Instance = this;
         }
 
-        for (int i = 0; i < enemyListValues.Count; i++) {
-            enemyListSOMap.Add(enemyListValues[i].Type, enemyListValues[i].List);
+        foreach (EnemyListSO enemyListSO in enemyListSOs) {
+            // TODO: account relative token amounts with enemyListSO.List.Count
+            enemyListSOMap.Add(enemyListSO.Type, enemyListSO.List.Select(list => list.Enemy).ToList());
         }
     }
 

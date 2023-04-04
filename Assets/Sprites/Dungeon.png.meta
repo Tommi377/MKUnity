@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: a7ae09f8cdf9241429a55de01cf57bff
+guid: 2a533c91cd349164c8d84e85aebf31fd
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -119,133 +119,49 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Cursed Hags
+      name: Minotaur
       rect:
         serializedVersion: 2
         x: 0
-        y: 1024
+        y: 512
         width: 512
         height: 512
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6e854a12afab776468ac65d7702fa80c
-      internalID: 1582738653
+      spriteID: 39deb912551d1354fbc9f0115ae6aef1
+      internalID: 462477540
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Diggers
+      name: Gargoyle
       rect:
         serializedVersion: 2
         x: 512
-        y: 1024
+        y: 512
         width: 512
         height: 512
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: bea68e81b7faff6439844f35432240d7
-      internalID: 680590367
+      spriteID: cd4a1fd5ba812f1489d0f4d54415b50c
+      internalID: -1783872477
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ironclads
-      rect:
-        serializedVersion: 2
-        x: 1024
-        y: 1024
-        width: 512
-        height: 512
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: d1d241bcd8e43b34e842c9212b1fc885
-      internalID: 454931408
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Orc Skirmishers
-      rect:
-        serializedVersion: 2
-        x: 1536
-        y: 1024
-        width: 512
-        height: 512
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 1dc0333b8492b4043bda197b091687f7
-      internalID: 619956586
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Orc Stonethrower
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 515
-        width: 512
-        height: 512
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: c550649276235554cb17b62cbef00c31
-      internalID: -1046109252
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Orc Summoners
-      rect:
-        serializedVersion: 2
-        x: 512
-        y: 515
-        width: 512
-        height: 512
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 69c7e999ba315f9468963ac3d167ad2f
-      internalID: -1485170218
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Orc Trackers
+      name: Medusa
       rect:
         serializedVersion: 2
         x: 1024
@@ -253,41 +169,41 @@ TextureImporter:
         width: 512
         height: 512
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6f5f11e1de4fdab4d8e95b9fba97d9fb
-      internalID: -2066016871
+      spriteID: 2133dc94ffae8bb49aaa3445c8244bdc
+      internalID: 1686381140
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Orc War Beasts
+      name: Crypt Worm
       rect:
         serializedVersion: 2
         x: 1536
-        y: 515
+        y: 512
         width: 512
         height: 512
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 91f08b4d2292b3941b742a6ae8d2cdcf
-      internalID: 805564044
+      spriteID: 15c5a9833e34b264ab14a08eb00d5f54
+      internalID: -1269778137
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Prowlers
+      name: Werewolf
       rect:
         serializedVersion: 2
         x: 0
@@ -295,20 +211,20 @@ TextureImporter:
         width: 512
         height: 512
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 773c99845f9ced445997083dca19f8f0
-      internalID: 392814971
+      spriteID: 91a16603a211de7458afc11326cb6b37
+      internalID: 619638668
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Wolf Riders
+      name: Shadow
       rect:
         serializedVersion: 2
         x: 512
@@ -316,14 +232,56 @@ TextureImporter:
         width: 512
         height: 512
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 87bc267c3c646ac4cbb92933712492b8
-      internalID: 189029712
+      spriteID: b702a73e2c56d6345b1c114386ac73b4
+      internalID: -700482028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Manticore
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 0
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 19fba2b170664fe49b069ba71cc7f120
+      internalID: 2014489838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hydra
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 0
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 206b3fdc47d696e488aa48669f57ed67
+      internalID: -246382721
       vertices: []
       indices: 
       edges: []
@@ -331,7 +289,7 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 3b78c23980133e24e98a4e7454b61126
+    spriteID: 1bb350612563d9742be9cefec68dd275
     internalID: 0
     vertices: []
     indices: 
@@ -339,16 +297,14 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Ironclads: 454931408
-      Prowlers: 392814971
-      Diggers: 680590367
-      Orc Summoners: -1485170218
-      Cursed Hags: 1582738653
-      Orc Stonethrower: -1046109252
-      Wolf Riders: 189029712
-      Orc Skirmishers: 619956586
-      Orc Trackers: -2066016871
-      Orc War Beasts: 805564044
+      Shadow: -700482028
+      Hydra: -246382721
+      Minotaur: 462477540
+      Gargoyle: -1783872477
+      Werewolf: 619638668
+      Medusa: 1686381140
+      Crypt Worm: -1269778137
+      Manticore: 2014489838
   spritePackingTag: 
   pSDRemoveMatte: 0
   userData: 
