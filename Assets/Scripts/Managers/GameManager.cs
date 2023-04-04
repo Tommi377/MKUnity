@@ -34,8 +34,7 @@ public class GameManager : MonoBehaviour {
 
         Combat.OnCombatEnd += Combat_OnCombatEnd;
 
-        // Button click events
-        ButtonInputManager.Instance.OnActionChooseClick += ButtonInput_OnActionChooseClick;
+        RoundManager.Instance.OnRoundStateEnter += RoundManager_OnRoundStateEnter;
 
         SetDoneInitializing();
     }
@@ -97,32 +96,29 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private void ChooseAction(ActionTypes action) {
-        ActionTypes actionFinal = action;
-        switch(action) {
-            case ActionTypes.Combat:
-                // TODO: optionally choose neighboring rampaging enemies
-                Hex hex = GetHexWithCurrentPlayer();
-                List<Enemy> enemies = hex.GetEnemies();
-                List<Enemy> forced = new List<Enemy>(enemies);
-
-                foreach (Hex neighbor in HexMap.Instance.GetNeighbors(hex.Position)) {
-                    enemies.AddRange(neighbor.GetEnemies());
-                }
-
-                Debug.Log("Enemies: " + enemies.Count);
-                if (enemies.Count > 0) {
-                    Combat = new Combat(CurrentPlayer, enemies, forced);
-                    Combat.Init();
-                } else {
-                    Debug.Log("Can't start combat with no enemies");
-                    actionFinal = ActionTypes.None;
-                }
-                break;
+    private void StartCombat() {
+        if (Combat != null) {
+            Debug.Log("Another combat already in progress!");
+            return;
         }
 
-        Debug.Log("Choose Action:  " + actionFinal);
-        RoundManager.Instance.SetPhaseAndAction(TurnPhases.Action, actionFinal);
+        // TODO: optionally choose neighboring rampaging enemies
+        Hex hex = GetHexWithCurrentPlayer();
+        List<Enemy> enemies = hex.GetEnemies();
+        List<Enemy> forced = new List<Enemy>(enemies);
+
+        foreach (Hex neighbor in HexMap.Instance.GetNeighbors(hex.Position)) {
+            enemies.AddRange(neighbor.GetEnemies());
+        }
+
+        Debug.Log("Enemies: " + enemies.Count);
+        if (enemies.Count > 0) {
+            Combat = new Combat(CurrentPlayer, enemies, forced);
+            Combat.Init();
+        } else {
+            Debug.Log("Can't start combat with no enemies");
+            RoundManager.Instance.AttemptStateTransfer();
+        }
     }
 
     private void EndOfCombat(CombatResult result) {
@@ -131,6 +127,7 @@ public class GameManager : MonoBehaviour {
         foreach (Enemy enemy in result.Defeated) {
             enemy.DestroySelf();
         }
+        RoundManager.Instance.AttemptStateTransfer();
     }
 
     /* ------------------- EVENTS ---------------------- */
@@ -139,7 +136,9 @@ public class GameManager : MonoBehaviour {
         EndOfCombat(e.result);
     }
 
-    private void ButtonInput_OnActionChooseClick(object sender, ButtonInputManager.OnActionChooseClickArgs e) {
-        ChooseAction(e.actionType);
+    private void RoundManager_OnRoundStateEnter(object sender, RoundManager.RoundStateArgs e) {
+        if (e.State == RoundManager.States.Combat) {
+            StartCombat();
+        }
     }
 }

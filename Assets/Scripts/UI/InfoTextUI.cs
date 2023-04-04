@@ -8,12 +8,12 @@ public class InfoTextUI : MonoBehaviour {
     private Combat.States? combatState = null;
 
     private void Start() {
-        RoundManager.Instance.OnPhaseChange += RoundManager_OnPhaseChange;
+        RoundManager.Instance.OnRoundStateEnter += Instance_OnRoundStateEnter;
 
         Combat.OnCombatStateEnter += Combat_OnCombatStateEnter;
         Combat.OnCombatEnd += Combat_OnCombatEnd;
 
-        updateActionText();
+        UpdateActionText();
     }
 
     private void Update() {
@@ -27,12 +27,10 @@ public class InfoTextUI : MonoBehaviour {
         debugPlayerInfoText.SetText(debugText);
     }
 
-    private void updateActionText() {
-        TurnPhases phase = RoundManager.Instance.CurrentPhase;
-        ActionTypes action = RoundManager.Instance.CurrentAction;
-        string text = "Current phase:\n" + phase;
+    private void UpdateActionText() {
+        string text = "Current state:\n" + RoundManager.Instance.GetCurrentState();
 
-        text += "\nCurrent action:\n" + action;
+        text += "\nCurrent action:\n" + RoundManager.Instance.GetCurrentAction();
 
         if (combatState != null) {
             text += "\nCurrent action:\n" + combatState;
@@ -41,17 +39,17 @@ public class InfoTextUI : MonoBehaviour {
         phaseInfoText.SetText(text);
     }
 
-    private void RoundManager_OnPhaseChange(object sender, RoundManager.OnPhaseChangeArgs e) {
-        updateActionText();
+    private void Instance_OnRoundStateEnter(object sender, RoundManager.RoundStateArgs e) {
+        UpdateActionText();
     }
 
     private void Combat_OnCombatStateEnter(object sender, Combat.OnCombatStateEnterArgs e) {
         combatState = e.State;
-        updateActionText();
+        UpdateActionText();
     }
 
     private void Combat_OnCombatEnd(object sender, Combat.OnCombatResultArgs e) {
         combatState = null;
-        updateActionText();
+        UpdateActionText();
     }
 }

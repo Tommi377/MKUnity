@@ -38,7 +38,7 @@ public class InfluenceUI : MonoBehaviour {
             );
         }
 
-        buttonContainer.AddButton("End\nInfluence\nPhase", () => ButtonInputManager.Instance.EndInfluencePhaseClick());
+        buttonContainer.AddButton("End\nInfluence\nPhase", () => RoundAction.RoundNextStateClick(this));
 
         influenceText.SetText("Influence: " + influence);
     }

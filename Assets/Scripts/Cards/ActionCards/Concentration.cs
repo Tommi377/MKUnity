@@ -12,9 +12,9 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
 
         // TODO: Logic to decide whether the player has playable cards in hand
         return actionChoice.Id != 3 ||
-            RoundManager.Instance.CurrentAction == ActionTypes.Move ||
-            RoundManager.Instance.CurrentAction == ActionTypes.Influence ||
-            RoundManager.Instance.CurrentAction == ActionTypes.Combat;
+            RoundManager.Instance.GetCurrentAction() == ActionTypes.Move ||
+            RoundManager.Instance.GetCurrentAction() == ActionTypes.Influence ||
+            RoundManager.Instance.GetCurrentAction() == ActionTypes.Combat;
     }
 
     public TargetTypes TargetType => TargetTypes.ActionCardChoice;
@@ -25,7 +25,7 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
 
         ActionCard actionCard = target.Item1 as ActionCard;
         CardChoice targetChoice = target.Item2;
-        ActionTypes actionType = RoundManager.Instance.CurrentAction;
+        ActionTypes actionType = RoundManager.Instance.GetCurrentAction();
 
         return targetChoice.ManaTypes.Any() && actionCard.HasPlayableChoices(actionType) && actionCard.CanApply(actionType, targetChoice);
     }
@@ -58,7 +58,7 @@ public class Concentration : ActionCard, ITargetingCard<(Card, CardChoice)> {
                 int combatCardCount = GetPlayer().IsInCombat() ? GetCombat(GetPlayer()).CombatCards.Count() : 0;
 
                 CardManager.Instance.AddUnresolvedCard(this, () => {
-                    switch (RoundManager.Instance.CurrentAction) {
+                    switch (RoundManager.Instance.GetCurrentAction()) {
                         case ActionTypes.Move:
                             if (GetPlayer().Movement > initMovement) {
                                 GetPlayer().AddMovement(2);

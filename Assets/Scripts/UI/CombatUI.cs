@@ -28,12 +28,19 @@ public class CombatUI : MonoBehaviour {
     private Combat.States state;
     private List<EnemyButtonVisual> enemyVisuals = new List<EnemyButtonVisual>();
 
-    private void Awake() {
-        gameObject.SetActive(false);
-    }
+    //private void Awake() {
+    //    gameObject.SetActive(false);
+    //}
 
     private void OnEnable() {
         combat = GameManager.Instance.Combat;
+        if (combat == null) {
+            Debug.LogError("Can't enable combat UI without combat");
+            return;
+        }
+
+        ResetUI();
+
         SetState(combat.GetCurrentState());
 
         Combat.OnCombatStateEnter += Combat_OnCombatStateEnter;
@@ -55,13 +62,16 @@ public class CombatUI : MonoBehaviour {
         }
 
         combat = null;
+    }
 
+    private void ResetUI() {
         enemyVisuals.ForEach(visual => visual.DestroySelf());
         enemyVisuals.Clear();
 
         resultTab.gameObject.SetActive(false);
         aliveTab.gameObject.SetActive(false);
         deadTab.gameObject.SetActive(false);
+        resultTab.gameObject.SetActive(false);
 
         foreach (Transform child in aliveContainer) Destroy(child.gameObject);
         foreach (Transform child in deadContainer) Destroy(child.gameObject);
