@@ -321,8 +321,7 @@ public class Player : Entity {
         return false;
     }
 
-    public void EndAction() {
-        ResetValues();
+    public void TestRetreat() {
         if (!GetHex().IsSafeTile()) {
             // Force player to retreat
             // Then execute the end of turn
