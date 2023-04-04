@@ -159,18 +159,15 @@ public class HexMap : MonoBehaviour {
     }
 
     public Entity SpawnRandomEntity(Hex hex, EntityTypes type) {
-        List<EnemySO> entitySOs = EntityManager.Instance.GetEntitySOs(type);
+        EnemySO enemySO = EntityManager.Instance.GetRandomEnemySO(type);
 
-        if (entitySOs.Count > 0) {
-            EnemySO enemySO = entitySOs[Random.Range(0, entitySOs.Count)];
+        if (enemySO != null) {
             Enemy enemy = Instantiate(enemyPrefab).GetComponent<Enemy>();
             enemy.Init(enemySO);
             SpawnEntity(hex, enemy);
             return enemy;
-        } else {
-            Debug.Log("Type didn't have any possible enities (" + type + ")");
-            return null;
         }
+        return null;
     }
 
     public void SpawnEntity(Hex hex, Entity entity) {

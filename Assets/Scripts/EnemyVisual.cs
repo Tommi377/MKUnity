@@ -13,12 +13,14 @@ public class EnemyVisual : MonoBehaviour {
     [SerializeField] private Transform abilityContainer;
     [SerializeField] private GameObject abilityVisualPrefab;
 
-    private EnemySO enemySO;
+    [SerializeField] private EnemySO enemySO;
 
     private void Start() {
         if (TryGetComponent(out Enemy enemy)) {
             if (enemy.EnemySO) {
                 Init(enemy.EnemySO);
+            } else if (enemySO != null) {
+                Init(enemySO);
             } else {
                 enemy.OnInit += Enemy_OnInit;
             }

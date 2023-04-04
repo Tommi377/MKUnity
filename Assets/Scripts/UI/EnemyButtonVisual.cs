@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class EnemyButtonVisual : MonoBehaviour {
     [SerializeField] private EnemyVisual enemyVisual;
+    [SerializeField] private EnemyVisual summonedEnemy;
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private Transform backgroundHighlight;
     [SerializeField] private Transform backgroundDead;
@@ -17,9 +18,16 @@ public class EnemyButtonVisual : MonoBehaviour {
 
     public Enemy Enemy { get; private set; }
 
-    public event Action<Enemy, int> OnButtonClick;
+    private Combat Combat => GameManager.Instance.Combat;
+
+    public event Action<Enemy, EnemyAttack> OnEnemyButtonClick;
 
     public void Init(Combat.States state, Enemy enemy, bool disableName = false) {
+        if (Combat == null) {
+            Debug.LogError("Can't instantiate EnemyButtonVisual without active combat");
+            return;
+        }
+
         Enemy = enemy;
 
         if (!disableName) {
@@ -29,9 +37,44 @@ public class EnemyButtonVisual : MonoBehaviour {
 
         enemyVisual.Init(enemy.EnemySO);
         UpdateUI(state);
+        DrawSummonToken(state);
     }
 
-    public void UpdateUI(Combat.States state) {
+    public void ToggleSelect() {
+        if (Selected) {
+            Deselect();
+        } else {
+            Select();
+        }
+
+        OnEnemyButtonClick?.Invoke(Enemy, null);
+    }
+
+    public void SetDead() {
+        Dead = true;
+        backgroundDead.gameObject.SetActive(true);
+    }
+
+    public void SetForced() {
+        Forced = true;
+    }
+
+    public void Select() {
+        Selected = true;
+        backgroundHighlight.gameObject.SetActive(true);
+    }
+
+    public void Deselect() {
+        Selected = false;
+        backgroundHighlight.gameObject.SetActive(false);
+    }
+
+    public void DestroySelf() {
+        OnEnemyButtonClick = null;
+        Destroy(gameObject);
+    }
+
+    private void UpdateUI(Combat.States state) {
         buttonContainer.ClearButtons();
 
         if (Dead) {
@@ -57,13 +100,15 @@ public class EnemyButtonVisual : MonoBehaviour {
                 break;
             case Combat.States.BlockStart:
             case Combat.States.AssignStart:
-                if (GameManager.Instance.Combat.UnassignedAttacks.TryGetValue(Enemy, out List<EnemyAttack> attacks)) {
-                    for (int i = 0; i < Enemy.Attacks.Count; i++) {
-                        int choiceIndex = i;
-                        EnemyAttack attack = Enemy.Attacks[i];
-                        var options = new ExpandingButtonUI.Options() { Interactable = attacks.Contains(attack) };
+                if (Combat.UnassignedAttacks.TryGetValue(Enemy, out List<EnemyAttack> unassigned)) {
+                    List<EnemyAttack> attacks = Combat.SummonedEnemies[Enemy] ? Combat.SummonedEnemies[Enemy].Attacks : Enemy.Attacks;
 
-                        buttonContainer.AddButton(attack.ToString(), () => OnButtonClick?.Invoke(Enemy, choiceIndex), options);
+                    for (int i = 0; i < attacks.Count; i++) {
+                        int choiceIndex = i;
+                        EnemyAttack attack = attacks[i];
+                        var options = new ExpandingButtonUI.Options() { Interactable = unassigned.Contains(attack) };
+
+                        buttonContainer.AddButton(attack.ToString(), () => OnEnemyButtonClick?.Invoke(Enemy, attack), options);
                     }
                 }
                 break;
@@ -72,37 +117,19 @@ public class EnemyButtonVisual : MonoBehaviour {
         }
     }
 
-    public void ToggleSelect() {
-        if (Selected) {
-            Deselect();
-        } else {
-            Select();
+    private void DrawSummonToken(Combat.States state) {
+        summonedEnemy.gameObject.SetActive(false);
+
+        if (
+            state == Combat.States.BlockStart ||
+            state == Combat.States.BlockPlay ||
+            state == Combat.States.AssignStart ||
+            state == Combat.States.AssignDamage
+        ) {
+            summonedEnemy.gameObject.SetActive(true);
+
+            EnemySO summoned = Combat.SummonedEnemies[Enemy];
+            summonedEnemy.Init(summoned);
         }
-
-        OnButtonClick?.Invoke(Enemy, 0);
-    }
-
-    public void SetDead() {
-        Dead = true;
-        backgroundDead.gameObject.SetActive(true);
-    }
-
-    public void SetForced() {
-        Forced = true;
-    }
-
-    public void Select() {
-        Selected = true;
-        backgroundHighlight.gameObject.SetActive(true);
-    }
-
-    public void Deselect() {
-        Selected = false;
-        backgroundHighlight.gameObject.SetActive(false);
-    }
-
-    public void DestroySelf() {
-        OnButtonClick = null;
-        Destroy(gameObject);
     }
 }

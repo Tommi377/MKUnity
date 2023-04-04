@@ -19,7 +19,7 @@ MonoBehaviour:
     EntityType: 2
   - HexType: 2
     StructureType: 0
-    EntityType: 5
+    EntityType: 2
   - HexType: 8
     StructureType: 0
     EntityType: 0

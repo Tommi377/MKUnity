@@ -11,6 +11,8 @@ public class Combat {
     private List<Enemy> forced = new List<Enemy>();
     private List<Enemy> defeated = new List<Enemy>();
     private List<Enemy> fullyBlocked = new List<Enemy>();
+
+    private Dictionary<Enemy, EnemySO> summonedEnemies = new Dictionary<Enemy, EnemySO>();
     private Dictionary<Enemy, List<EnemyAttack>> unassignedAttacks = new Dictionary<Enemy, List<EnemyAttack>>();
 
     private List<CombatData> combatCards = new List<CombatData>();
@@ -28,6 +30,7 @@ public class Combat {
     public ReadOnlyCollection<Enemy> Alive => alive.AsReadOnly();
     public ReadOnlyCollection<Enemy> Forced => forced.AsReadOnly();
     public ReadOnlyCollection<Enemy> Defeated => defeated.AsReadOnly();
+    public Dictionary<Enemy, EnemySO> SummonedEnemies => summonedEnemies;
     public Dictionary<Enemy, List<EnemyAttack>> UnassignedAttacks => unassignedAttacks;
 
     public States GetCurrentState() => stateMachine.GetCurrentState();
@@ -66,10 +69,16 @@ public class Combat {
         this.forced.AddRange(forced);
 
         foreach (Enemy enemy in enemies) {
-            if (!unassignedAttacks.ContainsKey(enemy)) {
-                unassignedAttacks[enemy] = new List<EnemyAttack>();
-            }
+            unassignedAttacks[enemy] = new List<EnemyAttack>();
             unassignedAttacks[enemy].AddRange(enemy.Attacks);
+
+            if (enemy.Abilities.Contains(EnemyAbilities.Summon)) {
+                EnemySO summoned = EntityManager.Instance.GetRandomEnemySO(EntityTypes.Dungeon);
+                summonedEnemies.Add(enemy, summoned);
+                unassignedAttacks[enemy].AddRange(summoned.Attacks);
+            } else {
+                unassignedAttacks[enemy].AddRange(enemy.Attacks);
+            }
         }
 
         stateMachine = new CombatStateMachine(this);
@@ -200,15 +209,16 @@ public class Combat {
 
     private void AssignDamageToPlayer() {
         Enemy enemy = Targets[0];
+        List<EnemyAbilities> Abilities = SummonedEnemies[enemy]?.Abilities ?? enemy.Abilities;
 
-        Player.TakeWound(enemy.Abilities.Contains(EnemyAbilities.Poison));
+        Player.TakeWound(Abilities.Contains(EnemyAbilities.Poison));
         DamageToAssign -= Player.Armor;
 
         if (DamageToAssign <= 0) {
             unassignedAttacks[enemy].Remove(AttackToHandle);
         }
 
-        if (enemy.Abilities.Contains(EnemyAbilities.Paralyze)) {
+        if (Abilities.Contains(EnemyAbilities.Paralyze)) {
             Player.DiscardAllNonWounds();
         }
 
@@ -221,15 +231,16 @@ public class Combat {
         }
 
         Enemy enemy = Targets[0];
+        List<EnemyAbilities> Abilities = SummonedEnemies[enemy]?.Abilities ?? enemy.Abilities;
 
-        unit.WoundUnit(enemy.Abilities.Contains(EnemyAbilities.Poison));
+        unit.WoundUnit(Abilities.Contains(EnemyAbilities.Poison));
         DamageToAssign -= unit.Armor;
 
         if (DamageToAssign <= 0) {
             unassignedAttacks[enemy].Remove(AttackToHandle);
         }
 
-        if (enemy.Abilities.Contains(EnemyAbilities.Paralyze)) {
+        if (Abilities.Contains(EnemyAbilities.Paralyze)) {
             Player.DisbandUnit(unit);
         }
 
