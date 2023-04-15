@@ -7,11 +7,6 @@ public class SupplyUI : MonoBehaviour {
     [SerializeField] private TabGroup tabGroup;
     [SerializeField] private ActionPageUI actionPageUI;
 
-    //public void Start() {
-    //    Close();
-    //    transform.GetChild(0).gameObject.SetActive(true);
-    //}
-
     public void OpenSpecial(RoundManager.States state) {
         Open();
         switch (state) {
