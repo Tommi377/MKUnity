@@ -5,28 +5,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
 
-public class BaseAction {
-    public string Name;
-    public string Description;
-    public Action Action;
-    public BaseAction(string name, string description, Action action) {
-        Name = name;
-        Description = description;
-        Action = action;
-    }
-}
-
-public struct LevelStats {
-    public int Armor;
-    public int HandLimit;
-    public int UnitLimit;
-    public LevelStats(int armor, int handLimit, int unitLimit) {
-        Armor = armor;
-        HandLimit = handLimit;
-        UnitLimit = unitLimit;
-    }
-}
-
 [RequireComponent(typeof(Deck))]
 [RequireComponent(typeof(Inventory))]
 public class Player : Entity {
@@ -36,6 +14,9 @@ public class Player : Entity {
 
     /* EVENT DEFINITIONS - START */
     public static event EventHandler OnShuffleDiscardToDeck;
+    public static event EventHandler OnUpdateDeck;
+
+    public static event EventHandler OnLevelUpCardChoose;
 
     public static event EventHandler<CardEventArgs> OnPlayerDisbandUnit;
     public static event EventHandler<CardEventArgs> OnPlayerDrawCard;
@@ -55,6 +36,8 @@ public class Player : Entity {
 
     public static void ResetStaticData() {
         OnShuffleDiscardToDeck = null;
+        OnUpdateDeck = null;
+        OnLevelUpCardChoose = null;
 
         OnPlayerDisbandUnit = null;
         OnPlayerDrawCard = null;
@@ -91,6 +74,8 @@ public class Player : Entity {
     private readonly int[] reputationBonuses = new int[] { -99, -5, -3, -2, -1, -1, 0, 0, 0, 1, 1, 2, 2, 3, 3 };
     private readonly int[] levelThresholds = new int[] { 2, 7, 14, 23, 34, 47, 62, 79, 98, 119 };
 
+    private int unhandledLevelUps = 0;
+
     private readonly List<LevelStats> levelStats = new List<LevelStats>() {
         new LevelStats(2, 5, 1),
         new LevelStats(3, 5, 2),
@@ -122,6 +107,7 @@ public class Player : Entity {
     public bool CanNormalRest() => GetWoundCount() > 0 && GetWoundCount() < HandLimit;
     public bool MustSlowRest() => GetWoundCount() == HandLimit;
     public bool CanEndRound() => deck.Count == 0;
+    public bool HasUnhandledLevelUp() => unhandledLevelUps > 0;
 
     public ReadOnlyCollection<Card> DiscardPile => discard.AsReadOnly();
 
@@ -132,8 +118,6 @@ public class Player : Entity {
 
     private void Start() {
         TurnStartInit();
-
-        Combat.OnCombatEnd += Combat_OnCombatEnd;
 
         RoundManager.Instance.OnNewRound += RoundManager_OnNewRound;
         RoundManager.Instance.OnNewTurn += RoundManager_OnNewTurn;
@@ -147,6 +131,8 @@ public class Player : Entity {
         ButtonInputManager.Instance.OnRecruitUnitClick += ButtonInputManager_OnRecruitUnitClick;
 
         HealAction.OnHealClick += HealAction_OnHealClick;
+
+        SupplyAction.OnAdvancedActionChoose += SupplyAction_OnAdvancedActionChoose;
     }
 
     public bool TryGetCombat(out Combat combat) {
@@ -336,16 +322,25 @@ public class Player : Entity {
         }
     }
 
-    private void LevelUp() {
-        Level += 1;
-    }
-
-    private void GainFame(int amount) {
+    public void GainFame(int amount) {
         // TODO: account for multiple level ups at once
         Fame += amount;
         if (levelThresholds[Level - 1] < Fame) {
             LevelUp();
         }
+    }
+
+    public void ChooseLevelUpCard(Card card) {
+        if (SupplyManager.Instance.GainAdvancedAction(card)) {
+            deck.Add(card);
+            OnUpdateDeck?.Invoke(this, EventArgs.Empty);
+            OnLevelUpCardChoose?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private void LevelUp() {
+        Level += 1;
+        unhandledLevelUps += 1;
     }
 
     private void DrawToHandLimit() {
@@ -415,11 +410,6 @@ public class Player : Entity {
     }
 
     /* ------------------- EVENTS ---------------------- */
-
-    private void Combat_OnCombatEnd(object sender, Combat.OnCombatResultArgs e) {
-        GainFame(e.result.Fame);
-    }
-
     private void RoundManager_OnNewRound(object sender, EventArgs e) {
         RoundStartInit();
     }
@@ -464,5 +454,32 @@ public class Player : Entity {
             HealWound();
         else
             HealUnit(e.Unit);
+    }
+
+    private void SupplyAction_OnAdvancedActionChoose(object sender, SupplyAction.ChoiceIndexArgs e) {
+        Card card = SupplyManager.Instance.AdvancedActionOffer[e.choiceId];
+        ChooseLevelUpCard(card);
+    }
+}
+
+public class BaseAction {
+    public string Name;
+    public string Description;
+    public Action Action;
+    public BaseAction(string name, string description, Action action) {
+        Name = name;
+        Description = description;
+        Action = action;
+    }
+}
+
+public struct LevelStats {
+    public int Armor;
+    public int HandLimit;
+    public int UnitLimit;
+    public LevelStats(int armor, int handLimit, int unitLimit) {
+        Armor = armor;
+        HandLimit = handLimit;
+        UnitLimit = unitLimit;
     }
 }

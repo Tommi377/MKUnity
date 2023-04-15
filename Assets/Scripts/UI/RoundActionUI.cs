@@ -8,6 +8,7 @@ public class RoundActionUI : MonoBehaviour {
     [SerializeField] private ExpandingButtonUI buttonContainer;
     [SerializeField] private TMP_Text roundText;
 
+    [SerializeField] private SupplyUI supplyUI;
     [SerializeField] private CombatUI combatPhaseUI;
     [SerializeField] private InfluenceUI influencePhaseUI;
 
@@ -35,6 +36,9 @@ public class RoundActionUI : MonoBehaviour {
             case RoundManager.States.Influence:
                 influencePhaseUI.gameObject.SetActive(true);
                 break;
+            case RoundManager.States.LevelUp:
+                supplyUI.OpenSpecial(state);
+                break;
             default:
                 buttonContainer.gameObject.SetActive(true);
                 roundText.gameObject.SetActive(true);
@@ -48,16 +52,19 @@ public class RoundActionUI : MonoBehaviour {
         switch (state) {
             case RoundManager.States.RoundStart: return "Start of Round";
             case RoundManager.States.TurnStart: return "Start of Turn";
-            case RoundManager.States.TurnChoice: return "Choose whether to rest";
-            case RoundManager.States.NormalRest: return "Normal rest";
-            case RoundManager.States.SlowRest: return "Slow rest";
-            case RoundManager.States.Move: return "Move phase";
-            case RoundManager.States.PreAction: return "Choose action";
-            case RoundManager.States.Influence: return "Influence phase";
-            case RoundManager.States.Combat: return "Combat phase";
+            case RoundManager.States.TurnChoice: return "Move or Rest";
+            case RoundManager.States.NormalRest: return "Normal Rest";
+            case RoundManager.States.SlowRest: return "Slow Rest";
+            case RoundManager.States.Move: return "Move Phase";
+            case RoundManager.States.PreAction: return "Choose Action";
+            case RoundManager.States.Influence: return "Influence Phase";
+            case RoundManager.States.Combat: return "Combat Phase";
+            case RoundManager.States.SiteRewards: return "Site Rewards";
+            case RoundManager.States.LevelUp: return "Level Up Reward";
+            case RoundManager.States.Withdraw: return "Withdraw from Combat";
             case RoundManager.States.TurnEnd: return "End of Turn";
             case RoundManager.States.RoundEnd: return "End of Round";
-            default: return "";
+            default: return state.ToString();
         }
     }
 

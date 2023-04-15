@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cc3d7ceae0021941bc61c5708520f9e, type: 3}
+  m_Name: AdvancedActionDeck
+  m_EditorClassIdentifier: 
+  cards:
+  - {fileID: 11400000, guid: 0cfc98d44a640524eb099feff637dc4a, type: 2}
+  - {fileID: 11400000, guid: b31365a50156d5747b4d7f6ad98cfc7e, type: 2}
+  - {fileID: 11400000, guid: 254145576d8ee3d4a88fc676fc0b9ef4, type: 2}
+  - {fileID: 11400000, guid: b4836db6138791c458ac2b97242f8c4c, type: 2}

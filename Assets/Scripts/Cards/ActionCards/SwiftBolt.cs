@@ -1,6 +1,6 @@
 
-public class SwfitBolt : ActionCard {
-    public SwfitBolt(ActionCardSO actionCardSO) : base(actionCardSO) { }
+public class SwiftBolt : ActionCard {
+    public SwiftBolt(ActionCardSO actionCardSO) : base(actionCardSO) { }
 
     public override void Apply(CardChoice choice) {
         switch (choice.Id) {

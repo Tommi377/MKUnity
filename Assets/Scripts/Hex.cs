@@ -18,10 +18,10 @@ public enum HexTypes {
 public enum StructureTypes {
     None,
     Portal,
-    MagicalGlade,
+    Glade,
     CrystalMine,
     Village,
-    MageTower,
+    WizardTower,
     Monastery,
     Keep,
     AncientRuins

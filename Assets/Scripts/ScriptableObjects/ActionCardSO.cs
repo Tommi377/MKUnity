@@ -11,6 +11,7 @@ public class ActionCardSO : CardSO {
 
     public override Card.Types Type => Card.Types.Action;
     public override Card CreateInstance() {
+        Debug.Log("Instantiating ActionCard " + Name);
         Type type = System.Type.GetType(Name.Replace(" ", ""));
         return (ActionCard)Activator.CreateInstance(type, new object[] { this });
     }
