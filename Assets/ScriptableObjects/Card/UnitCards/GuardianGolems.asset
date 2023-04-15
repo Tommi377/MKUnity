@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bfd1856fa64c6f469501a8cb7e829a3, type: 3}
   m_Name: GuardianGolems
   m_EditorClassIdentifier: 
-  Name: GuardianGolems
+  Name: Guardian Golems
   Choices:
   - Name: Attack 2
     Description: Attack 2

@@ -16,6 +16,9 @@ public class UnitCardVisual : MonoBehaviour {
     [SerializeField] private Transform woundContainer;
     [SerializeField] private GameObject woundTemplate;
 
+    [SerializeField] private Transform locationContainer;
+    [SerializeField] private GameObject locationTemplate;
+
     private UnitCard unitCard;
 
     private void OnDisable() {
@@ -30,6 +33,8 @@ public class UnitCardVisual : MonoBehaviour {
         nameText.SetText(unitCard.Name);
         influenceText.SetText(unitCard.Influence.ToString());
         armorText.SetText(unitCard.Armor.ToString());
+
+        // Actions
         foreach (CardChoice choice in unitCard.UnitCardSO.Choices) {
             TMP_Text text = Instantiate(abilityTemplate, abilityContainer).GetComponent<TMP_Text>();
             text.SetText(choice.Description);
@@ -38,6 +43,14 @@ public class UnitCardVisual : MonoBehaviour {
             }
             text.gameObject.SetActive(true);
         }
+
+        // Locations
+        foreach (StructureTypes location in unitCard.Locations) {
+            TokenVisual visual = Instantiate(locationTemplate, locationContainer).GetComponent<TokenVisual>();
+            visual.SetText(location.ToString()[0].ToString());
+            visual.gameObject.SetActive(true);
+        }
+
         SetExhaustedStatus();
         SetWounds();
 

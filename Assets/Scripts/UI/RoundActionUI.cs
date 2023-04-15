@@ -8,6 +8,7 @@ public class RoundActionUI : MonoBehaviour {
     [SerializeField] private ExpandingButtonUI buttonContainer;
     [SerializeField] private TMP_Text roundText;
 
+    [SerializeField] private SupplyUI supplyUI;
     [SerializeField] private CombatUI combatPhaseUI;
     [SerializeField] private InfluenceUI influencePhaseUI;
 
@@ -34,6 +35,9 @@ public class RoundActionUI : MonoBehaviour {
                 break;
             case RoundManager.States.Influence:
                 influencePhaseUI.gameObject.SetActive(true);
+                break;
+            case RoundManager.States.LevelUp:
+                supplyUI.OpenSpecial(state);
                 break;
             default:
                 buttonContainer.gameObject.SetActive(true);

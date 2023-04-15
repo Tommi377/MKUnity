@@ -124,6 +124,9 @@ public class GameManager : MonoBehaviour {
     private void EndOfCombat(CombatResult result) {
         Combat.Dispose();
         Combat = null;
+
+        result.Player.GainFame(result.Fame);
+
         foreach (Enemy enemy in result.Defeated) {
             enemy.DestroySelf();
         }

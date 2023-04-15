@@ -56,6 +56,9 @@ public class RoundStateMachine {
         State Combat = CreateState(RoundManager.States.Combat);
         State Influence = CreateState(RoundManager.States.Influence);
         State ActionCard = CreateState(RoundManager.States.ActionCard);
+        State SiteRewards = CreateState(RoundManager.States.SiteRewards);
+        State LevelUp = CreateState(RoundManager.States.LevelUp);
+        State Withdraw = CreateState(RoundManager.States.Withdraw);
         State TurnEnd = CreateState(RoundManager.States.TurnEnd);
         State RoundEnd = CreateState(RoundManager.States.RoundEnd);
 
@@ -66,6 +69,11 @@ public class RoundStateMachine {
         TurnStart.AddAction(OnStateEnterAction.Create(() => AttemptAutomaticTransfer(() => Player.GetStartOfTurnActions().Count == 0)));
         TurnChoice.AddAction(OnStateEnterAction.Create(() => AttemptAutomaticTransfer(() => !Player.CanNormalRest() && !Player.MustSlowRest() && !Player.CanEndRound())));
 
+        SiteRewards.AddAction(OnStateEnterAction.Create(() => AttemptAutomaticTransfer(() => true)));
+        LevelUp.AddAction(OnStateEnterAction.Create(() => AttemptAutomaticTransfer(() => { Debug.Log("Fame "+Player.Fame); return !Player.HasUnhandledLevelUp(); } )));
+        Withdraw.AddAction(OnStateEnterAction.Create(() => AttemptAutomaticTransfer(() => true)));
+        TurnEnd.AddAction(OnStateEnterAction.Create(() => AttemptAutomaticTransfer(() => true)));
+
         List<StateTransition> transitions = new List<StateTransition>() {
             // Start states
             RoundStart  .To(TurnStart,  () => goNextState), // Start of round (has SoT actions)
@@ -75,8 +83,8 @@ public class RoundStateMachine {
             // Resting related states
             TurnChoice  .To(NormalRest, () => goNextState && choiceIndex == 1 && Player.CanNormalRest()), // Normal rest
             TurnChoice  .To(SlowRest,   () => goNextState && choiceIndex == 1 && Player.MustSlowRest()), // slow rest
-            NormalRest  .To(TurnEnd,    () => goNextState), // End of rest
-            SlowRest    .To(TurnEnd,    () => goNextState), // End of rest
+            NormalRest  .To(SiteRewards,() => goNextState), // End of rest
+            SlowRest    .To(SiteRewards,() => goNextState), // End of rest
 
             // Move related states
             TurnChoice  .To(Move,       () => automaticTransfer || goNextState && choiceIndex == 0 && Player.GetHand().Count > 0), // Start move phase
@@ -87,14 +95,18 @@ public class RoundStateMachine {
             PreAction   .To(Combat,     () => goNextState && choiceIndex == 0 && GameManager.Instance.GetPossibleActions().Contains(ActionTypes.Combat)), // Choose combat as action
             PreAction   .To(Influence,  () => goNextState && choiceIndex == 1 && GameManager.Instance.GetPossibleActions().Contains(ActionTypes.Influence)), // Choose influence as action
             PreAction   .To(ActionCard, () => goNextState && choiceIndex == 2 && GameManager.Instance.GetPossibleActions().Contains(ActionTypes.Action)), // Choose actioncard as action
-            PreAction   .To(TurnEnd,    () => goNextState && choiceIndex == 3), // Skip action
+            PreAction   .To(SiteRewards,() => goNextState && choiceIndex == 3), // Skip action
 
-            Combat      .To(TurnEnd,    () => goNextState && GameManager.Instance.Combat == null),
-            Influence   .To(TurnEnd,    () => goNextState),
-            ActionCard  .To(TurnEnd,    () => goNextState),
+            Combat      .To(SiteRewards,() => goNextState && GameManager.Instance.Combat == null),
+            Influence   .To(SiteRewards,() => goNextState),
+            ActionCard  .To(SiteRewards,() => goNextState),
 
             // End states
+            SiteRewards .To(LevelUp,    () => automaticTransfer || goNextState),
+            LevelUp     .To(Withdraw,   () => automaticTransfer || goNextState),
+            Withdraw    .To(TurnEnd,    () => automaticTransfer || goNextState),
             TurnEnd     .To(TurnStart,  () => goNextState),
+
             RoundEnd    .To(RoundStart, () => goNextState),
         };
 

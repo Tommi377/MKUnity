@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AbilityVisual : MonoBehaviour {
+public class TokenVisual : MonoBehaviour {
     [SerializeField] private TMP_Text text;
     [SerializeField] private Image background;
 

@@ -21,6 +21,7 @@ public class DeckUI : MonoBehaviour {
     }
 
     private void Start() {
+        Player.OnUpdateDeck += Player_OnUpdateDeck;
         Player.OnPlayerDrawCard += Player_OnPlayerDrawCard;
         Player.OnPlayerDiscardCard += Player_OnPlayerDiscardCard;
         Player.OnShuffleDiscardToDeck += Player_OnShuffleDiscardToDeck;
@@ -80,6 +81,9 @@ public class DeckUI : MonoBehaviour {
 
     private Player GetPlayer() => GameManager.Instance.CurrentPlayer;
 
+    private void Player_OnUpdateDeck(object sender, System.EventArgs e) {
+        UpdateUI();
+    }
 
     private void Player_OnPlayerDrawCard(object sender, Player.CardEventArgs e) {
         UpdateUI();

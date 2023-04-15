@@ -36,7 +36,7 @@ public class EnemyVisual : MonoBehaviour {
         fameText.SetText(enemySO.Fame.ToString());
 
         foreach (CombatElements resistance in enemySO.Resistances) {
-            AbilityVisual resistanceVisual = Instantiate(abilityVisualPrefab, resistanceContainer).GetComponent<AbilityVisual>();
+            TokenVisual resistanceVisual = Instantiate(abilityVisualPrefab, resistanceContainer).GetComponent<TokenVisual>();
             resistanceVisual.SetText("");
             switch (resistance) {
                 case CombatElements.Ice:
@@ -49,7 +49,7 @@ public class EnemyVisual : MonoBehaviour {
         }
 
         foreach (EnemyAttack attack in enemySO.Attacks) {
-            AbilityVisual attackVisual = Instantiate(abilityVisualPrefab, attackContainer).GetComponent<AbilityVisual>();
+            TokenVisual attackVisual = Instantiate(abilityVisualPrefab, attackContainer).GetComponent<TokenVisual>();
             attackVisual.SetText(attack.Damage.ToString());
             switch(attack.Element) {
                 case CombatElements.Ice:
@@ -66,7 +66,7 @@ public class EnemyVisual : MonoBehaviour {
 
 
         foreach (EnemyAbilities ability in enemySO.Abilities) {
-            AbilityVisual abilityVisual = Instantiate(abilityVisualPrefab, abilityContainer).GetComponent<AbilityVisual>();
+            TokenVisual abilityVisual = Instantiate(abilityVisualPrefab, abilityContainer).GetComponent<TokenVisual>();
             abilityVisual.SetText(ability.ToString()[..2]); // TODO: Make ability visual
         }
     }

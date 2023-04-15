@@ -6,7 +6,7 @@ using UnityEngine;
 public class RoundManager : MonoBehaviour {
     public static RoundManager Instance { get; private set; }
 
-    public enum States { RoundStart, /*RoundCard,*/ TurnStart, TurnChoice, NormalRest, SlowRest, Move, PreAction, Combat, Influence, ActionCard, TurnEnd, RoundEnd }
+    public enum States { RoundStart, TurnStart, TurnChoice, NormalRest, SlowRest, Move, PreAction, Combat, Influence, ActionCard, SiteRewards, LevelUp, Withdraw, TurnEnd, RoundEnd }
 
     /* EVENT DEFINITIONS - START */
     public event EventHandler OnNewRound;
@@ -49,6 +49,8 @@ public class RoundManager : MonoBehaviour {
 
     private void Start() {
         RoundAction.OnRoundNextStateClick += RoundAction_OnRoundNextStateClick;
+
+        Player.OnLevelUpCardChoose += Player_OnLevelUpCardChoose;
     }
 
     // Tests if a card's action is playable with the selected action
@@ -150,6 +152,10 @@ public class RoundManager : MonoBehaviour {
 
     private void RoundAction_OnRoundNextStateClick(object sender, RoundAction.OnRoundNextStateClickArgs e) {
         AttemptStateTransfer(e.choiceId);
+    }
+
+    private void Player_OnLevelUpCardChoose(object sender, EventArgs e) {
+        AttemptStateTransfer();
     }
 }
 
