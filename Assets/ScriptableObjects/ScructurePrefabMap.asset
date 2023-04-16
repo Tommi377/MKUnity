@@ -12,8 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c467e27679101fd4899e711f6678463a, type: 3}
   m_Name: ScructurePrefabMap
   m_EditorClassIdentifier: 
-  structureTypeKey: 040000000200000003000000
-  prefabValue:
-  - {fileID: 2262680798046734203, guid: 839cb720bfd740f4ba37647629fa89a8, type: 3}
-  - {fileID: 2262680798046734203, guid: b00fb0e87fec6284089796da4a830c59, type: 3}
-  - {fileID: 2262680798046734203, guid: 5db60840e1bbe9b48b2495eedb5000bb, type: 3}
+  keys: 00000000030000000200000004000000060000000700000005000000
+  values:
+  - {fileID: 2088803158865821572, guid: 37caf243b04b9a348abaf9b56de79428, type: 3}
+  - {fileID: 3596970846940343332, guid: 2e865e0f49bafd9499df2b542ada1c6b, type: 3}
+  - {fileID: 532590658720173290, guid: 3c484af20d125ee4c9ac2bb4c5d1ba31, type: 3}
+  - {fileID: 7471653849972465108, guid: 57816a9800d606040b1d70024da7bc88, type: 3}
+  - {fileID: 6097429253392228448, guid: 7bb8b94dbf37d7443b019381d9036c1b, type: 3}
+  - {fileID: 7978548051328591437, guid: 7197e2fe3d77e5f4a8f96e71dd19d3fa, type: 3}
+  - {fileID: 826563515322586488, guid: 70a7f1bc8f7037a48ae939b999efa165, type: 3}

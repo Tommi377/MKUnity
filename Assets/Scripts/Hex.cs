@@ -27,8 +27,10 @@ public enum StructureTypes {
     AncientRuins
 }
 
+[RequireComponent(typeof(HexVisual))]
 public class Hex : MonoBehaviour {
-    [SerializeField] Transform entityContainerTransform;
+    [SerializeField] Transform entityContainer;
+    [SerializeField] Transform visualContainer;
 
     List<Entity> _entities = new List<Entity>();
     public ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
@@ -68,13 +70,17 @@ public class Hex : MonoBehaviour {
             }
         }
 
-        if (StructureType != StructureTypes.None) {
-            GameObject prefab = HexMap.Instance.StructurePrefabMap[StructureType];
-            Structure structure = Instantiate(prefab, transform).GetComponent<Structure>();
-            Structure = structure;
+        if (HexMap.Instance.StructurePrefabMap.TryGetValue(StructureType, out GameObject prefab)) {
+            GameObject go = Instantiate(prefab, visualContainer, false);
+            go.name = "OtherVisual";
+            Structure structure = go.GetComponent<Structure>();
+            if (structure != null) {
+                Structure = structure;
+            }
         }
 
-        RenderHex();
+        GetComponent<HexVisual>().Initialize(HexType);
+        //RenderHex();
     }
     public bool Occupied { get => _entities.Count > 0; }
 
@@ -94,7 +100,7 @@ public class Hex : MonoBehaviour {
 
     public void PlaceEntity(Entity entity) {
         entity.Position = Position;
-        entity.gameObject.transform.SetParent(entityContainerTransform, false);
+        entity.gameObject.transform.SetParent(entityContainer, false);
         _entities.Add(entity);
     }
 

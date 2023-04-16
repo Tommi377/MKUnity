@@ -7,6 +7,7 @@ using UnityEngine.Assertions;
 public class HexMap : MonoBehaviour {
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private StructurePrefabMapSO structurePrefabMapSO;
+    [SerializeField] private HexTypePrefabMapSO hexTypePrefabMapSO;
 
     [SerializeField] private MapTileSO mapStart;
     [SerializeField] private MapTileListSO countrysideTiles;
@@ -184,10 +185,14 @@ public class HexMap : MonoBehaviour {
         for (int i = 0; i < 7; i++) {
             Vector3Int microCoordinate = MapTileSO.CoordinateOffsets[i] + MacroToMicroCoordinates(origin);
             Vector3 worldCoordinate = MicroToWorldCoordinates(microCoordinate);
+            HexInfo hexInfo = mapTile.GetHex(i);
 
-            Hex hex = Instantiate(HexPrefab, worldCoordinate, Quaternion.identity, this.transform).GetComponent<Hex>();
+            // Hex hex = Instantiate(HexPrefab, worldCoordinate, Quaternion.identity, this.transform).GetComponent<Hex>();
+            GameObject prefab = hexTypePrefabMapSO.HasKey(hexInfo.HexType) ? hexTypePrefabMapSO.GetValue(hexInfo.HexType) : HexPrefab;
+
+            Hex hex = Instantiate(prefab, worldCoordinate, Quaternion.identity, this.transform).GetComponent<Hex>();
             hex.name = microCoordinate.ToString();
-            hex.Initialize(microCoordinate, mapTile.GetHex(i));
+            hex.Initialize(microCoordinate, hexInfo);
             microCoordinates.Add(microCoordinate, hex);
         }
     }
