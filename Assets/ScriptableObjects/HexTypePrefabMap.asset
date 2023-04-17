@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7163228b37a89c84aa84666887be5fc8, type: 3}
+  m_Name: HexTypePrefabMap
+  m_EditorClassIdentifier: 
+  keys: 01000000060000000700000008000000
+  values:
+  - {fileID: 2088803158865821572, guid: 9b247cc5a0d16cc479dbcc33b2772801, type: 3}
+  - {fileID: 1253105922606848170, guid: 563b752cfe9c769488842ccbda4027e2, type: 3}
+  - {fileID: 169661952486297951, guid: 9f5017cab19b43642bdd6aeee6d74af0, type: 3}
+  - {fileID: 1253105922606848170, guid: c69b2680ce56ddb409493973f292ce89, type: 3}
