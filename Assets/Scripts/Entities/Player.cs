@@ -107,7 +107,10 @@ public class Player : Entity {
     public bool CanNormalRest() => GetWoundCount() > 0 && GetWoundCount() < HandLimit;
     public bool MustSlowRest() => GetWoundCount() == HandLimit;
     public bool CanEndRound() => deck.Count == 0;
-    public bool HasUnhandledLevelUp() => unhandledLevelUps > 0;
+    public bool HasUnhandledLevelUp() {
+        Debug.Log(unhandledLevelUps > 0);
+        return unhandledLevelUps > 0;
+    }
 
     public ReadOnlyCollection<Card> DiscardPile => discard.AsReadOnly();
 

@@ -6299,7 +6299,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
-  m_LocalPosition: {x: 0, y: 5, z: -2}
+  m_LocalPosition: {x: 0, y: 8, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11391,7 +11391,7 @@ MonoBehaviour:
   zoomDamping: 7.5
   stepSize: 1
   maxHeight: 10
-  minHeight: 4
+  minHeight: 6.1
   maxRotateSpeed: 0.5
   edgeTolerance: 0.05
   useScreenEdge: 0
