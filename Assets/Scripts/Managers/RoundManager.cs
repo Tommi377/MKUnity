@@ -21,7 +21,7 @@ public class RoundManager : MonoBehaviour {
 
     public int Round { get; private set; }
     public int Turn { get; private set; }
-    public Time Time { get; private set; }
+    public TimePhase Time { get; private set; }
 
     public States GetCurrentState() => stateMachine.GetCurrentState();
 
@@ -94,8 +94,8 @@ public class RoundManager : MonoBehaviour {
         return true;
     }
 
-    public bool IsDay() => Time == Time.Day;
-    public bool IsNight() => Time == Time.Night;
+    public bool IsDay() => Time == TimePhase.Day;
+    public bool IsNight() => Time == TimePhase.Night;
 
     private void Init() {
         Turn = 0;
@@ -106,7 +106,7 @@ public class RoundManager : MonoBehaviour {
     public void NewRound() {
         Round++;
         Turn = 0;
-        Time = Round % 2 == 0 ? Time.Night : Time.Day;
+        Time = Round % 2 == 0 ? TimePhase.Night : TimePhase.Day;
 
         Debug.Log("New round: " + Round);
         OnNewRound?.Invoke(this, EventArgs.Empty);
@@ -159,7 +159,7 @@ public class RoundManager : MonoBehaviour {
     }
 }
 
-public enum Time { Day, Night }
+public enum TimePhase { Day, Night }
 
 public enum ActionTypes {
     None,
