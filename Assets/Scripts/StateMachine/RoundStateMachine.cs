@@ -25,13 +25,6 @@ public class RoundStateMachine {
         stateMachine.Tick();
     }
 
-    public void AttemptAutomaticTransfer(Func<bool> func) {
-        if (func()) {
-            automaticTransfer = true;
-            stateMachine.Tick();
-        }
-    }
-
     private void OnStateEnter() {
         goNextState = false;
         automaticTransfer = false;
@@ -65,51 +58,40 @@ public class RoundStateMachine {
         RoundStart.AddAction(OnStateExitAction.Create(RoundManager.Instance.RoundStartExit));
         TurnStart.AddAction(OnStateExitAction.Create(RoundManager.Instance.TurnStartExit));
 
-        // Automatic transfer
-        TurnStart.AddAction(OnStateEnterAction.Create(() => AttemptAutomaticTransfer(() => Player.GetStartOfTurnActions().Count == 0)));
-        TurnChoice.AddAction(OnStateEnterAction.Create(() => AttemptAutomaticTransfer(() => !Player.CanNormalRest() && !Player.MustSlowRest() && !Player.CanEndRound())));
+        // Start states
+        RoundStart  .To(TurnStart,  () => goNextState); // Start of round (has SoT actions)
+        TurnStart   .To(TurnChoice, () => goNextState, () => Player.GetStartOfTurnActions().Count == 0); // Start of turn
+        TurnChoice  .To(RoundEnd,   () => goNextState && choiceIndex == 2 && Player.CanEndRound()); // Announce end of round
 
-        SiteRewards.AddAction(OnStateEnterAction.Create(() => AttemptAutomaticTransfer(() => true)));
-        LevelUp.AddAction(OnStateEnterAction.Create(() => AttemptAutomaticTransfer(() => { Debug.Log("Fame "+Player.Fame); return !Player.HasUnhandledLevelUp(); } )));
-        Withdraw.AddAction(OnStateEnterAction.Create(() => AttemptAutomaticTransfer(() => true)));
-        TurnEnd.AddAction(OnStateEnterAction.Create(() => AttemptAutomaticTransfer(() => true)));
+        // Resting related states
+        TurnChoice  .To(NormalRest, () => goNextState && choiceIndex == 1 && Player.CanNormalRest()); // Normal rest
+        TurnChoice  .To(SlowRest,   () => goNextState && choiceIndex == 1 && Player.MustSlowRest()); // slow rest
+        NormalRest  .To(SiteRewards,() => goNextState); // End of rest
+        SlowRest    .To(SiteRewards,() => goNextState); // End of rest
 
-        List<StateTransition> transitions = new List<StateTransition>() {
-            // Start states
-            RoundStart  .To(TurnStart,  () => goNextState), // Start of round (has SoT actions)
-            TurnStart   .To(TurnChoice, () => automaticTransfer || goNextState), // Start of turn
-            TurnChoice  .To(RoundEnd,   () => goNextState && choiceIndex == 2 && Player.CanEndRound()), // Announce end of round
+        // Move related states
+        TurnChoice  .To(Move,       () => goNextState && choiceIndex == 0 && Player.GetHand().Count > 0, () => !Player.CanNormalRest() && !Player.MustSlowRest() && !Player.CanEndRound()); // Start move phase
+        Move        .To(PreAction,  () => goNextState && Player.IsOnSafeHex()); // Move -> Preaction (if on safe hex)
+        Move        .To(Combat,     () => goNextState && !Player.IsOnSafeHex()); // Move -> Combat (if on unsafe hex)
 
-            // Resting related states
-            TurnChoice  .To(NormalRest, () => goNextState && choiceIndex == 1 && Player.CanNormalRest()), // Normal rest
-            TurnChoice  .To(SlowRest,   () => goNextState && choiceIndex == 1 && Player.MustSlowRest()), // slow rest
-            NormalRest  .To(SiteRewards,() => goNextState), // End of rest
-            SlowRest    .To(SiteRewards,() => goNextState), // End of rest
+        // Action related states
+        PreAction   .To(Combat,     () => goNextState && choiceIndex == 0 && GameManager.Instance.GetPossibleActions().Contains(ActionTypes.Combat)); // Choose combat as action
+        PreAction   .To(Influence,  () => goNextState && choiceIndex == 1 && GameManager.Instance.GetPossibleActions().Contains(ActionTypes.Influence)); // Choose influence as action
+        PreAction   .To(ActionCard, () => goNextState && choiceIndex == 2 && GameManager.Instance.GetPossibleActions().Contains(ActionTypes.Action)); // Choose actioncard as action
+        PreAction   .To(SiteRewards,() => goNextState && choiceIndex == 3); // Skip action
 
-            // Move related states
-            TurnChoice  .To(Move,       () => automaticTransfer || goNextState && choiceIndex == 0 && Player.GetHand().Count > 0), // Start move phase
-            Move        .To(PreAction,  () => goNextState && Player.IsOnSafeHex()), // Move -> Preaction (if on safe hex)
-            Move        .To(Combat,     () => goNextState && !Player.IsOnSafeHex()), // Move -> Combat (if on unsafe hex)
+        Combat      .To(SiteRewards,() => goNextState && GameManager.Instance.Combat == null);
+        Influence   .To(SiteRewards,() => goNextState);
+        ActionCard  .To(SiteRewards,() => goNextState);
 
-            // Action related states
-            PreAction   .To(Combat,     () => goNextState && choiceIndex == 0 && GameManager.Instance.GetPossibleActions().Contains(ActionTypes.Combat)), // Choose combat as action
-            PreAction   .To(Influence,  () => goNextState && choiceIndex == 1 && GameManager.Instance.GetPossibleActions().Contains(ActionTypes.Influence)), // Choose influence as action
-            PreAction   .To(ActionCard, () => goNextState && choiceIndex == 2 && GameManager.Instance.GetPossibleActions().Contains(ActionTypes.Action)), // Choose actioncard as action
-            PreAction   .To(SiteRewards,() => goNextState && choiceIndex == 3), // Skip action
+        // End states
+        SiteRewards .To(LevelUp,    () => goNextState, () => true);
+        LevelUp     .To(Withdraw,   () => goNextState, () => !Player.HasUnhandledLevelUp());
+        Withdraw    .To(TurnEnd,    () => goNextState, () => true);
+        TurnEnd     .To(TurnStart,  () => goNextState, () => true);
 
-            Combat      .To(SiteRewards,() => goNextState && GameManager.Instance.Combat == null),
-            Influence   .To(SiteRewards,() => goNextState),
-            ActionCard  .To(SiteRewards,() => goNextState),
+        RoundEnd    .To(RoundStart, () => goNextState);
 
-            // End states
-            SiteRewards .To(LevelUp,    () => automaticTransfer || goNextState),
-            LevelUp     .To(Withdraw,   () => automaticTransfer || goNextState),
-            Withdraw    .To(TurnEnd,    () => automaticTransfer || goNextState),
-            TurnEnd     .To(TurnStart,  () => goNextState),
-
-            RoundEnd    .To(RoundStart, () => goNextState),
-        };
-
-        stateMachine = new StateMachine(RoundStart, transitions);
+        stateMachine = new StateMachine(RoundStart);
     }
 }
