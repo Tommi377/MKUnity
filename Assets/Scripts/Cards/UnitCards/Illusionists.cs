@@ -14,7 +14,7 @@ public class Illusionists : UnitCard {
                 });
                 break;
             case 2:
-                GetPlayer().GetInventory().AddCrystal(Mana.Types.White);
+                GetPlayer().GetInventory().AddCrystal();
                 break;
         }
     }

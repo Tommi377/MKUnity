@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6888c3bfc2e8dca4db77a4ad2eb4a8a4, type: 3}
+  m_Name: ManaDraw
+  m_EditorClassIdentifier: 
+  Name: Mana Draw
+  Choices:
+  - Name: Channel 1 (N)
+    Description: You can use one additional mana die from the Source this turn
+    Id: 0
+    ActionType: 4
+    ManaTypes: 
+  - Name: Mana Draw (S)
+    Description: Take a mana die from the source and set it to any color except gold.
+      Gain two mana tokens of that color. Do not reroll this die when you return
+      it to the Source
+    Id: 1
+    ActionType: 4
+    ManaTypes: 03000000
+  DescUp: You can use one additional mana die from the Source this turn
+  DescDown: Take a mana die from the source and set it to any color except gold.
+    Gain two mana tokens of that color. Do not reroll this die when you return it
+    to the Source
+  ManaTypes: 03000000

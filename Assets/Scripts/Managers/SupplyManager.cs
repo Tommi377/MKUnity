@@ -22,7 +22,7 @@ public class SupplyManager : MonoBehaviour {
             Instance = this;
         }
 
-        IEnumerable<Card> advancedActions = advancedActionListSO.cards.OrderBy(x => UnityEngine.Random.value).Select(cardSO => cardSO.CreateInstance());
+        IEnumerable<Card> advancedActions = advancedActionListSO.GetCards.OrderBy(x => UnityEngine.Random.value).Select(cardSO => cardSO.CreateInstance());
 
         advancedActionStack = new Stack<Card>(advancedActions);
 
@@ -41,10 +41,8 @@ public class SupplyManager : MonoBehaviour {
     private void SupplyOffer() {
         int advancedActionOfferLimit = 3;
         bool updateNeed = AdvancedActionOffer.Count < advancedActionOfferLimit;
-        while (AdvancedActionOffer.Count < advancedActionOfferLimit) {
-            if (advancedActionStack.Count > 0) {
-                AdvancedActionOffer.Add(advancedActionStack.Pop());
-            }
+        while (AdvancedActionOffer.Count < advancedActionOfferLimit && AdvancedActionOffer.Count > 0) {
+            AdvancedActionOffer.Add(advancedActionStack.Pop());
         }
 
         if (updateNeed) {

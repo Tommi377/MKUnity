@@ -37,9 +37,7 @@ public class HandUI : MonoBehaviour {
         Player.OnPlayerDiscardCard += Player_OnPlayerDiscardCard;
         Player.OnPlayerTrashCard += Player_OnPlayerTrashCard;
         Player.OnPlayerDisbandUnit += Player_OnPlayerDisbandUnit;
-
-        ManaManager.Instance.OnManaSelected += ManaManager_OnManaSelected;
-        ManaManager.Instance.OnManaDeselected += ManaManager_OnManaDeselected;
+        Player.OnPlayerManaUpdate += Player_OnPlayerManaUpdate;
 
         RoundManager.Instance.OnRoundStateExit += RoundManager_OnRoundStateExit;
 
@@ -109,20 +107,20 @@ public class HandUI : MonoBehaviour {
             switch (mode) {
                 case SelectionMode.Default: 
                     foreach (CardChoice choice in choices) {
-                        bool interactable = !choice.ManaTypes.Any() || ManaManager.Instance.SelectedManaUsableWithChoice(choice);
-                        Color? manaColor = choice.ManaTypes.Any() ? Mana.GetColor(choice.ManaTypes[0]) : null;
+                        bool interactable = !choice.Super || GameManager.Instance.CurrentPlayer.Mana > 0;
+                        Color? backgroundColor = choice.Super ? Color.yellow : null;
                         Button button = buttonUI.AddButton(
                             choice.Name, () => CardActionClick(selectedCardVisual.Card, choice),
-                            new ExpandingButtonUI.Options() { Interactable = interactable, BackgroundColor = manaColor }
+                            new ExpandingButtonUI.Options() { Interactable = interactable, BackgroundColor = backgroundColor }
                         );
                     }
                     break;
                 case SelectionMode.OnlySuper:
                     foreach (CardChoice choice in choices) {
-                        Color? manaColor = choice.ManaTypes.Any() ? Mana.GetColor(choice.ManaTypes[0]) : null;
-                        if (choice.ManaTypes.Any()) buttonUI.AddButton(
+                        Color? backgroundColor = choice.Super ? Color.yellow : null;
+                        if (choice.Super) buttonUI.AddButton(
                             choice.Name, () => CardActionClick(selectedCardVisual.Card, choice),
-                            new ExpandingButtonUI.Options() { BackgroundColor = manaColor }
+                            new ExpandingButtonUI.Options() { BackgroundColor = backgroundColor }
                         );
                     }
                     break;
@@ -168,11 +166,8 @@ public class HandUI : MonoBehaviour {
         DeselectCard();
     }
 
-    private void ManaManager_OnManaSelected(object sender, ManaManager.OnManaSelectedArgs e) {
-        UpdateChoices();
-    }
 
-    private void ManaManager_OnManaDeselected(object sender, EventArgs e) {
+    private void Player_OnPlayerManaUpdate(object sender, Player.PlayerIntEventArgs e) {
         UpdateChoices();
     }
 

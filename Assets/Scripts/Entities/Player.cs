@@ -29,6 +29,7 @@ public class Player : Entity {
     }
 
     public static event EventHandler<PlayerIntEventArgs> OnPlayerInfluenceUpdate;
+    public static event EventHandler<PlayerIntEventArgs> OnPlayerManaUpdate;
     public static event EventHandler<PlayerIntEventArgs> OnPlayerHealUpdate;
     public class PlayerIntEventArgs : EventArgs {
         public Player Player;
@@ -46,6 +47,7 @@ public class Player : Entity {
         OnPlayerTrashCard = null;
 
         OnPlayerInfluenceUpdate = null;
+        OnPlayerManaUpdate = null;
         OnPlayerHealUpdate = null;
     }
     /* EVENT DEFINITIONS - END */
@@ -54,6 +56,9 @@ public class Player : Entity {
     public int Movement { get; private set; } = 0;
     public int Influence { get; private set; } = 0;
     public int Heal { get; private set; } = 0;
+    public int Mana { get; private set; } = 0;
+
+    public int ManaPerTurn { get; private set; } = 1;
 
     // Components
     private Inventory inventory;
@@ -201,6 +206,16 @@ public class Player : Entity {
 
     public void ReduceFame(int fame) {
         Fame -= fame;
+    }
+
+    public void AddMana(int mana) {
+        OnPlayerManaUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Mana });
+        Mana += mana;
+    }
+
+    public void ReduceMana(int mana) {
+        OnPlayerManaUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Mana });
+        Mana -= mana;
     }
 
     public void HealWound() {
@@ -401,7 +416,11 @@ public class Player : Entity {
     }
 
     private void TurnStartInit() {
-        inventory.RemoveAllTokens();
+        ResetValues();
+
+        Mana = ManaPerTurn;
+        OnPlayerManaUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Mana });
+
         DrawToHandLimit();
     }
 

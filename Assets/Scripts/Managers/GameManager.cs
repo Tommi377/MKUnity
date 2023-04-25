@@ -33,7 +33,6 @@ public class GameManager : MonoBehaviour {
         SetCurrentPlayer(GameObject.FindWithTag("Player").GetComponent<Player>()); // TODO: temp
 
         Combat.OnCombatEnd += Combat_OnCombatEnd;
-
         RoundManager.Instance.OnRoundStateEnter += RoundManager_OnRoundStateEnter;
 
         SetDoneInitializing();

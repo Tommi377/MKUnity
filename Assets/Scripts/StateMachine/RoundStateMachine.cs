@@ -58,7 +58,7 @@ public class RoundStateMachine {
 
         // Start states
         RoundStart  .To(TurnStart,  () => goNextState); // Start of round (has SoT actions)
-        TurnStart   .To(TurnChoice, () => goNextState, () => Player.GetStartOfTurnActions().Count == 0); // Start of turn
+        TurnStart   .To(TurnChoice, () => goNextState); // Start of turn
         TurnChoice  .To(RoundEnd,   () => goNextState && choiceIndex == 2 && Player.CanEndRound()); // Announce end of round
 
         // Resting related states

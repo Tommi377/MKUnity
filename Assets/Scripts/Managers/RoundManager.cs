@@ -60,9 +60,9 @@ public class RoundManager : MonoBehaviour {
         if (!StateAllowsCardPlay(card)) return false; // Can't play if card actions does not include round action
 
         // Use mana
-        if (!options.SkipManaUse && card is ActionCard && actionChoice.ManaTypes.Any()) {
-            if (!ManaManager.Instance.SelectedManaUsableWithChoice(actionChoice)) {
-                Debug.Log("Selected mana not suitable for casting");
+        if (!options.SkipManaUse && card is ActionCard && actionChoice.Super) {
+            if (GameManager.Instance.CurrentPlayer.Mana <= 0) {
+                Debug.Log("Not enough mana");
                 return false;
             }
         }
@@ -164,6 +164,8 @@ public enum TimePhase { Day, Night }
 public enum ActionTypes {
     None,
     Move,
+    Block,
+    Attack,
     Combat,
     Influence,
     Special,

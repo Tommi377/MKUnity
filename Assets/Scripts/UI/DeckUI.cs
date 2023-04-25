@@ -14,6 +14,7 @@ public class DeckUI : MonoBehaviour {
     [SerializeField] private Button shuffleDiscardButton;
     [SerializeField] private TMP_Text deckCountText;
     [SerializeField] private TMP_Text discardCountText;
+    [SerializeField] private TMP_Text manaText;
 
     private void Awake() {
         drawButton.onClick.AddListener(() => ButtonInputManager.Instance.DrawCardClick());
@@ -21,10 +22,11 @@ public class DeckUI : MonoBehaviour {
     }
 
     private void Start() {
-        Player.OnUpdateDeck += Player_OnUpdateDeck;
-        Player.OnPlayerDrawCard += Player_OnPlayerDrawCard;
-        Player.OnPlayerDiscardCard += Player_OnPlayerDiscardCard;
-        Player.OnShuffleDiscardToDeck += Player_OnShuffleDiscardToDeck;
+        Player.OnUpdateDeck += UpdateUIEvent;
+        Player.OnPlayerDrawCard += UpdateUIEvent;
+        Player.OnPlayerDiscardCard += UpdateUIEvent;
+        Player.OnShuffleDiscardToDeck += UpdateUIEvent;
+        Player.OnPlayerManaUpdate += UpdateUIEvent;
 
         if (GameManager.Instance.DoneInitializing) {
             UpdateUI();
@@ -44,6 +46,7 @@ public class DeckUI : MonoBehaviour {
 
         deckCountText.SetText(deckCount.ToString());
         discardCountText.SetText(discardCount.ToString());
+        manaText.SetText(GetManaCount().ToString());
 
         bool renderDeckVisual = deckCount > 0;
         bool renderDiscardVisual = discardCount > 0;
@@ -78,22 +81,11 @@ public class DeckUI : MonoBehaviour {
 
     private int GetDeckCount() => GetPlayer().GetDeckCount();
     private int GetDiscardCount() => GetPlayer().GetDiscardCount();
+    private int GetManaCount() => GetPlayer().Mana;
 
     private Player GetPlayer() => GameManager.Instance.CurrentPlayer;
 
-    private void Player_OnUpdateDeck(object sender, System.EventArgs e) {
-        UpdateUI();
-    }
-
-    private void Player_OnPlayerDrawCard(object sender, Player.CardEventArgs e) {
-        UpdateUI();
-    }
-
-    private void Player_OnPlayerDiscardCard(object sender, Player.CardEventArgs e) {
-        UpdateUI();
-    }
-
-    private void Player_OnShuffleDiscardToDeck(object sender, System.EventArgs e) {
+    private void UpdateUIEvent(object sender, System.EventArgs e) {
         UpdateUI();
     }
 }
