@@ -56,7 +56,7 @@ public class Player : Entity {
     public int Movement { get; private set; } = 0;
     public int Influence { get; private set; } = 0;
     public int Heal { get; private set; } = 0;
-    public int Mana { get; private set; } = 1;
+    public int Mana { get; private set; } = 0;
 
     public int ManaPerTurn { get; private set; } = 1;
 
@@ -417,6 +417,10 @@ public class Player : Entity {
 
     private void TurnStartInit() {
         ResetValues();
+
+        Mana = ManaPerTurn;
+        OnPlayerManaUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Mana });
+
         DrawToHandLimit();
     }
 
@@ -424,9 +428,6 @@ public class Player : Entity {
         Movement = 0;
         Influence = 0;
         Heal = 0;
-        Mana = ManaPerTurn;
-
-        OnPlayerManaUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Mana });
 
         MoveModifiers.Clear();
     }
