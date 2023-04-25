@@ -19,7 +19,7 @@ public class Player : Entity {
 
     public static event EventHandler OnLevelUpCardChoose;
 
-    public static event EventHandler<CardEventArgs> OnPlayerDisbandUnit;
+    public static event EventHandler<CardEventArgs> OnPlayerRemoveItem;
     public static event EventHandler<CardEventArgs> OnPlayerDrawCard;
     public static event EventHandler<CardEventArgs> OnPlayerDiscardCard;
     public static event EventHandler<CardEventArgs> OnPlayerTrashCard;
@@ -30,7 +30,6 @@ public class Player : Entity {
 
     public static event EventHandler<PlayerIntEventArgs> OnPlayerInfluenceUpdate;
     public static event EventHandler<PlayerIntEventArgs> OnPlayerManaUpdate;
-    public static event EventHandler<PlayerIntEventArgs> OnPlayerHealUpdate;
     public class PlayerIntEventArgs : EventArgs {
         public Player Player;
         public int Value;
@@ -41,21 +40,19 @@ public class Player : Entity {
         OnUpdateDeck = null;
         OnLevelUpCardChoose = null;
 
-        OnPlayerDisbandUnit = null;
+        OnPlayerRemoveItem = null;
         OnPlayerDrawCard = null;
         OnPlayerDiscardCard = null;
         OnPlayerTrashCard = null;
 
         OnPlayerInfluenceUpdate = null;
         OnPlayerManaUpdate = null;
-        OnPlayerHealUpdate = null;
     }
     /* EVENT DEFINITIONS - END */
 
     // Actions
     public int Movement { get; private set; } = 0;
     public int Influence { get; private set; } = 0;
-    public int Heal { get; private set; } = 0;
     public int Mana { get; private set; } = 0;
 
     public int ManaPerTurn { get; private set; } = 1;
@@ -66,7 +63,7 @@ public class Player : Entity {
 
     private List<Card> hand = new List<Card>();
     private List<Card> discard = new List<Card>();
-    private List<UnitCard> units = new List<UnitCard>();
+    private List<ItemCard> items = new List<ItemCard>();
 
     // Stats
     public int Level { get; private set; } = 1;
@@ -75,7 +72,7 @@ public class Player : Entity {
     public int ReputationBonus => reputationBonuses[Math.Min(Math.Max(Reputation + 7, 0), reputationBonuses.Length - 1)];
     public int Armor => levelStats[Level / 2].Armor;
     public int HandLimit => levelStats[Level / 2].HandLimit;
-    public int UnitLimit => levelStats[Level / 2].UnitLimit;
+    public int UnitLimit => levelStats[Level / 2].InventoryLimit;
 
     private readonly int[] reputationBonuses = new int[] { -99, -5, -3, -2, -1, -1, 0, 0, 0, 1, 1, 2, 2, 3, 3 };
     private readonly int[] levelThresholds = new int[] { 2, 7, 14, 23, 34, 47, 62, 79, 98, 119 };
@@ -94,8 +91,7 @@ public class Player : Entity {
     public Inventory GetInventory() => inventory;
     public Deck GetDeck() => deck;
     public List<Card> GetHand() => hand;
-    public List<UnitCard> GetUnits() => units;
-    public List<UnitCard> GetWoundedUnits() => units.Where(e => e.Wounded).ToList();
+    public List<ItemCard> GetItems() => items;
 
     // Modifier functions
     List<Func<Hex, int, int>> MoveModifiers = new List<Func<Hex, int, int>>();
@@ -137,9 +133,7 @@ public class Player : Entity {
         ButtonInputManager.Instance.OnShuffleDiscardClick += ButtonInputManager_OnShuffleDiscardClick;
         ButtonInputManager.Instance.OnDrawCardClick += ButtonInputManager_OnDrawCardClick;
         ButtonInputManager.Instance.OnInfluenceChoiceClick += ButtonInputManager_OnInfluenceChoiceClick;
-        ButtonInputManager.Instance.OnRecruitUnitClick += ButtonInputManager_OnRecruitUnitClick;
-
-        HealAction.OnHealClick += HealAction_OnHealClick;
+        ButtonInputManager.Instance.OnBuyItemClick += ButtonInputManager_OnBuyItemClick;
 
         SupplyAction.OnAdvancedActionChoose += SupplyAction_OnAdvancedActionChoose;
     }
@@ -182,16 +176,6 @@ public class Player : Entity {
         OnPlayerInfluenceUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Influence });
     }
 
-    public void AddHeal(int heal) {
-        Heal += heal;
-        OnPlayerHealUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Heal });
-    }
-
-    public void ReduceHeal(int heal) {
-        Heal -= heal;
-        OnPlayerHealUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Heal });
-    }
-
     public void AddReputation(int reputation) {
         Reputation += reputation;
     }
@@ -218,27 +202,15 @@ public class Player : Entity {
         Mana -= mana;
     }
 
-    public void HealWound() {
-        Card found = hand.Find((card) => card is Wound);
-        if (found != null) {
-            hand.Remove(found);
-            OnPlayerTrashCard?.Invoke(this, new CardEventArgs { Player = this, Cards = new List<Card>() { found } });
-
-            ReduceHeal(1);
-        }
-    }
-
-    public void HealUnit(UnitCard unit) {
-        if (units.Contains(unit)) {
-            if (unit.Level <= Heal) {
-                unit.Heal();
-
-                ReduceHeal(unit.Level);
+    public void HealWounds(int heal = 1) {
+        for (int i = 0; i < heal; i++) {
+            Card found = hand.Find((card) => card is Wound);
+            if (found != null) {
+                hand.Remove(found);
+                OnPlayerTrashCard?.Invoke(this, new CardEventArgs { Player = this, Cards = new List<Card>() { found } });
             } else {
-                Debug.LogError("Not enough heal to heal unit");
+                break;
             }
-        } else {
-            Debug.LogError("Player does not own unit");
         }
     }
 
@@ -275,9 +247,9 @@ public class Player : Entity {
         OnPlayerDiscardCard?.Invoke(this, new CardEventArgs { Player = this, Cards = nonWounds });
     }
 
-    public void DisbandUnit(UnitCard unit) {
-        units.Remove(unit);
-        OnPlayerDisbandUnit?.Invoke(this, new CardEventArgs { Player = this, Cards = new List<Card>() { unit } });
+    public void RemoveItem(ItemCard item) {
+        items.Remove(item);
+        OnPlayerRemoveItem?.Invoke(this, new CardEventArgs { Player = this, Cards = new List<Card>() { item } });
     }
     
     public List<BaseAction> GetStartOfTurnActions() {
@@ -396,22 +368,23 @@ public class Player : Entity {
         action.Apply(this);
     }
 
-    private void RecruitUnit(UnitCard unitCard) {
-        int trueCost = unitCard.Influence - ReputationBonus;
+    private void BuyItem(ItemCard itemCard) {
+        int trueCost = itemCard.Cost - ReputationBonus;
         if (Influence < trueCost) {
             Debug.Log("Not enough influence for recruit");
             return;
         }
         ReduceInfluence(trueCost);
-        // TODO: make replace unit if at cap
-        units.Add(unitCard);
-        UnitManager.Instance.RecruitUnit(unitCard);
+        items.Add(itemCard);
+        ItemManager.Instance.BuyItem(itemCard);
     }
 
     private void RoundStartInit() {
         ShuffleDiscardToDeck();
-        foreach (UnitCard unitCard in units) {
-            unitCard.Ready();
+        foreach (ItemCard itemCard in items) {
+            if (itemCard.UseRate == ItemUseRate.Day) {
+                itemCard.Ready();
+            }
         }
     }
 
@@ -421,13 +394,18 @@ public class Player : Entity {
         Mana = ManaPerTurn;
         OnPlayerManaUpdate?.Invoke(this, new PlayerIntEventArgs { Player = this, Value = Mana });
 
+        foreach (ItemCard itemCard in items) {
+            if (itemCard.UseRate == ItemUseRate.Turn) {
+                itemCard.Ready();
+            }
+        }
+
         DrawToHandLimit();
     }
 
     public void ResetValues() {
         Movement = 0;
         Influence = 0;
-        Heal = 0;
 
         MoveModifiers.Clear();
     }
@@ -468,15 +446,12 @@ public class Player : Entity {
         ApplyInfluenceAction(e.influenceAction);
     }
 
-    private void ButtonInputManager_OnRecruitUnitClick(object sender, ButtonInputManager.OnRecruitUnitClickArgs e) {
-        RecruitUnit(e.unitCard);
+    private void ButtonInputManager_OnBuyItemClick(object sender, ButtonInputManager.OnBuyItemClickArgs e) {
+        BuyItem(e.Item);
     }
 
-    private void HealAction_OnHealClick(object sender, HealAction.OnHealClickArgs e) {
-        if (e.Unit == null)
-            HealWound();
-        else
-            HealUnit(e.Unit);
+    private void HealAction_OnHealClick(object sender, EventArgs e) {
+        HealWounds();
     }
 
     private void SupplyAction_OnAdvancedActionChoose(object sender, SupplyAction.ChoiceIndexArgs e) {
@@ -499,10 +474,10 @@ public class BaseAction {
 public struct LevelStats {
     public int Armor;
     public int HandLimit;
-    public int UnitLimit;
-    public LevelStats(int armor, int handLimit, int unitLimit) {
+    public int InventoryLimit;
+    public LevelStats(int armor, int handLimit, int inventoryLimit) {
         Armor = armor;
         HandLimit = handLimit;
-        UnitLimit = unitLimit;
+        InventoryLimit = inventoryLimit;
     }
 }

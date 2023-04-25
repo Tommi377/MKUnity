@@ -12,7 +12,7 @@ public class UnitPageUI : MonoBehaviour {
 
     public void UpdateUI() {
         ResetUI();
-        foreach (UnitCard unit in UnitManager.Instance.UnitOffer) {
+        foreach (ItemCard unit in ItemManager.Instance.ItemOffer) {
             CardVisual unitCardVisual = Instantiate(unitCardVisualPrefab, unitCardContainer).GetComponent<CardVisual>();
             unitCardVisual.Init(unit);
         }

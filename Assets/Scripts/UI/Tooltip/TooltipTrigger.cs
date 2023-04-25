@@ -8,7 +8,7 @@ public abstract class TooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPoi
     protected abstract string GetHeader();
 
     public void OnPointerEnter(PointerEventData eventData) {
-        Show();
+        Show(false);
     }
 
     public void OnPointerExit(PointerEventData eventData) {
@@ -17,23 +17,15 @@ public abstract class TooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPoi
 
     private void OnMouseEnter() {
         if (!TooltipSystemUI.Instance.IsPointerOverUI())
-            Show();
-    }
-
-    private void OnMouseOver() {
-        if (TooltipSystemUI.Instance.IsTooltipEnabled() && TooltipSystemUI.Instance.IsPointerOverUI()) {
-            Hide();
-        } else if (!TooltipSystemUI.Instance.IsTooltipEnabled() && !TooltipSystemUI.Instance.IsPointerOverUI()) {
-            Show();
-        }
+            Show(true);
     }
 
     private void OnMouseExit() {
         Hide();
     }
 
-    private void Show() {
-        TooltipSystemUI.Instance.Show(GetDescription(), GetHeader());
+    private void Show(bool blockedByUI) {
+        TooltipSystemUI.Instance.Show(GetDescription(), GetHeader(), blockedByUI);
     }
 
     private void Hide() {

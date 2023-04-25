@@ -16,7 +16,7 @@ public class Combat {
     private Dictionary<Enemy, List<EnemyAttack>> unassignedAttacks = new Dictionary<Enemy, List<EnemyAttack>>();
 
     private List<CombatData> combatCards = new List<CombatData>();
-    private List<UnitCard> assignedUnits = new List<UnitCard>();
+    private List<ItemCard> assignedUnits = new List<ItemCard>();
 
     public enum States { Start, RangedStart, RangedPlay, BlockStart, BlockPlay, AssignStart, AssignDamage, AttackStart, AttackPlay, Result, End }
 
@@ -70,7 +70,6 @@ public class Combat {
 
         foreach (Enemy enemy in enemies) {
             unassignedAttacks[enemy] = new List<EnemyAttack>();
-            unassignedAttacks[enemy].AddRange(enemy.Attacks);
 
             if (enemy.Abilities.Contains(EnemyAbilities.Summon)) {
                 EnemySO summoned = EntityManager.Instance.GetRandomEnemySO(EntityTypes.Dungeon);
@@ -185,19 +184,6 @@ public class Combat {
         ResetAfterPlay();
     }
 
-    public List<UnitCard> GetAssignableUnits() {
-        List<UnitCard> units = new List<UnitCard>();
-
-        if (Targets[0].Abilities.Contains(EnemyAbilities.Assassination)) return units;
-
-        foreach (UnitCard unit in Player.GetUnits()) {
-            if (!unit.Wounded && !assignedUnits.Contains(unit)) {
-                units.Add(unit);
-            }
-        }
-        return units;
-    }
-
     public bool CanApply(CardChoice cardChoice) {
         // Check Cumbersome
         if (Targets.Count == 1 && cardChoice.ActionType == ActionTypes.Move && Targets[0].Abilities.Contains(EnemyAbilities.Cumbersome)) {
@@ -209,7 +195,7 @@ public class Combat {
 
     private void AssignDamageToPlayer() {
         Enemy enemy = Targets[0];
-        List<EnemyAbilities> Abilities = SummonedEnemies[enemy]?.Abilities ?? enemy.Abilities;
+        List<EnemyAbilities> Abilities = SummonedEnemies.ContainsKey(enemy) ? SummonedEnemies[enemy].Abilities : enemy.Abilities;
 
         Player.TakeWound(Abilities.Contains(EnemyAbilities.Poison));
         DamageToAssign -= Player.Armor;
@@ -222,29 +208,6 @@ public class Combat {
             Player.DiscardAllNonWounds();
         }
 
-        OnCombatDamageAssign?.Invoke(this, EventArgs.Empty);
-    }
-
-    private void AssignDamageToUnit(UnitCard unit) {
-        if (assignedUnits.Contains(unit)) {
-            Debug.LogError("Can't assign damage to the same unit twice");
-        }
-
-        Enemy enemy = Targets[0];
-        List<EnemyAbilities> Abilities = SummonedEnemies[enemy]?.Abilities ?? enemy.Abilities;
-
-        unit.WoundUnit(Abilities.Contains(EnemyAbilities.Poison));
-        DamageToAssign -= unit.Armor;
-
-        if (DamageToAssign <= 0) {
-            unassignedAttacks[enemy].Remove(AttackToHandle);
-        }
-
-        if (Abilities.Contains(EnemyAbilities.Paralyze)) {
-            Player.DisbandUnit(unit);
-        }
-
-        assignedUnits.Add(unit);
         OnCombatDamageAssign?.Invoke(this, EventArgs.Empty);
     }
 
@@ -317,12 +280,7 @@ public class Combat {
     }
 
     private void CombatAction_OnDamageAssignClick(object sender, CombatAction.OnDamageAssignClickArgs e) {
-        if (e.ChoiceId == -1) {
-            AssignDamageToPlayer();
-        } else {
-            UnitCard unit = GetAssignableUnits()[e.ChoiceId];
-            AssignDamageToUnit(unit);
-        }
+        AssignDamageToPlayer();
     }
 }
 

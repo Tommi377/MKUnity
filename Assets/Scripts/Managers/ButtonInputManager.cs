@@ -19,9 +19,9 @@ public class ButtonInputManager : MonoBehaviour {
     public class OnChoiceEffectDoneClickArgs : EventArgs {
         public int choiceId;
     }
-    public event EventHandler<OnRecruitUnitClickArgs> OnRecruitUnitClick;
-    public class OnRecruitUnitClickArgs : EventArgs {
-        public UnitCard unitCard;
+    public event EventHandler<OnBuyItemClickArgs> OnBuyItemClick;
+    public class OnBuyItemClickArgs : EventArgs {
+        public ItemCard Item;
     }
 
     /* MISC RELATED */
@@ -62,8 +62,8 @@ public class ButtonInputManager : MonoBehaviour {
         OnChoiceEffectDoneClick?.Invoke(this, new OnChoiceEffectDoneClickArgs { choiceId = id });
     }
 
-    public void RecruitUnitClick(UnitCard unitCard) {
-        OnRecruitUnitClick?.Invoke(this, new OnRecruitUnitClickArgs { unitCard = unitCard });
+    public void BuyItemClick(ItemCard item) {
+        OnBuyItemClick?.Invoke(this, new OnBuyItemClickArgs { Item = item });
     }
 
     public void ChannelManaClick() {

@@ -18,7 +18,7 @@ public class Village : Structure {
     public override bool CanInfluence(Player player) => true;
 
     public override List<InfluenceAction> InfluenceChoices(Player player) => new List<InfluenceAction> {
-        new InfluenceAction("Heal 1", "Heal 1 wound from your hand", 3, (p) => p.AddHeal(1))
+        new InfluenceAction("Heal 1", "Heal 1 wound from your hand", 3, (p) => p.HealWounds(1))
     };
 
     private List<BaseAction> VillageActionList(Player player) {

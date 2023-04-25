@@ -89,7 +89,7 @@ public class CardManager : MonoBehaviour {
                     SetTarget(card);
                     break;
                 case TargetTypes.UnitCard:
-                    SetTarget(card as UnitCard);
+                    SetTarget(card as ItemCard);
                     break;
             }
         }
@@ -195,7 +195,7 @@ public class CardManager : MonoBehaviour {
     }
 
     private void DiscardIfApplicable(Card card) {
-        if (card is not UnitCard) Player.DiscardCard(card);
+        if (card is not ItemCard) Player.DiscardCard(card);
     }
 
     private void ChooseChoiceEffect(int choiceId) {

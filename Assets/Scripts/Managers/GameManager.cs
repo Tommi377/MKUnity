@@ -71,7 +71,7 @@ public class GameManager : MonoBehaviour {
     private bool CanInfluence() {
         Hex currentHex = CurrentPlayer.GetHex();
         if (currentHex.ContainsStructure() && currentHex.Structure.CanInfluence(CurrentPlayer)) return true;
-        if (UnitManager.Instance.GetUnitOfferForStructure(currentHex.StructureType).Any()) return true;
+        if (ItemManager.Instance.GetItemOfferForStructure(currentHex.StructureType).Any()) return true;
         return false;
     }
 

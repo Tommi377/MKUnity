@@ -9,14 +9,14 @@ public class InfluenceUI : MonoBehaviour {
 
     private void OnEnable() {
         Player.OnPlayerInfluenceUpdate += Player_OnPlayerInfluenceUpdate;
-        UnitManager.Instance.OnUnitRecruit += UnitManager_OnUnitRecruit;
+        ItemManager.Instance.OnItemBuy += UnitManager_OnUnitRecruit;
 
         UpdateUI();
     }
 
     private void OnDisable() {
         Player.OnPlayerInfluenceUpdate -= Player_OnPlayerInfluenceUpdate;
-        UnitManager.Instance.OnUnitRecruit -= UnitManager_OnUnitRecruit;
+        ItemManager.Instance.OnItemBuy -= UnitManager_OnUnitRecruit;
     }
 
     private void UpdateUI() {
@@ -30,11 +30,11 @@ public class InfluenceUI : MonoBehaviour {
                 new ExpandingButtonUI.Options() { Interactable = action.Cost <= influence }
             );
         }
-        foreach (UnitCard unitCard in GetUnitOffer()) {
-            string text = "Recruit\n" + unitCard.Name + "\nCost: " + unitCard.Influence;
+        foreach (ItemCard itemCard in GetItemOffer()) {
+            string text = "Buy\n" + itemCard.Name + "\nCost: " + itemCard.Cost;
             buttonContainer.AddButton(
-                text, () => ButtonInputManager.Instance.RecruitUnitClick(unitCard),
-                new ExpandingButtonUI.Options() { Interactable = unitCard.Influence <= influence }
+                text, () => ButtonInputManager.Instance.BuyItemClick(itemCard),
+                new ExpandingButtonUI.Options() { Interactable = itemCard.Cost <= influence }
             );
         }
 
@@ -50,18 +50,18 @@ public class InfluenceUI : MonoBehaviour {
         return new List<InfluenceAction>();
     }
 
-    private List<UnitCard> GetUnitOffer() {
+    private List<ItemCard> GetItemOffer() {
         if (GameManager.Instance.CurrentPlayer.TryGetHex(out Hex hex)) {
-            return UnitManager.Instance.GetUnitOfferForStructure(hex.StructureType);
+            return ItemManager.Instance.GetItemOfferForStructure(hex.StructureType);
         }
-        return new List<UnitCard>();
+        return new List<ItemCard>();
     }
 
     private void Player_OnPlayerInfluenceUpdate(object sender, Player.PlayerIntEventArgs e) {
         UpdateUI();
     }
 
-    private void UnitManager_OnUnitRecruit(object sender, UnitManager.OnUnitRecruitArgs e) {
+    private void UnitManager_OnUnitRecruit(object sender, ItemManager.OnItemBuyArgs e) {
         UpdateUI();
     }
 }

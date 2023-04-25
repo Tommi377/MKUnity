@@ -36,12 +36,12 @@ public class HandUI : MonoBehaviour {
         Player.OnPlayerDrawCard += Player_OnPlayerDrawCard;
         Player.OnPlayerDiscardCard += Player_OnPlayerDiscardCard;
         Player.OnPlayerTrashCard += Player_OnPlayerTrashCard;
-        Player.OnPlayerDisbandUnit += Player_OnPlayerDisbandUnit;
+        Player.OnPlayerRemoveItem += Player_OnPlayerDisbandUnit;
         Player.OnPlayerManaUpdate += Player_OnPlayerManaUpdate;
 
         RoundManager.Instance.OnRoundStateExit += RoundManager_OnRoundStateExit;
 
-        UnitManager.Instance.OnUnitRecruit += UnitManager_OnUnitRecruit;
+        ItemManager.Instance.OnItemBuy += UnitManager_OnUnitRecruit;
 
         EventSignalManager.OnChangeHandUIMode += EventSignalManager_OnChangeHandUIMode;
     }
@@ -61,7 +61,7 @@ public class HandUI : MonoBehaviour {
                 GameManager.Instance.CurrentPlayer.GetHand().ForEach((card) => AddCard(card));
                 break;
             case State.Unit:
-                GameManager.Instance.CurrentPlayer.GetUnits().ForEach((card) => AddCard(card));
+                GameManager.Instance.CurrentPlayer.GetItems().ForEach((card) => AddCard(card));
                 break;
         }
     }
@@ -175,7 +175,7 @@ public class HandUI : MonoBehaviour {
         DeselectCard();
     }
 
-    private void UnitManager_OnUnitRecruit(object sender, UnitManager.OnUnitRecruitArgs e) {
+    private void UnitManager_OnUnitRecruit(object sender, ItemManager.OnItemBuyArgs e) {
         UpdateHand();
     }
 

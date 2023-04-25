@@ -1,6 +1,6 @@
 
-public class Peasants : UnitCard {
-    public Peasants(UnitCardSO UnitCardSO) : base(UnitCardSO) { }
+public class Peasants : ItemCard {
+    public Peasants(ItemCardSO UnitCardSO) : base(UnitCardSO) { }
 
     public override void Apply(CardChoice choice) {
         switch(choice.Id) {

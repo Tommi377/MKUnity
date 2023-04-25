@@ -37,7 +37,10 @@ public class EnemyButtonVisual : MonoBehaviour {
 
         enemyVisual.Init(enemy.EnemySO);
         UpdateUI(state);
-        DrawSummonToken(state);
+
+        if (Combat.SummonedEnemies.ContainsKey(Enemy)) {
+            DrawSummonToken(state);
+        }
     }
 
     public void ToggleSelect() {
@@ -101,7 +104,7 @@ public class EnemyButtonVisual : MonoBehaviour {
             case Combat.States.BlockStart:
             case Combat.States.AssignStart:
                 if (Combat.UnassignedAttacks.TryGetValue(Enemy, out List<EnemyAttack> unassigned)) {
-                    List<EnemyAttack> attacks = Combat.SummonedEnemies[Enemy] ? Combat.SummonedEnemies[Enemy].Attacks : Enemy.Attacks;
+                    List<EnemyAttack> attacks = Combat.SummonedEnemies.ContainsKey(Enemy) ? Combat.SummonedEnemies[Enemy].Attacks : Enemy.Attacks;
 
                     for (int i = 0; i < attacks.Count; i++) {
                         int choiceIndex = i;

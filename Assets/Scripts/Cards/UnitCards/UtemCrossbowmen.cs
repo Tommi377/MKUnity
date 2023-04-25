@@ -1,6 +1,6 @@
 
-public class UtemCrossbowmen : UnitCard {
-    public UtemCrossbowmen(UnitCardSO UnitCardSO) : base(UnitCardSO) { }
+public class UtemCrossbowmen : ItemCard {
+    public UtemCrossbowmen(ItemCardSO UnitCardSO) : base(UnitCardSO) { }
 
     public override void Apply(CardChoice choice) {
         switch (choice.Id) {
