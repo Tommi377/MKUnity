@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class MagicalGlade : Structure {
+    public override StructureTypes StructureType => StructureTypes.Glade;
+
     public override List<BaseAction> StartOfTurnActions(Player player) => new List<BaseAction>() {
         new BaseAction(
             "Gain " + (RoundManager.Instance.IsDay() ? "Gold" : "Black") + "\ntoken",

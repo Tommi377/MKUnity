@@ -9,7 +9,6 @@ public class CombatStateMachine {
 
     // Flags
     private bool goNextState = false;
-    private bool transferIfNoEnemies = false;
 
     private StateMachine stateMachine;
 
@@ -30,7 +29,6 @@ public class CombatStateMachine {
 
     private void OnStateEnter() {
         goNextState = false;
-        transferIfNoEnemies = false;
         combat.CombatStateEnter();
     }
 

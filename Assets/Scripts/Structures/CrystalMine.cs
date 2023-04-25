@@ -5,6 +5,7 @@ using UnityEngine;
 public class CrystalMine : Structure {
     [SerializeField] Renderer[] crystalRenderers;
 
+    public override StructureTypes StructureType => StructureTypes.CrystalMine;
     private Mana.Types manaType;
 
     private void Awake() {

@@ -6,7 +6,6 @@ using UnityEngine;
 public class RoundStateMachine {
     // Flags
     private bool goNextState = false;
-    private bool automaticTransfer = false;
     private int choiceIndex = -1;
 
     private StateMachine stateMachine;
@@ -27,7 +26,6 @@ public class RoundStateMachine {
 
     private void OnStateEnter() {
         goNextState = false;
-        automaticTransfer = false;
         choiceIndex = -1;
         RoundManager.Instance.RoundStateEnter();
     }

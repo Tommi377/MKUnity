@@ -106,9 +106,9 @@ public class MouseInputManager : MonoBehaviour {
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask)) {
                 Transform selection = hit.transform;
                 if (selection) {
-                    Hex hex = selection.parent.parent.GetComponent<Hex>();
+                    Hex hex = selection.GetComponent<Hex>();
                     OnHexClick?.Invoke(this, new OnHexClickArgs { hex = hex });
-                    Debug.Log("Clicked hex: " + selection.parent.parent.name);
+                    Debug.Log("Clicked hex: " + selection.name);
                 }
             }
         }

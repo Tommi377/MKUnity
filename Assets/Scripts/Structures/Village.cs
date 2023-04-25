@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Village : Structure {
+    public override StructureTypes StructureType => StructureTypes.Village;
+
     private List<Player> plundered = new List<Player>();
 
     private void Start() {
