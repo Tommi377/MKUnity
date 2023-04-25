@@ -4,8 +4,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 public abstract class TooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
-    private LTDescr showDelay;
-
     protected abstract string GetDescription();
     protected abstract string GetHeader();
 
@@ -35,16 +33,10 @@ public abstract class TooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPoi
     }
 
     private void Show() {
-        if (TooltipSystemUI.Instance.IsTooltipEnabled()) {
-            TooltipSystemUI.Instance.Show(GetDescription(), GetHeader());
-        } else {
-            showDelay = LeanTween.delayedCall(0.5f, () => TooltipSystemUI.Instance.Show(GetDescription(), GetHeader()));
-        }
+        TooltipSystemUI.Instance.Show(GetDescription(), GetHeader());
     }
 
     private void Hide() {
-        if (showDelay != null)
-            LeanTween.cancel(showDelay.uniqueId);
         TooltipSystemUI.Instance.Hide();
     }
 }
