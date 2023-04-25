@@ -10,6 +10,7 @@ using UnityEngine;
 public class Player : Entity {
     [SerializeField] private CardSO woundSO;
 
+    public override string Name => "Player";
     public override EntityTypes EntityType { get { return EntityTypes.Player; } }
 
     /* EVENT DEFINITIONS - START */

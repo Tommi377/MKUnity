@@ -118,37 +118,4 @@ public class Hex : MonoBehaviour {
     }
 
     private static readonly int[,] defaultMoveCosts = new int[,] { { 2, 2 }, { 3, 3 }, { 3, 5 }, { 4, 4 }, { 5, 3 }, { 5, 5 }, { -1, -1 }, { -1, -1 }, { -1, -1 } };
-
-    private void RenderHex() {
-        Renderer mr = GetComponentInChildren<Renderer>();
-        switch (HexType) {
-            case HexTypes.Plains:
-                mr.material.color = new Color(0.5f, 1f, 0f, 1f);
-                break;
-            case HexTypes.Hills:
-                mr.material.color = new Color(0.5f, 0.3f, 0f, 1f);
-                break;
-            case HexTypes.Forest:
-                mr.material.color = new Color(0f, 0.5f, 0f, 1f);
-                break;
-            case HexTypes.Wasteland:
-                mr.material.color = new Color(0.25f, 0.25f, 0f, 1f);
-                break;
-            case HexTypes.Desert:
-                mr.material.color = new Color(1f, 0.75f, 0f, 1f);
-                break;
-            case HexTypes.Swamp:
-                mr.material.color = new Color(0f, 1f, 0.75f, 1f);
-                break;
-            case HexTypes.Lake:
-                mr.material.color = new Color(0f, 0.5f, 1f, 1f);
-                break;
-            case HexTypes.Mountain:
-                mr.material.color = new Color(0.5f, 0.5f, 0.5f, 1f);
-                break;
-            case HexTypes.Inaccessable:
-                mr.material.color = new Color(0f, 0f, 0f, 1f);
-                break;
-        }
-    }
 }

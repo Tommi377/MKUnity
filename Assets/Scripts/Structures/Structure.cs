@@ -20,6 +20,8 @@ public class InfluenceAction {
 public abstract class Structure : MonoBehaviour {
     private static readonly List<BaseAction> emptyList = new List<BaseAction>();
 
+    public abstract StructureTypes StructureType { get; }
+
     public virtual List<BaseAction> StartOfTurnActions(Player player) => emptyList;
     public virtual List<BaseAction> EndOfTurnActions(Player player) => emptyList;
 

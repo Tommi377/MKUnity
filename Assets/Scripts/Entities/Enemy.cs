@@ -21,7 +21,7 @@ public enum EnemyAbilities {
 public class Enemy : Entity {
     public EnemySO EnemySO;
 
-    public string Name => EnemySO.Name;
+    public override string Name => EnemySO.Name;
     public int Armor => EnemySO.Armor;
     public int Fame => EnemySO.Fame;
     public List<CombatElements> Resistances => EnemySO.Resistances;
