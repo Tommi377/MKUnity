@@ -8,14 +8,12 @@ using UnityEngine;
 [Serializable]
 public class CardChoice {
     public string Name;
-    public string Description;
     public int Id;
     public ActionTypes ActionType;
     public bool Super;
 
-    public CardChoice(string name, string description, int id, ActionTypes actionTypes, bool super = false) {
+    public CardChoice(string name, int id, ActionTypes actionTypes, bool super = false) {
         Name = name;
-        Description = description;
         Id = id;
         ActionType = actionTypes;
         Super = super;
@@ -32,7 +30,7 @@ public abstract class Card {
         Wound,
         Spell,
         Artifact,
-        Unit
+        Item
     }
 
     public Card(CardSO cardSO) {

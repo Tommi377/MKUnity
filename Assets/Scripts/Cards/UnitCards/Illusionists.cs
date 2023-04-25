@@ -1,6 +1,6 @@
 
-public class Illusionists : UnitCard {
-    public Illusionists(UnitCardSO UnitCardSO) : base(UnitCardSO) { }
+public class Illusionists : ItemCard {
+    public Illusionists(ItemCardSO UnitCardSO) : base(UnitCardSO) { }
 
     public override void Apply(CardChoice choice) {
         switch (choice.Id) {

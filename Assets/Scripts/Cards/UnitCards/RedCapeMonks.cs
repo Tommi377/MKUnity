@@ -1,6 +1,6 @@
 
-public class RedCapeMonks : UnitCard {
-    public RedCapeMonks(UnitCardSO UnitCardSO) : base(UnitCardSO) { }
+public class RedCapeMonks : ItemCard {
+    public RedCapeMonks(ItemCardSO UnitCardSO) : base(UnitCardSO) { }
 
     public override void Apply(CardChoice choice) {
         switch (choice.Id) {

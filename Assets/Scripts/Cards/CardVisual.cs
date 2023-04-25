@@ -7,7 +7,7 @@ public class CardVisual : MonoBehaviour {
     [SerializeField] private Transform highlight;
     [SerializeField] private GameObject actionCardPrefab;
     [SerializeField] private GameObject woundCardPrefab;
-    [SerializeField] private GameObject unitCardPrefab;
+    [SerializeField] private GameObject itemCardPrefab;
 
     public Card Card { get; private set; }
 
@@ -39,9 +39,9 @@ public class CardVisual : MonoBehaviour {
             case Card.Types.Wound:
                 GameObject woundVisual = Instantiate(woundCardPrefab, cardGraphics);
                 break;
-            case Card.Types.Unit:
-                UnitCardVisual unitCardVisual = Instantiate(unitCardPrefab, cardGraphics).GetComponent<UnitCardVisual>();
-                unitCardVisual.Init(Card as UnitCard);
+            case Card.Types.Item:
+                ItemCardVisual itemCardVisual = Instantiate(itemCardPrefab, cardGraphics).GetComponent<ItemCardVisual>();
+                itemCardVisual.Init(Card as ItemCard);
                 break;
         }
     }

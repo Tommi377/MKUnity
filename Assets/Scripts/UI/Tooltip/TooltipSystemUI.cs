@@ -6,6 +6,8 @@ using UnityEngine.EventSystems;
 public class TooltipSystemUI : MonoBehaviour {
     public static TooltipSystemUI Instance;
 
+    private bool tooltipEnabled = false;
+    private bool blockedByUI;
     private LTDescr showDelay;
     private LTDescr hideDelay;
 
@@ -19,10 +21,21 @@ public class TooltipSystemUI : MonoBehaviour {
         }
     }
 
-    public bool IsPointerOverUI() => EventSystem.current.IsPointerOverGameObject();
-    public bool IsTooltipEnabled() => tooltip.gameObject.activeSelf;
+    private void Update() {
+        if (blockedByUI && IsTooltipEnabled()) {
+            if (tooltip.gameObject.activeSelf && IsPointerOverUI()) {
+                tooltip.Hide();
+            } else if (!tooltip.gameObject.activeSelf && !IsPointerOverUI()) {
+                tooltip.Show();
+            }
+        }
+    }
 
-    public void Show(string description, string header = "") {
+    public bool IsPointerOverUI() => EventSystem.current.IsPointerOverGameObject();
+    public bool IsTooltipEnabled() => tooltipEnabled;
+
+    public void Show(string description, string header, bool blockedByUI) {
+        this.blockedByUI = blockedByUI;
         tooltip.SetText(description, header);
 
         if (hideDelay != null) {
@@ -30,7 +43,10 @@ public class TooltipSystemUI : MonoBehaviour {
             hideDelay = null;
         }
 
-        showDelay = LeanTween.delayedCall(0.5f, () => tooltip.Show());
+        showDelay = LeanTween.delayedCall(0.5f, () => {
+            tooltipEnabled = true;
+            tooltip.Show();
+        });
     }
 
     public void Hide() {
@@ -38,6 +54,9 @@ public class TooltipSystemUI : MonoBehaviour {
             LeanTween.cancel(showDelay.uniqueId);
             showDelay = null;
         }
-        hideDelay = LeanTween.delayedCall(0.05f, () => tooltip.Hide());
+        hideDelay = LeanTween.delayedCall(0.05f, () => {
+            tooltipEnabled = false;
+            tooltip.Hide();
+        });
     }
 }

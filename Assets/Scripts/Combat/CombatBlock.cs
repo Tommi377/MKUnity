@@ -17,7 +17,7 @@ public class CombatBlock {
     public CombatBlock(Combat combat, Enemy enemy, EnemyAttack attack) {
         Player = combat.Player;
         Enemy = enemy;
-        Abilities = combat.SummonedEnemies[enemy]?.Abilities ?? enemy.Abilities;
+        Abilities = combat.SummonedEnemies.ContainsKey(enemy) ? combat.SummonedEnemies[enemy].Abilities : enemy.Abilities;
         Attack = attack;
         CombatCards = combat.CombatCards;
 

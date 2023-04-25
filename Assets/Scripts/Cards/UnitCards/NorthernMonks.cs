@@ -1,6 +1,6 @@
 
-public class NorthernMonks : UnitCard {
-    public NorthernMonks(UnitCardSO UnitCardSO) : base(UnitCardSO) { }
+public class NorthernMonks : ItemCard {
+    public NorthernMonks(ItemCardSO UnitCardSO) : base(UnitCardSO) { }
 
     public override void Apply(CardChoice choice) {
         switch (choice.Id) {

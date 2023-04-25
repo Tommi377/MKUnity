@@ -9,8 +9,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c92d35336307f694bba59411e17de9cf, type: 3}
-  m_Name: UnitListElite
+  m_Script: {fileID: 11500000, guid: 2bfd1856fa64c6f469501a8cb7e829a3, type: 3}
+  m_Name: GoodShoes
   m_EditorClassIdentifier: 
-  Elite: 1
-  List: []
+  Name: Good Shoes
+  Choices:
+  - Name: Move 2 & terrain cost -1 except plains
+    Id: 0
+    ActionType: 1
+    Super: 0
+  Tier: 1
+  Cost: 3
+  Weight: 1
+  Locations: 04000000
+  UseRate: 0

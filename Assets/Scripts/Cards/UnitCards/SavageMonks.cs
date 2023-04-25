@@ -1,6 +1,6 @@
 
-public class SavageMonks : UnitCard {
-    public SavageMonks(UnitCardSO UnitCardSO) : base(UnitCardSO) { }
+public class SavageMonks : ItemCard {
+    public SavageMonks(ItemCardSO UnitCardSO) : base(UnitCardSO) { }
 
     public override void Apply(CardChoice choice) {
         switch (choice.Id) {

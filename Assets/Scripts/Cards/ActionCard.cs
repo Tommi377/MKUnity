@@ -19,10 +19,10 @@ public abstract class ActionCard : Card {
 
     public override List<CardChoice> Choices() {
         List<CardChoice> choices = new List<CardChoice>() {
-            new CardChoice("Influence 1 (D)", "Influence 1 (D)", -4, ActionTypes.Influence),
-            new CardChoice("Block 1 (D)", "Block 1 (D)", -3, ActionTypes.Combat),
-            new CardChoice("Attack 1 (D)", "Attack 1 (D)", -2, ActionTypes.Combat),
-            new CardChoice("Move 1 (D)", "Move 1 (D)", -1, ActionTypes.Move),
+            new CardChoice("Influence 1", -4, ActionTypes.Influence),
+            new CardChoice("Block 1", -3, ActionTypes.Combat),
+            new CardChoice("Attack 1", -2, ActionTypes.Combat),
+            new CardChoice("Move 1",  -1, ActionTypes.Move),
         };
 
         choices.AddRange(CardSO.Choices);
