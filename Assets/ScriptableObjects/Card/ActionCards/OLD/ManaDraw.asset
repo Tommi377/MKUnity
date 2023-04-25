@@ -13,11 +13,9 @@ MonoBehaviour:
   m_Name: ManaDraw
   m_EditorClassIdentifier: 
   Name: Mana Draw
-  Type: 0
   Choices:
-  - Name: Channel +1 (N)
+  - Name: Channel 1 (N)
     Description: You can use one additional mana die from the Source this turn
-    Super: 0
     Id: 0
     ActionType: 4
     ManaTypes: 
@@ -25,7 +23,6 @@ MonoBehaviour:
     Description: Take a mana die from the source and set it to any color except gold.
       Gain two mana tokens of that color. Do not reroll this die when you return
       it to the Source
-    Super: 1
     Id: 1
     ActionType: 4
     ManaTypes: 03000000

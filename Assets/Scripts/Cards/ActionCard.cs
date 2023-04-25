@@ -12,7 +12,6 @@ public abstract class ActionCard : Card {
     public override Types Type => Types.Action;
     public string DescUp => ActionCardSO.DescUp;
     public string DescDown => ActionCardSO.DescDown;
-    public List<Mana.Types> ManaTypes => ActionCardSO.ManaTypes;
 
     private ActionCardSO ActionCardSO => CardSO as ActionCardSO;
 

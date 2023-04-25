@@ -16,6 +16,6 @@ public class CrystalMine : Structure {
     }
 
     public override List<BaseAction> EndOfTurnActions(Player player) => new List<BaseAction>() {
-        new BaseAction("Crystal", "Gain a " + manaType + " crystal", () => player.GetInventory().AddCrystal(manaType))
+        new BaseAction("Crystal", "Gain a mana crystal", () => player.GetInventory().AddCrystal())
     };
 }

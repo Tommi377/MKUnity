@@ -24,10 +24,6 @@ public class MouseInputManager : MonoBehaviour {
     public class OnManaSourceClickArgs : EventArgs {
         public ManaSourceVisual manaSourceVisual;
     }
-    public event EventHandler<OnManaCrystalClickArgs> OnManaCrystalClick;
-    public class OnManaCrystalClickArgs : EventArgs {
-        public CrystalCounterVisual crystalCounterVisual;
-    }
     public event EventHandler<OnManaTokenClickArgs> OnManaTokenClick;
     public class OnManaTokenClickArgs : EventArgs {
         public ManaTokenVisual manaTokenVisual;
@@ -71,15 +67,6 @@ public class MouseInputManager : MonoBehaviour {
                     ManaSourceVisual manaSourceVisual = found.gameObject.GetComponent<ManaSourceVisual>();
                     Debug.Log("Hit " + found.gameObject.name);
                     OnManaSourceClick?.Invoke(this, new OnManaSourceClickArgs { manaSourceVisual = manaSourceVisual });
-                    return;
-                }
-
-                // Raycast hits mana crystal
-                found = results.Find(result => result.gameObject.CompareTag("ManaCrystal"));
-                if (found.gameObject) {
-                    CrystalCounterVisual crystalCounterVisual = found.gameObject.GetComponent<CrystalCounterVisual>();
-                    Debug.Log("Hit " + found.gameObject.name);
-                    OnManaCrystalClick?.Invoke(this, new OnManaCrystalClickArgs { crystalCounterVisual = crystalCounterVisual });
                     return;
                 }
 

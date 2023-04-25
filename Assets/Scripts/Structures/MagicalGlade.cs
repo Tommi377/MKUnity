@@ -7,9 +7,9 @@ public class MagicalGlade : Structure {
 
     public override List<BaseAction> StartOfTurnActions(Player player) => new List<BaseAction>() {
         new BaseAction(
-            "Gain " + (RoundManager.Instance.IsDay() ? "Gold" : "Black") + "\ntoken",
-            "Gold on day. Black on night",
-            () => player.GetInventory().AddToken(RoundManager.Instance.IsDay() ? Mana.Types.Gold : Mana.Types.Black)
+            "Channel 1",
+            "Channel 1",
+            () => player.AddMana(1)
         )
     };
 

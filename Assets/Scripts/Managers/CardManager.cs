@@ -76,9 +76,6 @@ public class CardManager : MonoBehaviour {
         MouseInputManager.Instance.OnCardClick += MouseInputManager_OnCardClick;
         ButtonInputManager.Instance.OnCardActionClick += ButtonInputManager_OnCardActionClick;
         ButtonInputManager.Instance.OnChoiceEffectDoneClick += ButtonInputManager_OnChoiceEffectDoneClick;
-
-        ManaManager.Instance.OnManaSelected += ManaManager_OnManaSelected;
-        ManaManager.Instance.OnManaSourceSelected += ManaManager_OnManaSourceSelected;
     }
 
     public bool CanPlay() {
@@ -120,8 +117,8 @@ public class CardManager : MonoBehaviour {
 
         Debug.Log("Play card " + card.Name + " (" + choice.Name + ")");
 
-        if (!options.SkipManaUse && card is ActionCard && choice.ManaTypes.Any()) {
-            ManaManager.Instance.UseSelectedMana();
+        if (!options.SkipManaUse && card is ActionCard && choice.Super) {
+            Player.ReduceMana(1);
         }
 
         // Targeting card handling
@@ -226,18 +223,6 @@ public class CardManager : MonoBehaviour {
 
     private void ButtonInputManager_OnChoiceEffectDoneClick(object sender, ButtonInputManager.OnChoiceEffectDoneClickArgs e) {
         ChooseChoiceEffect(e.choiceId);
-    }
-
-    private void ManaManager_OnManaSelected(object sender, ManaManager.OnManaSelectedArgs e) {
-        if (targetingCard != null && targetingCard.TargetType == TargetTypes.AnyMana) {
-            SetTarget(e.mana);
-        }
-    }
-
-    private void ManaManager_OnManaSourceSelected(object sender, ManaManager.OnManaSourceSelectedArgs e) {
-        if (targetingCard != null && targetingCard.TargetType == TargetTypes.ManaSource) {
-            SetTarget(e.manaSource);
-        }
     }
 
 }

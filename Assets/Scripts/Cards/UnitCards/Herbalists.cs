@@ -15,7 +15,7 @@ public class Herbalists : UnitCard, ITargetingCard<UnitCard> {
                 cachedTarget.Ready();
                 break;
             case 2:
-                GetPlayer().GetInventory().AddToken(Mana.Types.Green);
+                GetPlayer().AddMana(1);
                 break;
         }
     }

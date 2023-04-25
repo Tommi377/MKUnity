@@ -11,14 +11,14 @@ public class CardChoice {
     public string Description;
     public int Id;
     public ActionTypes ActionType;
-    public List<Mana.Types> ManaTypes;
+    public bool Super;
 
-    public CardChoice(string name, string description, int id, ActionTypes actionTypes, List<Mana.Types> manaTypes = null) {
+    public CardChoice(string name, string description, int id, ActionTypes actionTypes, bool super = false) {
         Name = name;
         Description = description;
         Id = id;
         ActionType = actionTypes;
-        ManaTypes = manaTypes ?? new List<Mana.Types>();
+        Super = super;
     }
 
     public override string ToString() => $"Choice: {Name} ({Id}, {ActionType})";

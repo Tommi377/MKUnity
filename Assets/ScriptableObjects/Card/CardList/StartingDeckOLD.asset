@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3cc3d7ceae0021941bc61c5708520f9e, type: 3}
-  m_Name: StartingDeck
+  m_Name: StartingDeckOLD
   m_EditorClassIdentifier: 
   cards:
   - {fileID: 11400000, guid: 8dcaa55288ee18944af804de2b1ec579, type: 2}
@@ -28,4 +28,3 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c72cbf63121246c41b8f56865de04945, type: 2}
   - {fileID: 11400000, guid: 3994fe52c665f8e4491940486a7a8d6c, type: 2}
   - {fileID: 11400000, guid: e7e8e8220c94b0848a354691c15654e9, type: 2}
-  - {fileID: 11400000, guid: 999bc36b1c6f221448bce0d5d472532e, type: 2}
