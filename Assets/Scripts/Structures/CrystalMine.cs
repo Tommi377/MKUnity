@@ -6,12 +6,10 @@ public class CrystalMine : Structure {
     [SerializeField] Renderer[] crystalRenderers;
 
     public override StructureTypes StructureType => StructureTypes.CrystalMine;
-    private Mana.Types manaType;
 
     private void Awake() {
-        manaType = Mana.GetRandomType();
         foreach (var renderer in crystalRenderers) {
-            renderer.material.color = Mana.GetColor(manaType);
+            renderer.material.color = Color.yellow;
         }
     }
 

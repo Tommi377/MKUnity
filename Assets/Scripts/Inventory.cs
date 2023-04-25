@@ -20,7 +20,7 @@ public class Inventory : MonoBehaviour {
         OnInventoryUpdate = null;
     }
 
-    public int crystalCount = 0;
+    private int crystalCount = 0;
 
     private void Awake() {
         Owner = GetComponent<Player>();

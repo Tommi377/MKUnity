@@ -20,14 +20,6 @@ public class MouseInputManager : MonoBehaviour {
     public class OnHexClickArgs : EventArgs {
         public Hex hex;
     }
-    public event EventHandler<OnManaSourceClickArgs> OnManaSourceClick;
-    public class OnManaSourceClickArgs : EventArgs {
-        public ManaSourceVisual manaSourceVisual;
-    }
-    public event EventHandler<OnManaTokenClickArgs> OnManaTokenClick;
-    public class OnManaTokenClickArgs : EventArgs {
-        public ManaTokenVisual manaTokenVisual;
-    }
     /* EVENT DEFINITIONS - END */
 
     void Awake() {
@@ -57,25 +49,6 @@ public class MouseInputManager : MonoBehaviour {
                     CardVisual cardVisual = found.gameObject.GetComponent<CardVisual>();
                     Debug.Log("Hit " + found.gameObject.name);
                     OnCardClick?.Invoke(this, new OnCardClickArgs { cardVisual = cardVisual });
-                    return;
-                }
-
-
-                // Raycast hits mana source
-                found = results.Find(result => result.gameObject.CompareTag("ManaSource"));
-                if (found.gameObject) {
-                    ManaSourceVisual manaSourceVisual = found.gameObject.GetComponent<ManaSourceVisual>();
-                    Debug.Log("Hit " + found.gameObject.name);
-                    OnManaSourceClick?.Invoke(this, new OnManaSourceClickArgs { manaSourceVisual = manaSourceVisual });
-                    return;
-                }
-
-                // Raycast hits mana token
-                found = results.Find(result => result.gameObject.CompareTag("ManaToken"));
-                if (found.gameObject) {
-                    ManaTokenVisual manaTokenVisual = found.gameObject.GetComponent<ManaTokenVisual>();
-                    Debug.Log("Hit " + found.gameObject.name);
-                    OnManaTokenClick?.Invoke(this, new OnManaTokenClickArgs { manaTokenVisual = manaTokenVisual });
                     return;
                 }
 

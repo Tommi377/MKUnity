@@ -15,3 +15,19 @@ MonoBehaviour:
   List:
   - Card: {fileID: 11400000, guid: 3f3f93dde29305c40948a2e6c663ee88, type: 2}
     Count: 4
+  - Card: {fileID: 11400000, guid: 5b8f3476b1f903a4b8fe088555b65fe3, type: 2}
+    Count: 2
+  - Card: {fileID: 11400000, guid: efcb98a6848769643bfa566c9bd39153, type: 2}
+    Count: 2
+  - Card: {fileID: 11400000, guid: f7fec416fe141fe479eff1803d8bbf21, type: 2}
+    Count: 2
+  - Card: {fileID: 11400000, guid: b8aec0d873dcd7e4c8875fba850ab442, type: 2}
+    Count: 2
+  - Card: {fileID: 11400000, guid: 3dfea85181b30ee42b4ece37b0b60bcf, type: 2}
+    Count: 1
+  - Card: {fileID: 11400000, guid: d47940b14a0fca242886364903a9c9a5, type: 2}
+    Count: 1
+  - Card: {fileID: 11400000, guid: 231d8f7940a562347a14d74acd5ef0bd, type: 2}
+    Count: 1
+  - Card: {fileID: 11400000, guid: 36433a2abe33d7f4585b5933ae737959, type: 2}
+    Count: 1
