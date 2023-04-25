@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 public class TooltipSystemUI : MonoBehaviour {
     public static TooltipSystemUI Instance;
 
+    private LTDescr showDelay;
     private LTDescr hideDelay;
 
     [SerializeField] private TooltipUI tooltip;
@@ -24,13 +25,19 @@ public class TooltipSystemUI : MonoBehaviour {
     public void Show(string description, string header = "") {
         tooltip.SetText(description, header);
 
-        if (hideDelay != null)
+        if (hideDelay != null) {
             LeanTween.cancel(hideDelay.uniqueId);
+            hideDelay = null;
+        }
 
-        tooltip.Show();
+        showDelay = LeanTween.delayedCall(0.5f, () => tooltip.Show());
     }
 
     public void Hide() {
-        hideDelay = LeanTween.delayedCall(0.1f, () => tooltip.Hide());
+        if (showDelay != null) {
+            LeanTween.cancel(showDelay.uniqueId);
+            showDelay = null;
+        }
+        hideDelay = LeanTween.delayedCall(0.05f, () => tooltip.Hide());
     }
 }
