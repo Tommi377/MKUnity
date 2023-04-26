@@ -4,34 +4,34 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System;
+using static UnityEngine.GraphicsBuffer;
 
 public class Combat {
     private List<Enemy> enemies = new List<Enemy>();
     private List<Enemy> alive = new List<Enemy>();
-    private List<Enemy> forced = new List<Enemy>();
     private List<Enemy> defeated = new List<Enemy>();
     private List<Enemy> fullyBlocked = new List<Enemy>();
 
+    private List<CombatCard> combatCards = new List<CombatCard>();
+
     private Dictionary<Enemy, EnemySO> summonedEnemies = new Dictionary<Enemy, EnemySO>();
-    private Dictionary<Enemy, List<EnemyAttack>> unassignedAttacks = new Dictionary<Enemy, List<EnemyAttack>>();
 
-    private List<CombatData> combatCards = new List<CombatData>();
-    private List<ItemCard> assignedUnits = new List<ItemCard>();
+    private Dictionary<Enemy, int> enemyArmorMap = new Dictionary<Enemy, int>();
+    private Dictionary<Enemy, Dictionary<EnemyAttack, int>> enemyAttackMap = new Dictionary<Enemy, Dictionary<EnemyAttack, int>>();
 
-    public enum States { Start, RangedStart, RangedPlay, BlockStart, BlockPlay, AssignStart, AssignDamage, AttackStart, AttackPlay, Result, End }
+    public enum States { Start, Block, Assign, Attack, Result, End }
 
     public Player Player { get; private set; }
-    public List<Enemy> Targets { get; private set; } = new List<Enemy>();
-    public EnemyAttack AttackToHandle { get; private set; }
+    public Enemy TargetEnemy { get; private set; }
+    public EnemyAttack TargetAttack { get; private set; }
     public int DamageToAssign { get; private set; } = 0;
 
-    public List<CombatData> CombatCards => combatCards;
+    public List<CombatCard> CombatCards => combatCards;
     public ReadOnlyCollection<Enemy> Enemies => enemies.AsReadOnly();
     public ReadOnlyCollection<Enemy> Alive => alive.AsReadOnly();
-    public ReadOnlyCollection<Enemy> Forced => forced.AsReadOnly();
     public ReadOnlyCollection<Enemy> Defeated => defeated.AsReadOnly();
     public Dictionary<Enemy, EnemySO> SummonedEnemies => summonedEnemies;
-    public Dictionary<Enemy, List<EnemyAttack>> UnassignedAttacks => unassignedAttacks;
+    public Dictionary<Enemy, Dictionary<EnemyAttack, int>> UnassignedAttacks => enemyAttackMap;
 
     public States GetCurrentState() => stateMachine.GetCurrentState();
 
@@ -62,22 +62,25 @@ public class Combat {
     }
     /* EVENT DEFINITIONS - END */
 
-    public Combat(Player player, IEnumerable<Enemy> enemies, IEnumerable<Enemy> forced) {
+    public Combat(Player player, IEnumerable<Enemy> enemies) {
         Player = player;
         this.enemies.AddRange(enemies);
         this.alive.AddRange(enemies);
-        this.forced.AddRange(forced);
 
         foreach (Enemy enemy in enemies) {
-            unassignedAttacks[enemy] = new List<EnemyAttack>();
+            enemyAttackMap[enemy] = new Dictionary<EnemyAttack, int>();
 
             if (enemy.Abilities.Contains(EnemyAbilities.Summon)) {
                 EnemySO summoned = EntityManager.Instance.GetRandomEnemySO(EntityTypes.Dungeon);
                 summonedEnemies.Add(enemy, summoned);
-                unassignedAttacks[enemy].AddRange(summoned.Attacks);
+
+                summoned.Attacks.ForEach(attack => enemyAttackMap[enemy][attack] = attack.Damage);
             } else {
-                unassignedAttacks[enemy].AddRange(enemy.Attacks);
+                enemy.Attacks.ForEach(attack => enemyAttackMap[enemy][attack] = attack.Damage);
             }
+
+            // Track enemy armor
+            enemyArmorMap.Add(enemy, enemy.Armor);
         }
 
         stateMachine = new CombatStateMachine(this);
@@ -85,108 +88,75 @@ public class Combat {
 
     public void Init() {
         CombatAction.OnCombatNextStateClick += CombatAction_OnCombatNextStateClick;
-        CombatAction.OnTargetsSelectedClick += CombatAction_OnTargetsSelectedClick;
-        CombatAction.OnAttackSelectedClick += CombatAction_OnAttackSelectedClick;
-        CombatAction.OnDamageAssignClick += CombatAction_OnDamageAssignClick;
+
+        CombatAction.OnCombatSelectTargetClick += CombatAction_OnCombatSelectTargetClick;
     }
 
     public void Dispose() {
         CombatAction.OnCombatNextStateClick -= CombatAction_OnCombatNextStateClick;
-        CombatAction.OnTargetsSelectedClick -= CombatAction_OnTargetsSelectedClick;
-        CombatAction.OnAttackSelectedClick -= CombatAction_OnAttackSelectedClick;
-        CombatAction.OnDamageAssignClick -= CombatAction_OnDamageAssignClick;
+
+        CombatAction.OnCombatSelectTargetClick -= CombatAction_OnCombatSelectTargetClick;
     }
 
     public bool EveryEnemyDefeated() => Alive.Count == 0;
-    public bool HasUnassignedAttacks() => UnassignedAttacks.Any(item => item.Value.Any());
+    public bool HasUnassignedAttacks() => enemyAttackMap.Count > 0;
 
-    public void RemoveTargetEnemies() {
-        if (Targets.Count == Enemies.Count) return;
+    public int GetEnemyArmor(Enemy enemy) => enemyArmorMap[enemy];
+    public int GetEnemyAttack(Enemy enemy, EnemyAttack attack) => enemyAttackMap[enemy][attack];
 
-        List<Enemy> removed = enemies.Where(enemy => !Targets.Contains(enemy)).ToList();
-        foreach (Enemy enemy in removed) {
-            if (!Forced.Contains(enemy)) {
-                enemies.Remove(enemy);
-                alive.Remove(enemy);
-                unassignedAttacks.Remove(enemy);
-                Debug.Log("removed");
-            } else {
-                Debug.LogError("Can't remove forced enemy from combat");
+    public void PlayAttackCard(int damage, CombatElements combatElement, bool fast = false, Func<CombatAttack, int> attackFunc = null) {
+        if (TargetEnemy != null) {
+            if (GetCurrentState() == States.Block && !fast) {
+                Debug.Log("Can't play non-fast attack cards during block phase");
+                return;
             }
+
+            AttackCard attackCard = new AttackCard(damage, combatElement, fast, attackFunc);
+            CombatAttack combatAttack = new CombatAttack(this, TargetEnemy, attackCard);
+
+            combatCards.Add(attackCard);
+
+            enemyArmorMap[TargetEnemy] -= (int)combatAttack.Calculate();
+            if (enemyArmorMap[TargetEnemy] <= 0) {
+                defeated.Add(TargetEnemy);
+                fullyBlocked.Add(TargetEnemy);
+                alive.Remove(TargetEnemy);
+                Debug.Log("Enemy defeated!! remaining: " + alive.Count);
+            }
+
+            OnCombatCardPlayed?.Invoke(this, EventArgs.Empty);
         }
     }
-
-    public void PlayAttackCard(int damage, CombatTypes combatType, CombatElements combatElement, Func<CombatAttack, int> attackFunc = null) {
-        PlayCombatCard(new CombatData(damage, combatType, combatElement, attackFunc));
-    }
     public void PlayBlockCard(int damage, CombatElements combatElement, Func<CombatBlock, int> blockFunc = null) {
-        PlayCombatCard(new CombatData(damage, CombatTypes.Block, combatElement, null, blockFunc));
+        if (TargetEnemy != null && TargetAttack != null) {
+            BlockCard blockCard = new BlockCard(damage, combatElement, blockFunc);
+            CombatBlock combatBlock = new CombatBlock(this, TargetEnemy, TargetAttack, blockCard);
+
+            combatCards.Add(blockCard);
+
+            enemyAttackMap[TargetEnemy][TargetAttack] -= (int)combatBlock.Calculate();
+
+            if (enemyAttackMap[TargetEnemy][TargetAttack] <= 0) {
+                enemyAttackMap[TargetEnemy].Remove(TargetAttack);
+
+                if (enemyAttackMap[TargetEnemy].Count == 0) {
+                    fullyBlocked.Add(TargetEnemy);
+                    enemyAttackMap.Remove(TargetEnemy);
+                    Debug.Log("Enemy fully blocked!! remaining: " + alive.Count);
+                }
+
+                Debug.Log("Attack fully blocked");
+            }
+
+            OnCombatCardPlayed?.Invoke(this, EventArgs.Empty);
+        }
     }
-
-    public void PlayCombatCard(CombatData combatData) {
-        combatCards.Add(combatData);
-        OnCombatCardPlayed?.Invoke(this, EventArgs.Empty);
-        Debug.Log(combatData);
-    }
-
-    public float CalculateDamage(bool rangePhase) {
-        CombatAttack combatAttack = new CombatAttack(this, Targets, rangePhase);
-        return combatAttack.Calculate();
-    }
-
-    public float CalculateBlock() {
-        CombatBlock combatBlock = new CombatBlock(this, Targets[0], AttackToHandle);
-        return combatBlock.Calculate();
-    }
-
-    public int CalculateEnemyArmor() => (new CombatAttack(this, Targets, true)).TotalArmor;
-
-    public int CalculateEnemyAttack() => (new CombatBlock(this, Targets[0], AttackToHandle)).TotalDamage;
 
     public bool EnemyIsFullyBlocked(Enemy enemy) => fullyBlocked.Contains(enemy);
 
-    public void AttackEnemies(bool rangePhase) {
-        if (Targets.Count > 0) {
-            CombatAttack combatAttack = new CombatAttack(this, Targets, rangePhase);
-            if (combatAttack.IsEnemyDead()) {
-                defeated.AddRange(Targets);
-                foreach (Enemy target in Targets) {
-                    alive.Remove(target);
-                }
-                Debug.Log("Enemy defeated!! remaining: " + alive.Count);
-            }
-            Debug.Log("Enemy left with hp: " + combatAttack.TotalArmor);
-        } else {
-            Debug.Log("Must have targets to attack");
-        }
-
-        ResetAfterPlay();
-    }
-
-    public void BlockEnemyAttack() {
-        Enemy enemy = Targets[0];
-        if (unassignedAttacks[enemy].Contains(AttackToHandle)) {
-            CombatBlock combatBlock = new CombatBlock(this, enemy, AttackToHandle);
-            int damageReceived = combatBlock.PlayerReceivedDamage();
-
-            if (combatBlock.FullyBlocked) {
-                Debug.Log("Enemy attack was fully blocked");
-                unassignedAttacks[enemy].Remove(AttackToHandle);
-
-                if (unassignedAttacks[enemy].Count == 0) {
-                    fullyBlocked.Add(enemy);
-                }
-            } else {
-                Debug.Log("Enemy attack was not fully blocked, take " + damageReceived + " damage");
-            }
-        }
-
-        ResetAfterPlay();
-    }
-
     public bool CanApply(CardChoice cardChoice) {
         // Check Cumbersome
-        if (Targets.Count == 1 && cardChoice.ActionType == ActionTypes.Move && Targets[0].Abilities.Contains(EnemyAbilities.Cumbersome)) {
+        if (TargetEnemy != null && cardChoice.ActionType == ActionTypes.Move && TargetEnemy.Abilities.Contains(EnemyAbilities.Cumbersome)) {
             return true;
         }
 
@@ -194,14 +164,14 @@ public class Combat {
     }
 
     private void AssignDamageToPlayer() {
-        Enemy enemy = Targets[0];
+        Enemy enemy = TargetEnemy;
         List<EnemyAbilities> Abilities = SummonedEnemies.ContainsKey(enemy) ? SummonedEnemies[enemy].Abilities : enemy.Abilities;
 
         Player.TakeWound(Abilities.Contains(EnemyAbilities.Poison));
         DamageToAssign -= Player.Armor;
 
         if (DamageToAssign <= 0) {
-            unassignedAttacks[enemy].Remove(AttackToHandle);
+            enemyAttackMap[enemy].Remove(TargetAttack);
         }
 
         if (Abilities.Contains(EnemyAbilities.Paralyze)) {
@@ -211,17 +181,11 @@ public class Combat {
         OnCombatDamageAssign?.Invoke(this, EventArgs.Empty);
     }
 
-    public void ResetAfterPlay() {
-        combatCards.Clear();
-        Player.ResetValues();
-    }
-
     public void CombatStateEnter() {
         States state = GetCurrentState();
-        if (state == States.RangedStart || state == States.BlockStart || state == States.AssignStart || state == States.AttackStart) {
-            AttackToHandle = null;
-            Targets.Clear();
-        }
+        TargetEnemy = null;
+        TargetAttack = null;
+
         OnCombatStateEnter?.Invoke(this, new OnCombatStateEnterArgs { Combat = this, State = GetCurrentState() });
     }
 
@@ -237,21 +201,11 @@ public class Combat {
     }
 
     public void CombatEnd() {
-        assignedUnits.Clear();
         OnCombatEnd?.Invoke(this, new OnCombatResultArgs { combat = this, result = result });
     }
 
-    public void SetTargets(List<Enemy> targets) {
-        Targets.Clear();
-        foreach (Enemy enemy in targets) {
-            if (!Targets.Contains(enemy)) {
-                Targets.Add(enemy);
-            } else {
-                Debug.Log("Enemy already targeted");
-            }
-        }
-
-        Debug.Log("Targeted " + Targets.Count + " enemies");
+    public void SetTargets(Enemy target) {
+        TargetEnemy = target;
     }
 
     /* ------------------- EVENTS ---------------------- */
@@ -264,43 +218,37 @@ public class Combat {
         Debug.Log("Combat statemachine: Old state: " + prev + ". New state: " + GetCurrentState());
     }
 
-    private void CombatAction_OnTargetsSelectedClick(object sender, CombatAction.OnTargetsSelectedClickArgs e) {
-        SetTargets(e.Targets);
-    }
-
-    private void CombatAction_OnAttackSelectedClick(object sender, CombatAction.OnAttackSelectedClickArgs e) {
-        Targets.Clear();
-        AttackToHandle = null;
-
-        Targets.Add(e.Target);
-        AttackToHandle = e.Attack;
-        DamageToAssign = e.Attack.Damage;
-
-        if (e.Target.Abilities.Contains(EnemyAbilities.Brutal)) DamageToAssign *= 2;
-    }
-
-    private void CombatAction_OnDamageAssignClick(object sender, CombatAction.OnDamageAssignClickArgs e) {
-        AssignDamageToPlayer();
+    private void CombatAction_OnCombatSelectTargetClick(object sender, CombatAction.OnCombatSelectTargetClickArgs e) {
+        TargetEnemy = e.Enemy;
+        TargetAttack = e.Attack;
     }
 }
 
-public class CombatData {
+public abstract class CombatCard { }
+
+public class AttackCard : CombatCard {
     public int Damage;
-    public CombatTypes CombatType;
     public CombatElements CombatElement;
+    public bool Fast;
     public Func<CombatAttack, int> CombatAttackModifier;
+
+    public AttackCard(int damage, CombatElements combatElement, bool fast, Func<CombatAttack, int> attackFunc = null) {
+        Damage = damage;
+        CombatElement = combatElement;
+        Fast = fast;
+        CombatAttackModifier = attackFunc;
+    }
+}
+
+public class BlockCard : CombatCard {
+    public int Block;
+    public CombatElements CombatElement;
     public Func<CombatBlock, int> CombatBlockModifier;
 
-    public CombatData(int damage, CombatTypes combatType, CombatElements combatElement, Func<CombatAttack, int> attackFunc = null, Func<CombatBlock, int> blockFunc = null) {
-        Damage = damage;
-        CombatType = combatType;
+    public BlockCard(int damage, CombatElements combatElement, Func<CombatBlock, int> blockFunc = null) {
+        Block = damage;
         CombatElement = combatElement;
-        CombatAttackModifier = attackFunc;
         CombatBlockModifier = blockFunc;
-    }
-
-    public override string ToString() {
-        return "Combat data: " + Damage + "dmg " + CombatElement + " " + CombatType + " attack";
     }
 }
 
@@ -312,18 +260,9 @@ public class CombatResult {
     public int Reputation;
 }
 
-public enum CombatPhases {
-    Range,
-    Block,
-    AssignDamage,
-    Attack,
-    End
-}
-
 public enum CombatTypes {
     Normal,
-    Range,
-    Siege,
+    Fast,
     Block
 }
 public enum CombatElements {

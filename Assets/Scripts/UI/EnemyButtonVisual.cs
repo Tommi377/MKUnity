@@ -14,13 +14,12 @@ public class EnemyButtonVisual : MonoBehaviour {
 
     public bool Dead { get; private set; } = false;
     public bool Selected { get; private set; } = false;
-    public bool Forced { get; private set; } = false;
 
     public Enemy Enemy { get; private set; }
 
     private Combat Combat => GameManager.Instance.Combat;
 
-    public event Action<Enemy, EnemyAttack> OnEnemyButtonClick;
+    public event Action<EnemyButtonVisual, Enemy, EnemyAttack> OnEnemyButtonClick;
 
     public void Init(Combat.States state, Enemy enemy, bool disableName = false) {
         if (Combat == null) {
@@ -44,22 +43,18 @@ public class EnemyButtonVisual : MonoBehaviour {
     }
 
     public void ToggleSelect() {
-        if (Selected) {
-            Deselect();
-        } else {
-            Select();
-        }
+        //if (Selected) {
+        //    Deselect();
+        //} else {
+        //    Select();
+        //}
 
-        OnEnemyButtonClick?.Invoke(Enemy, null);
+        OnEnemyButtonClick?.Invoke(this, Enemy, null);
     }
 
     public void SetDead() {
         Dead = true;
         backgroundDead.gameObject.SetActive(true);
-    }
-
-    public void SetForced() {
-        Forced = true;
     }
 
     public void Select() {
@@ -85,33 +80,23 @@ public class EnemyButtonVisual : MonoBehaviour {
         }
 
         switch (state) {
-            case Combat.States.Start:
-                Select();
-                if (!Forced) {
-                    buttonContainer.AddButton("Deselect", (btn) => {
-                        ToggleSelect();
-                        buttonContainer.SetText(btn, Selected ? "Select" : "Select");
-                    });
-                }
-                break;
-            case Combat.States.AttackStart:
-            case Combat.States.RangedStart:
+            case Combat.States.Attack:
                 buttonContainer.AddButton("Select", (btn) => {
                     ToggleSelect();
                     buttonContainer.SetText(btn, Selected ? "Deselect" : "Select");
                 });
                 break;
-            case Combat.States.BlockStart:
-            case Combat.States.AssignStart:
-                if (Combat.UnassignedAttacks.TryGetValue(Enemy, out List<EnemyAttack> unassigned)) {
+            case Combat.States.Block:
+            case Combat.States.Assign:
+                if (Combat.UnassignedAttacks.TryGetValue(Enemy, out Dictionary<EnemyAttack, int> unassigned)) {
                     List<EnemyAttack> attacks = Combat.SummonedEnemies.ContainsKey(Enemy) ? Combat.SummonedEnemies[Enemy].Attacks : Enemy.Attacks;
 
                     for (int i = 0; i < attacks.Count; i++) {
                         int choiceIndex = i;
                         EnemyAttack attack = attacks[i];
-                        var options = new ExpandingButtonUI.Options() { Interactable = unassigned.Contains(attack) };
+                        var options = new ExpandingButtonUI.Options() { Interactable = unassigned.ContainsKey(attack) };
 
-                        buttonContainer.AddButton(attack.ToString(), () => OnEnemyButtonClick?.Invoke(Enemy, attack), options);
+                        buttonContainer.AddButton(attack.ToString(), () => OnEnemyButtonClick?.Invoke(this, Enemy, attack), options);
                     }
                 }
                 break;
@@ -124,10 +109,8 @@ public class EnemyButtonVisual : MonoBehaviour {
         summonedEnemy.gameObject.SetActive(false);
 
         if (
-            state == Combat.States.BlockStart ||
-            state == Combat.States.BlockPlay ||
-            state == Combat.States.AssignStart ||
-            state == Combat.States.AssignDamage
+            state == Combat.States.Block ||
+            state == Combat.States.Assign
         ) {
             summonedEnemy.gameObject.SetActive(true);
 

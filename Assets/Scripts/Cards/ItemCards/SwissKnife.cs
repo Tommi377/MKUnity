@@ -12,7 +12,7 @@ public class SwissKnife : ItemCard {
                 GetPlayer().AddMovement(1);
                 break;
             case 1:
-                GetCombat(GetPlayer()).PlayAttackCard(1, CombatTypes.Normal, CombatElements.Physical);
+                GetCombat(GetPlayer()).PlayAttackCard(1, CombatElements.Physical);
                 break;
             case 2:
                 GetCombat(GetPlayer()).PlayBlockCard(1, CombatElements.Physical);

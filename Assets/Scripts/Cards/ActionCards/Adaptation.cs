@@ -68,9 +68,13 @@ public class Adaptation : ActionCard, ITargetingCard<(Card, CardChoice)> {
                         case ActionTypes.Combat:
                             Combat combat = GetCombat(GetPlayer());
                             if (combat.CombatCards.Count() > combatCardCount) {
-                                CombatData combatCard = combat.CombatCards.Last();
+                                CombatCard combatCard = combat.CombatCards.Last();
 
-                                combat.PlayCombatCard(new CombatData(2, combatCard.CombatType, combatCard.CombatElement));
+                                if (combatCard is AttackCard attackCard) {
+                                    combat.PlayAttackCard(2, attackCard.CombatElement, attackCard.Fast);
+                                } else if (combatCard is BlockCard blockCard) {
+                                    combat.PlayBlockCard(2, blockCard.CombatElement);
+                                }
                             }
                             break;
                     }

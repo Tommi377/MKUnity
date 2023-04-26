@@ -104,7 +104,6 @@ public class GameManager : MonoBehaviour {
         // TODO: optionally choose neighboring rampaging enemies
         Hex hex = GetHexWithCurrentPlayer();
         List<Enemy> enemies = hex.GetEnemies();
-        List<Enemy> forced = new List<Enemy>(enemies);
 
         foreach (Hex neighbor in HexMap.Instance.GetNeighbors(hex.Position)) {
             enemies.AddRange(neighbor.GetEnemies());
@@ -112,7 +111,7 @@ public class GameManager : MonoBehaviour {
 
         Debug.Log("Enemies: " + enemies.Count);
         if (enemies.Count > 0) {
-            Combat = new Combat(CurrentPlayer, enemies, forced);
+            Combat = new Combat(CurrentPlayer, enemies);
             Combat.Init();
         } else {
             Debug.Log("Can't start combat with no enemies");

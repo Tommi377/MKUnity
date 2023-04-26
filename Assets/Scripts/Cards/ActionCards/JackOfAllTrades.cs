@@ -11,7 +11,7 @@ public class JackOfAllTrades : ActionCard {
                 GetPlayer().AddInfluence(2);
                 break;
             case 2:
-                GetCombat(GetPlayer()).PlayAttackCard(2, CombatTypes.Normal, CombatElements.Physical);
+                GetCombat(GetPlayer()).PlayAttackCard(2, CombatElements.Physical);
                 break;
             case 3:
                 GetCombat(GetPlayer()).PlayBlockCard(2, CombatElements.Physical);
@@ -23,7 +23,7 @@ public class JackOfAllTrades : ActionCard {
                 GetPlayer().AddInfluence(4);
                 break;
             case 6:
-                GetCombat(GetPlayer()).PlayAttackCard(4, CombatTypes.Normal, CombatElements.Physical);
+                GetCombat(GetPlayer()).PlayAttackCard(4, CombatElements.Physical);
                 break;
             case 7:
                 GetCombat(GetPlayer()).PlayBlockCard(4, CombatElements.Physical);

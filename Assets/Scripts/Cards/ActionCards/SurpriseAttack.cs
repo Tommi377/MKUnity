@@ -8,10 +8,10 @@ public class SurpriseAttack : ActionCard {
                 GetPlayer().AddMovement(2);
                 break;
             case 1:
-                GetCombat(GetPlayer()).PlayAttackCard(1, CombatTypes.Range, CombatElements.Physical);
+                GetCombat(GetPlayer()).PlayAttackCard(1, CombatElements.Physical, true);
                 break;
             case 2:
-                GetCombat(GetPlayer()).PlayAttackCard(3, CombatTypes.Range, CombatElements.Physical);
+                GetCombat(GetPlayer()).PlayAttackCard(3, CombatElements.Physical, true);
                 break;
         }
     }

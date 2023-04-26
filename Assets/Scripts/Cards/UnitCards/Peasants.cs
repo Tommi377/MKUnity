@@ -5,10 +5,10 @@ public class Peasants : ItemCard {
     public override void Apply(CardChoice choice) {
         switch(choice.Id) {
             case 0:
-                GetCombat(GetPlayer()).PlayCombatCard(new CombatData(2, CombatTypes.Normal, CombatElements.Physical));
+                GetCombat(GetPlayer()).PlayAttackCard(2, CombatElements.Physical);
                 break;
             case 1:
-                GetCombat(GetPlayer()).PlayCombatCard(new CombatData(2, CombatTypes.Block, CombatElements.Physical));
+                GetCombat(GetPlayer()).PlayBlockCard(2, CombatElements.Physical);
                 break;
             case 2:
                 GetPlayer().AddInfluence(2);
