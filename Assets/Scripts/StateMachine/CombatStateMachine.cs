@@ -24,36 +24,20 @@ public class CombatStateMachine {
         stateMachine.Tick();
     }
 
-    //private void OnStateEnter() {
-    //    goNextState = false;
-    //    combat.CombatStateEnter();
-    //}
+    private void OnStateEnter() {
+        goNextState = false;
+        combat.CombatStateEnter();
+    }
 
-    //private void ExitStart() {
-    //    combat.RemoveTargetEnemies();
-    //}
+    private void EnterResult() {
+        combat.GenerateCombatResult();
+    }
 
-    //private void ExitRangedPlay() {
-    //    combat.AttackEnemies(true);
-    //}
+    private void EnterEnd() {
+        combat.CombatEnd();
+    }
 
-    //private void ExitAttackPlay() {
-    //    combat.AttackEnemies(false);
-    //}
-
-    //private void ExitBlockPlay() {
-    //    combat.BlockEnemyAttack();
-    //}
-
-    //private void EnterResult() {
-    //    combat.GenerateCombatResult();
-    //}
-
-    //private void EnterEnd() {
-    //    combat.CombatEnd();
-    //}
-
-    private State CreateState(Combat.States stateType) => new State((int)stateType);
+    private State CreateState(Combat.States stateType) => new State((int)stateType, OnStateEnterAction.Create(OnStateEnter));
 
     private void StateMachineInit() {
         State Start = CreateState(Combat.States.Start);
@@ -63,13 +47,15 @@ public class CombatStateMachine {
         State Result = CreateState(Combat.States.Result);
         State End = CreateState(Combat.States.End);
 
+        Result.AddAction(OnStateEnterAction.Create(EnterResult));
+        End.AddAction(OnStateEnterAction.Create(EnterEnd));
 
         /////////////// TRANSITIONS ///////////////
-        Start   .To(Block,  () => goNextState); // Start
+        Start.To(Block,  () => goNextState); // Start
 
         // Block
-        Block   .To(Assign, () => goNextState && !combat.EveryEnemyDefeated() && !combat.HasUnassignedAttacks()); // Assign damage if unblocked
-        Block   .To(Attack, () => goNextState && combat.HasUnassignedAttacks()); // Skip to attack if everything blocked
+        Block   .To(Assign, () => goNextState && !combat.EveryEnemyDefeated() && combat.HasUnassignedAttacks()); // Assign damage if unblocked
+        Block   .To(Attack, () => goNextState && !combat.HasUnassignedAttacks()); // Skip to attack if everything blocked
         Block   .To(Result, () => goNextState && combat.EveryEnemyDefeated()); // Skip to end if all enemies defeated
 
         Assign  .To(Attack, () => goNextState && !combat.HasUnassignedAttacks());

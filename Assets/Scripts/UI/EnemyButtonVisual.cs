@@ -83,14 +83,13 @@ public class EnemyButtonVisual : MonoBehaviour {
             case Combat.States.Attack:
                 buttonContainer.AddButton("Select", (btn) => {
                     ToggleSelect();
-                    buttonContainer.SetText(btn, Selected ? "Deselect" : "Select");
+                    buttonContainer.SetText(btn, "Select");
                 });
                 break;
             case Combat.States.Block:
             case Combat.States.Assign:
+                List<EnemyAttack> attacks = Combat.SummonedEnemies.ContainsKey(Enemy) ? Combat.SummonedEnemies[Enemy].Attacks : Enemy.Attacks;
                 if (Combat.UnassignedAttacks.TryGetValue(Enemy, out Dictionary<EnemyAttack, int> unassigned)) {
-                    List<EnemyAttack> attacks = Combat.SummonedEnemies.ContainsKey(Enemy) ? Combat.SummonedEnemies[Enemy].Attacks : Enemy.Attacks;
-
                     for (int i = 0; i < attacks.Count; i++) {
                         int choiceIndex = i;
                         EnemyAttack attack = attacks[i];
@@ -98,6 +97,11 @@ public class EnemyButtonVisual : MonoBehaviour {
 
                         buttonContainer.AddButton(attack.ToString(), () => OnEnemyButtonClick?.Invoke(this, Enemy, attack), options);
                     }
+                } else {
+                    attacks.ForEach(attack => {
+                        var options = new ExpandingButtonUI.Options() { Interactable = false };
+                        buttonContainer.AddButton(attack.ToString(), () => { }, options);
+                    });
                 }
                 break;
             default:

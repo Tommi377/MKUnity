@@ -118,7 +118,8 @@ public class CombatUI : MonoBehaviour {
                 subheaderText.SetText("Select attack to receive");
 
                 string assignText = "To\nAttack\nPhase";
-                bottomRightButtonContainer.AddButton(assignText, () => CombatAction.CombatNextStateClick(this));
+                var options = new ExpandingButtonUI.Options { Interactable = !combat.HasUnassignedAttacks() };
+                bottomRightButtonContainer.AddButton(assignText, () => CombatAction.CombatNextStateClick(this), options);
                 break;
             case Combat.States.Attack:
                 headerText.SetText("Block Phase");
@@ -318,7 +319,8 @@ public class CombatUI : MonoBehaviour {
     }
 
     private void Combat_OnCombatDamageAssign(object sender, EventArgs e) {
-        //UpdateInfoText();
+        DrawEnemies();
+        UpdateUI();
     }
 
     private void CardManager_OnPlayCard(object sender, CardManager.OnPlayCardArgs e) {

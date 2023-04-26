@@ -24,7 +24,6 @@ public class Combat {
     public Player Player { get; private set; }
     public Enemy TargetEnemy { get; private set; }
     public EnemyAttack TargetAttack { get; private set; }
-    public int DamageToAssign { get; private set; } = 0;
 
     public List<CombatCard> CombatCards => combatCards;
     public ReadOnlyCollection<Enemy> Enemies => enemies.AsReadOnly();
@@ -164,17 +163,25 @@ public class Combat {
     }
 
     private void AssignDamageToPlayer() {
-        Enemy enemy = TargetEnemy;
-        List<EnemyAbilities> Abilities = SummonedEnemies.ContainsKey(enemy) ? SummonedEnemies[enemy].Abilities : enemy.Abilities;
+        if (!UnassignedAttacks.ContainsKey(TargetEnemy) || !UnassignedAttacks[TargetEnemy].ContainsKey(TargetAttack))
+            return;
 
-        Player.TakeWound(Abilities.Contains(EnemyAbilities.Poison));
-        DamageToAssign -= Player.Armor;
+        int damage = UnassignedAttacks[TargetEnemy][TargetAttack];
+        List <EnemyAbilities> Abilities = SummonedEnemies.ContainsKey(TargetEnemy) ? SummonedEnemies[TargetEnemy].Abilities : TargetEnemy.Abilities;
 
-        if (DamageToAssign <= 0) {
-            enemyAttackMap[enemy].Remove(TargetAttack);
+        int woundsTaken = Mathf.CeilToInt(damage / (float)Player.Armor);
+        Debug.Log("Taking " + woundsTaken + " wounds");
+
+        for (int i = 0; i < woundsTaken; i++) {
+            Player.TakeWound(Abilities.Contains(EnemyAbilities.Poison));
         }
 
-        if (Abilities.Contains(EnemyAbilities.Paralyze)) {
+        enemyAttackMap[TargetEnemy].Remove(TargetAttack);
+        if (enemyAttackMap[TargetEnemy].Count == 0) {
+            enemyAttackMap.Remove(TargetEnemy);
+        }
+
+        if (woundsTaken > 0 && Abilities.Contains(EnemyAbilities.Paralyze)) {
             Player.DiscardAllNonWounds();
         }
 
@@ -221,6 +228,10 @@ public class Combat {
     private void CombatAction_OnCombatSelectTargetClick(object sender, CombatAction.OnCombatSelectTargetClickArgs e) {
         TargetEnemy = e.Enemy;
         TargetAttack = e.Attack;
+
+        if (GetCurrentState() == States.Assign) {
+            AssignDamageToPlayer();
+        }
     }
 }
 
