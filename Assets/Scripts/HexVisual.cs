@@ -16,8 +16,8 @@ public class HexVisual : MonoBehaviour {
 
     private void SetHexMaterial() {
         foreach (Renderer renderer in renderers) {
-            Material[] mats = renderer.materials;
-            for (int i = 0; i < mats.Length; i++) {
+            Material[] mats = new Material[renderer.sharedMaterials.Length];
+            for (int i = 0; i < renderer.sharedMaterials.Length; i++) {
                 mats[i] = hexTypeMaterialMapSO.Map()[hexType];
             }
             renderer.materials = mats;
