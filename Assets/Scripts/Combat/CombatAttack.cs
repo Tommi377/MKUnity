@@ -13,7 +13,7 @@ public class CombatAttack {
 
     public int TotalArmor { get; private set; } = 0;
 
-    public static Dictionary<CombatElements, bool> Resistances { get; private set; } = new Dictionary<CombatElements, bool> {
+    public Dictionary<CombatElements, bool> Resistances { get; private set; } = new Dictionary<CombatElements, bool> {
         { CombatElements.Physical, false },
         { CombatElements.Ice, false },
         { CombatElements.Fire, false },

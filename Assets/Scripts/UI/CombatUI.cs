@@ -84,7 +84,7 @@ public class CombatUI : MonoBehaviour {
 
         DrawEnemies();
         UpdateUI();
-        //UpdateInfoText();
+        UpdateInfoText();
     }
 
     private void UpdateUI() {
@@ -252,27 +252,26 @@ public class CombatUI : MonoBehaviour {
         return enemyVisual;
     }
 
-    //private void UpdateInfoText() {
-    //    switch (state) {
-    //        case Combat.States.AttackPlay:
-    //        case Combat.States.RangedPlay:
-    //            string attackText = "Enemy armor: " + combat.CalculateEnemyArmor();
-    //            attackText += "\nCurrent attack: " + combat.CalculateDamage(state == Combat.States.RangedPlay);
-    //            infoText.SetText(attackText);
-    //            break;
-    //        case Combat.States.BlockPlay:
-    //            string blockText = "Blocking: " + combat.CalculateEnemyAttack();
-    //            blockText += "\nCurrent block: " + combat.CalculateBlock();
-    //            infoText.SetText(blockText);
-    //            break;
-    //        case Combat.States.AssignDamage:
-    //            infoText.SetText("Damage Remaining: " + combat.DamageToAssign);
-    //            break;
-    //        default:
-    //            infoText.SetText("");
-    //            break;
-    //    }
-    //}
+    private void UpdateInfoText() {
+        string text = "";
+        switch (state) {
+            case Combat.States.Attack:
+                if (combat.TargetEnemy != null) {
+                    text = "Remaining hp: " + combat.TryGetEnemyArmor(combat.TargetEnemy);
+                }
+                infoText.SetText(text);
+                break;
+            case Combat.States.Block:
+                if (combat.TargetEnemy != null && combat.TargetAttack != null) {
+                    text = "Blocking: " + combat.TryGetEnemyAttack(combat.TargetEnemy, combat.TargetAttack);
+                }
+                infoText.SetText(text);
+                break;
+            default:
+                infoText.SetText("");
+                break;
+        }
+    }
 
     //private void SelectTargets() {
     //    CombatAction.TargetsSelectedClick(this, GetTargets());
@@ -297,6 +296,8 @@ public class CombatUI : MonoBehaviour {
         selectedEnemy.Select();
 
         CombatAction.CombatSelectTargetClick(this, enemy, attack);
+
+        UpdateInfoText();
 
         //switch (state) {
         //    case Combat.States.BlockStart:
@@ -324,7 +325,8 @@ public class CombatUI : MonoBehaviour {
     }
 
     private void CardManager_OnPlayCard(object sender, CardManager.OnPlayCardArgs e) {
-        //UpdateInfoText();
+        DrawEnemies();
+        UpdateInfoText();
     }
 }
 

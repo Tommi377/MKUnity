@@ -89,7 +89,7 @@ public class EnemyButtonVisual : MonoBehaviour {
             case Combat.States.Block:
             case Combat.States.Assign:
                 List<EnemyAttack> attacks = Combat.SummonedEnemies.ContainsKey(Enemy) ? Combat.SummonedEnemies[Enemy].Attacks : Enemy.Attacks;
-                if (Combat.UnassignedAttacks.TryGetValue(Enemy, out Dictionary<EnemyAttack, int> unassigned)) {
+                if (Combat.UnassignedAttacks.TryGetValue(Enemy, out Dictionary<EnemyAttack, float> unassigned)) {
                     for (int i = 0; i < attacks.Count; i++) {
                         int choiceIndex = i;
                         EnemyAttack attack = attacks[i];

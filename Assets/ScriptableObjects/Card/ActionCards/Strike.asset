@@ -15,17 +15,14 @@ MonoBehaviour:
   Name: Strike
   Choices:
   - Name: Attack 2
-    Description: Attack 2
     Id: 0
     ActionType: 3
     Super: 0
   - Name: Block 2
-    Description: Block 2
     Id: 1
     ActionType: 2
     Super: 0
   - Name: Attack 4
-    Description: Attack 4
     Id: 2
     ActionType: 3
     Super: 1

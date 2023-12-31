@@ -16,8 +16,8 @@ public class Combat {
 
     private Dictionary<Enemy, EnemySO> summonedEnemies = new Dictionary<Enemy, EnemySO>();
 
-    private Dictionary<Enemy, int> enemyArmorMap = new Dictionary<Enemy, int>();
-    private Dictionary<Enemy, Dictionary<EnemyAttack, int>> enemyAttackMap = new Dictionary<Enemy, Dictionary<EnemyAttack, int>>();
+    private Dictionary<Enemy, float> enemyArmorMap = new Dictionary<Enemy, float>();
+    private Dictionary<Enemy, Dictionary<EnemyAttack, float>> enemyAttackMap = new Dictionary<Enemy, Dictionary<EnemyAttack, float>>();
 
     public enum States { Start, Block, Assign, Attack, Result, End }
 
@@ -30,7 +30,7 @@ public class Combat {
     public ReadOnlyCollection<Enemy> Alive => alive.AsReadOnly();
     public ReadOnlyCollection<Enemy> Defeated => defeated.AsReadOnly();
     public Dictionary<Enemy, EnemySO> SummonedEnemies => summonedEnemies;
-    public Dictionary<Enemy, Dictionary<EnemyAttack, int>> UnassignedAttacks => enemyAttackMap;
+    public Dictionary<Enemy, Dictionary<EnemyAttack, float>> UnassignedAttacks => enemyAttackMap;
 
     public States GetCurrentState() => stateMachine.GetCurrentState();
 
@@ -67,7 +67,7 @@ public class Combat {
         this.alive.AddRange(enemies);
 
         foreach (Enemy enemy in enemies) {
-            enemyAttackMap[enemy] = new Dictionary<EnemyAttack, int>();
+            enemyAttackMap[enemy] = new Dictionary<EnemyAttack, float>();
 
             if (enemy.Abilities.Contains(EnemyAbilities.Summon)) {
                 EnemySO summoned = EntityManager.Instance.GetRandomEnemySO(EntityTypes.Dungeon);
@@ -100,8 +100,19 @@ public class Combat {
     public bool EveryEnemyDefeated() => Alive.Count == 0;
     public bool HasUnassignedAttacks() => enemyAttackMap.Count > 0;
 
-    public int GetEnemyArmor(Enemy enemy) => enemyArmorMap[enemy];
-    public int GetEnemyAttack(Enemy enemy, EnemyAttack attack) => enemyAttackMap[enemy][attack];
+    public float GetEnemyArmor(Enemy enemy) => enemyArmorMap[enemy];
+    public float GetEnemyAttack(Enemy enemy, EnemyAttack attack) => enemyAttackMap[enemy][attack];
+
+    public float TryGetEnemyArmor(Enemy enemy) {
+        if (enemyArmorMap.TryGetValue(enemy, out float val)) return val;
+        return 0;
+    }
+    public float TryGetEnemyAttack(Enemy enemy, EnemyAttack attack) {
+        if (enemyAttackMap.TryGetValue(enemy, out Dictionary<EnemyAttack, float> attacks)) {
+            if (attacks.TryGetValue(attack, out float val)) return val;
+        }
+        return 0;
+    }
 
     public void PlayAttackCard(int damage, CombatElements combatElement, bool fast = false, Func<CombatAttack, int> attackFunc = null) {
         if (TargetEnemy != null) {
@@ -115,7 +126,8 @@ public class Combat {
 
             combatCards.Add(attackCard);
 
-            enemyArmorMap[TargetEnemy] -= (int)combatAttack.Calculate();
+            enemyArmorMap[TargetEnemy] -= combatAttack.Calculate();
+            Debug.Log(TargetEnemy);
             if (enemyArmorMap[TargetEnemy] <= 0) {
                 defeated.Add(TargetEnemy);
                 fullyBlocked.Add(TargetEnemy);
@@ -133,7 +145,7 @@ public class Combat {
 
             combatCards.Add(blockCard);
 
-            enemyAttackMap[TargetEnemy][TargetAttack] -= (int)combatBlock.Calculate();
+            enemyAttackMap[TargetEnemy][TargetAttack] -= combatBlock.Calculate();
 
             if (enemyAttackMap[TargetEnemy][TargetAttack] <= 0) {
                 enemyAttackMap[TargetEnemy].Remove(TargetAttack);
@@ -155,9 +167,12 @@ public class Combat {
 
     public bool CanApply(CardChoice cardChoice) {
         // Check Cumbersome
-        if (TargetEnemy != null && cardChoice.ActionType == ActionTypes.Move && TargetEnemy.Abilities.Contains(EnemyAbilities.Cumbersome)) {
-            return true;
-        }
+        //if (TargetEnemy != null && cardChoice.ActionType == ActionTypes.Move && TargetEnemy.Abilities.Contains(EnemyAbilities.Cumbersome)) {
+        //    return true;
+        //}
+
+        if (GetCurrentState() == States.Attack && cardChoice.ActionType == ActionTypes.Attack) return true;
+        if (GetCurrentState() == States.Block && cardChoice.ActionType == ActionTypes.Block) return true;
 
         return false;
     }
@@ -166,10 +181,10 @@ public class Combat {
         if (!UnassignedAttacks.ContainsKey(TargetEnemy) || !UnassignedAttacks[TargetEnemy].ContainsKey(TargetAttack))
             return;
 
-        int damage = UnassignedAttacks[TargetEnemy][TargetAttack];
+        float damage = UnassignedAttacks[TargetEnemy][TargetAttack];
         List <EnemyAbilities> Abilities = SummonedEnemies.ContainsKey(TargetEnemy) ? SummonedEnemies[TargetEnemy].Abilities : TargetEnemy.Abilities;
 
-        int woundsTaken = Mathf.CeilToInt(damage / (float)Player.Armor);
+        int woundsTaken = Mathf.CeilToInt(damage / Player.Armor);
         Debug.Log("Taking " + woundsTaken + " wounds");
 
         for (int i = 0; i < woundsTaken; i++) {
